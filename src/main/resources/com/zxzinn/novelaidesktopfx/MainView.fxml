@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelaidesktopfx.MainController">
+    <tabs>
+        <Tab fx:id="generatorTab" text="generator">
+            <content>
+                <fx:include source="ImageGenerator.fxml" fx:id="generatorTabContent"/>
+            </content>
+        </Tab>
+        <Tab fx:id="fileManagerTab" text="fileManager">
+            <content>
+                <fx:include source="FileManager.fxml" fx:id="fileManagerTabContent"/>
+            </content>
+        </Tab>
+    </tabs>
+</TabPane>

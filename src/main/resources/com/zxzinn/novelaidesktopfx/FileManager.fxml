@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelaidesktopfx.FileManagerController">
+    <left>
+        <VBox spacing="10" prefWidth="200">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <HBox spacing="5">
+                <TextField HBox.hgrow="ALWAYS"/>
+                <Button text="+" minWidth="30"/>
+                <Button text="-" minWidth="30"/>
+            </HBox>
+            <Button text="Clear Metadata" maxWidth="Infinity"/>
+            <Button text="Construct Database" maxWidth="Infinity"/>
+            <TreeView fx:id="fileTreeView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS">
+                <ImageView fx:id="previewImageView" preserveRatio="true"/>
+            </ScrollPane>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="fit!" fx:id="fitButton" />
+                <Button text="originalSize!" fx:id="originalSizeButton" />
+            </HBox>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox spacing="10" prefWidth="200">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <TextField/>
+            <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </right>
+</BorderPane>
