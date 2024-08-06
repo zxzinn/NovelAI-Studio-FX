@@ -47,8 +47,13 @@ jobs:
         run: mvn clean
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml -e
-        timeout-minutes: 30
+        run: mvn clean package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: NovelAIDesktopFX
+          path: target/NovelAIDesktopFX-1.0-SNAPSHOT.jar
 
       - name: Run tests
         run: mvn test
