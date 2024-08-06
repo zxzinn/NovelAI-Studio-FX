@@ -42,6 +42,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
         loadSettings();
         setupListeners();
         setupZoomHandler();
+        positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
+        negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
     }
 
     private void setupZoomHandler() {

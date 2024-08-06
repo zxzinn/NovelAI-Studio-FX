@@ -13,15 +13,16 @@ import javafx.stage.Window;
 import java.io.IOException;
 
 public class MainController {
-    public BorderPane generatorTabContent;
-    public Tab Img2ImgTab;
-    public BorderPane fileManagerTabContent;
-    public BorderPane Img2ImgTabContent;
     @FXML private Tab generatorTab;
+    @FXML private Tab Img2ImgTab;
     @FXML private Tab fileManagerTab;
-    @FXML private ImageGeneratorController generatorTabController;
-    @FXML private Img2ImgGeneratorController img2ImgGeneratorController;
-    @FXML private FileManagerController fileManagerTabController;
+    @FXML private BorderPane generatorTabContent;
+    @FXML private BorderPane Img2ImgTabContent;
+    @FXML private BorderPane fileManagerTabContent;
+
+    private ImageGeneratorController generatorTabController;
+    private Img2ImgGeneratorController img2ImgGeneratorController;
+    private FileManagerController fileManagerTabController;
     private Window mainWindow;
 
     @FXML
@@ -29,16 +30,20 @@ public class MainController {
         Platform.runLater(() -> {
             try {
                 FXMLLoader generatorLoader = new FXMLLoader(getClass().getResource("ImageGenerator.fxml"));
-                generatorLoader.load();
+                generatorTabContent = generatorLoader.load();
                 generatorTabController = generatorLoader.getController();
 
                 FXMLLoader img2ImgLoader = new FXMLLoader(getClass().getResource("Img2ImgGenerator.fxml"));
-                img2ImgLoader.load();
+                Img2ImgTabContent = img2ImgLoader.load();
                 img2ImgGeneratorController = img2ImgLoader.getController();
 
                 FXMLLoader fileManagerLoader = new FXMLLoader(getClass().getResource("FileManager.fxml"));
-                fileManagerLoader.load();
+                fileManagerTabContent = fileManagerLoader.load();
                 fileManagerTabController = fileManagerLoader.getController();
+
+                generatorTab.setContent(generatorTabContent);
+                Img2ImgTab.setContent(Img2ImgTabContent);
+                fileManagerTab.setContent(fileManagerTabContent);
 
                 generatorTab.setOnSelectionChanged(event -> {
                     if (generatorTab.isSelected()) {

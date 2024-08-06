@@ -2,6 +2,7 @@ package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.NAIConstants;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
+import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -29,6 +30,7 @@ public abstract class AbstractGenerationController {
     @FXML public TextArea positivePromptPreviewArea;
     @FXML public TextArea negativePromptPreviewArea;
     @FXML public ComboBox<String> generateCountComboBox;
+    EmbedProcessor embedProcessor = new EmbedProcessor();
 
     @FXML
     public void initialize() {
