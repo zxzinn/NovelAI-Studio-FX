@@ -7,7 +7,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.controller.ImageGeneratorController">
     <left>
-        <VBox spacing="10.0" minWidth="250.0" maxWidth="300.0">
+        <VBox spacing="10.0" minWidth="300.0" maxWidth="350.0">
             <padding>
                 <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
             </padding>
