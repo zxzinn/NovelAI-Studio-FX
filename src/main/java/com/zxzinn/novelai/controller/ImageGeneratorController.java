@@ -18,6 +18,8 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 @Log4j2
@@ -25,6 +27,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
     @FXML public Button generateButton;
     @FXML public ScrollPane mainScrollPane;
+    @FXML public VBox historyImagesContainer;
 
     private EmbedProcessor embedProcessor;
     private int currentGeneratedCount = 0;
@@ -32,6 +35,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
     private Window mainWindow;
     private SettingsManager settingsManager;
     private ImageGenerationService imageGenerationService;
+    private List<Image> generatedImages;
 
     @FXML
     public void initialize() {
@@ -39,6 +43,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
         embedProcessor = new EmbedProcessor();
         settingsManager = Application.getSettingsManager();
         imageGenerationService = new ImageGenerationService(apiClient);
+        generatedImages = new ArrayList<>();
         loadSettings();
         setupListeners();
         setupZoomHandler();
@@ -104,6 +109,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     return;
                 }
 
+                generatedImages.add(image);
+
                 Platform.runLater(() -> {
                     mainImageView.setImage(image);
                     mainImageView.setPreserveRatio(true);
@@ -117,6 +124,12 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     historyImageView.setSmooth(true);
                     historyImageView.setFitWidth(150);
                     historyImageView.setFitHeight(150 / aspectRatio);
+
+                    // 為歷史圖片添加點擊事件
+                    historyImageView.setOnMouseClicked(event -> {
+                        mainImageView.setImage(image);
+                    });
+
                     historyImagesContainer.getChildren().add(historyImageView);
 
                     try {
