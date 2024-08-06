@@ -3,13 +3,13 @@
 <?import javafx.scene.control.*?>
 
 <TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.MainController">
-    <Tab fx:id="generatorTab" text="generator">
+    <Tab fx:id="generatorTab" text="generator" closable="false" >
         <fx:include source="ImageGenerator.fxml" fx:id="generatorTabContent"/>
     </Tab>
-    <Tab fx:id="Img2ImgTab" text="img2img">
+    <Tab fx:id="Img2ImgTab" text="img2img" closable="false">
         <fx:include source="Img2ImgGenerator.fxml" fx:id="Img2ImgTabContent"/>
     </Tab>
-    <Tab fx:id="fileManagerTab" text="fileManager">
+    <Tab fx:id="fileManagerTab" text="fileManager" closable="false">
         <fx:include source="FileManager.fxml" fx:id="fileManagerTabContent"/>
     </Tab>
 </TabPane>

@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.Application;
+import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -23,37 +24,21 @@ import java.util.concurrent.CountDownLatch;
 public class ImageGeneratorController extends AbstractGenerationController {
 
     @FXML public Button generateButton;
-    @FXML public TextField apiKeyField;
-    @FXML public ComboBox<String> modelComboBox;
-    @FXML public TextField widthField;
-    @FXML public TextField heightField;
-    @FXML public TextField ratioField;
-    @FXML public ComboBox<String> samplerComboBox;
-    @FXML public CheckBox smeaCheckBox;
-    @FXML public CheckBox smeaDynCheckBox;
-    @FXML public TextField stepsField;
-    @FXML public TextField seedField;
-    @FXML public TextField countField;
-    @FXML public ComboBox<String> generateCountComboBox;
-    @FXML public TextArea positivePromptArea;
-    @FXML public TextArea negativePromptArea;
-    @FXML public TextArea positivePromptPreviewArea;
-    @FXML public TextArea negativePromptPreviewArea;
-    @FXML public ImageView mainImageView;
-    @FXML public VBox historyImagesContainer;
-    public ScrollPane mainScrollPane;
+    @FXML public ScrollPane mainScrollPane;
 
     private EmbedProcessor embedProcessor;
     private int currentGeneratedCount = 0;
     @Setter
     private Window mainWindow;
     private SettingsManager settingsManager;
+    private ImageGenerationService imageGenerationService;
 
     @FXML
     public void initialize() {
         super.initialize();
         embedProcessor = new EmbedProcessor();
         settingsManager = Application.getSettingsManager();
+        imageGenerationService = new ImageGenerationService(apiClient);
         loadSettings();
         setupListeners();
         setupZoomHandler();
@@ -112,20 +97,10 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     return;
                 }
 
-                byte[] responseData = apiClient.generateImage(this);
-                if (responseData == null || responseData.length == 0) {
+                Image image = imageGenerationService.generateImage(this);
+                if (image == null) {
                     return;
                 }
-
-                byte[] imageData;
-                try {
-                    imageData = ImageUtils.extractImageFromZip(responseData);
-                } catch (IOException e) {
-                    log.info("數據不是 ZIP 格式，假定它是直接的圖像數據");
-                    imageData = responseData;
-                }
-
-                Image image = ImageUtils.byteArrayToImage(imageData);
 
                 Platform.runLater(() -> {
                     mainImageView.setImage(image);

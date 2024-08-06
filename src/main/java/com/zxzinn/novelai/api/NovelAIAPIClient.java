@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.api;
 
 import com.google.gson.Gson;
-import com.zxzinn.novelai.controller.ImageGeneratorController;
+import com.zxzinn.novelai.controller.AbstractGenerationController;
 import com.zxzinn.novelai.controller.Img2ImgGeneratorController;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
@@ -21,28 +21,19 @@ public class NovelAIAPIClient {
             .build();
     private final Gson gson = new Gson();
 
-    public byte[] generateImage(ImageGeneratorController controller) throws IOException {
+    public byte[] generateImage(AbstractGenerationController controller) throws IOException {
         ImageGenerationPayload payload = createImageGenerationPayload(controller);
         Request request = createRequest(payload, controller.apiKeyField.getText());
-        try (Response response = httpClient.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            ResponseBody body = response.body();
-            if (body == null) {
-                throw new IOException("Response body is null");
-            }
-            return body.bytes();
-        }
+        return sendRequest(request);
     }
 
-    public byte[] generateImg2Img(Img2ImgGeneratorController controller) throws IOException {
+    public byte[] generateImg2Img(AbstractGenerationController controller) throws IOException {
         Img2ImgGenerationPayload payload = createImg2ImgGenerationPayload(controller);
         Request request = createRequest(payload, controller.apiKeyField.getText());
         return sendRequest(request);
     }
 
-    private ImageGenerationPayload createImageGenerationPayload(ImageGeneratorController controller) {
+    private ImageGenerationPayload createImageGenerationPayload(AbstractGenerationController controller) {
         ImageGenerationPayload payload = new ImageGenerationPayload();
         payload.setInput(controller.positivePromptPreviewArea.getText());
         payload.setModel(controller.modelComboBox.getValue());
@@ -66,7 +57,7 @@ public class NovelAIAPIClient {
         return payload;
     }
 
-    private Img2ImgGenerationPayload createImg2ImgGenerationPayload(Img2ImgGeneratorController controller) {
+    private Img2ImgGenerationPayload createImg2ImgGenerationPayload(AbstractGenerationController controller) {
         Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
         payload.setInput(controller.positivePromptPreviewArea.getText());
         payload.setModel(controller.modelComboBox.getValue());
@@ -85,8 +76,12 @@ public class NovelAIAPIClient {
         parameters.setSm_dyn(controller.smeaDynCheckBox.isSelected());
         parameters.setSeed(Long.parseLong(controller.seedField.getText()));
         parameters.setNegative_prompt(controller.negativePromptPreviewArea.getText());
-        parameters.setImage(controller.base64Image);
-        parameters.setExtra_noise_seed(Long.parseLong(controller.extraNoiseSeedField.getText()));
+
+        if (controller instanceof Img2ImgGeneratorController) {
+            Img2ImgGeneratorController img2ImgController = (Img2ImgGeneratorController) controller;
+            parameters.setImage(img2ImgController.base64Image);
+            parameters.setExtra_noise_seed(Long.parseLong(img2ImgController.extraNoiseSeedField.getText()));
+        }
 
         payload.setParameters(parameters);
         return payload;

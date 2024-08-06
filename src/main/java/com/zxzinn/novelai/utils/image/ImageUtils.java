@@ -2,6 +2,7 @@ package com.zxzinn.novelai.utils.image;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,9 +17,8 @@ import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@Log4j2
 public class ImageUtils {
-    private static final Logger logger = LogManager.getLogger(ImageUtils.class);
-
     public static Image base64ToImage(String base64Data) throws IOException {
         byte[] imageData = Base64.getDecoder().decode(base64Data);
         return byteArrayToImage(imageData);
@@ -52,13 +52,13 @@ public class ImageUtils {
 
     public static void saveImage(Image image, String fileName) throws IOException {
         if (image == null) {
-            logger.error("無法保存圖像：圖像對象為null");
+            log.error("無法保存圖像：圖像對象為null");
             return;
         }
 
         File outputDir = new File("output");
         if (!outputDir.exists() && !outputDir.mkdir()) {
-            logger.error("無法創建輸出目錄");
+            log.error("無法創建輸出目錄");
             return;
         }
 
@@ -66,12 +66,12 @@ public class ImageUtils {
         BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
 
         if (bufferedImage == null) {
-            logger.error("無法將JavaFX圖像轉換為BufferedImage");
+            log.error("無法將JavaFX圖像轉換為BufferedImage");
             return;
         }
 
         if (!ImageIO.write(bufferedImage, "png", outputFile)) {
-            logger.error("沒有合適的寫入器來保存PNG圖像");
+            log.error("沒有合適的寫入器來保存PNG圖像");
         }
     }
 
@@ -82,7 +82,7 @@ public class ImageUtils {
             bis.reset();
             return mimeType;
         } catch (IOException e) {
-            logger.error("無法檢測MIME類型：" + e.getMessage(), e);
+            log.error("無法檢測MIME類型：" + e.getMessage(), e);
             return null;
         }
     }

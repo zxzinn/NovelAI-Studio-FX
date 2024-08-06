@@ -8,8 +8,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
-
 public abstract class AbstractGenerationController {
     public VBox historyImagesContainer;
     public ImageView mainImageView;
@@ -61,29 +59,5 @@ public abstract class AbstractGenerationController {
     }
 
     @FXML
-    protected abstract void handleGenerate() throws IOException;
-
-    @FXML
-    private void handleRefreshEmbed() {
-        // 處理刷新嵌入按鈕點擊事件
-        System.out.println("刷新嵌入按鈕被點擊");
-    }
-
-    @FXML
-    private void handleLockEmbed() {
-        // 處理鎖定嵌入按鈕點擊事件
-        System.out.println("鎖定嵌入按鈕被點擊");
-    }
-
-    @FXML
-    private void handleFit() {
-        // 處理適應按鈕點擊事件
-        System.out.println("適應按鈕被點擊");
-    }
-
-    @FXML
-    private void handleOriginalSize() {
-        // 處理原始大小按鈕點擊事件
-        System.out.println("原始大小按鈕被點擊");
-    }
+    protected abstract void handleGenerate();
 }

@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.controller;
 
+import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -13,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 
 @Log4j2
-public class Img2ImgGeneratorController extends AbstractGenerationController{
+public class Img2ImgGeneratorController extends AbstractGenerationController {
     public VBox historyImagesContainer;
     public ImageView mainImageView;
     public Button generateButton;
@@ -21,11 +22,7 @@ public class Img2ImgGeneratorController extends AbstractGenerationController{
     @FXML public Button uploadImageButton;
 
     public String base64Image;
-    @FXML
-    public void initialize() {
-        super.initialize();
-        if (extraNoiseSeedField != null) extraNoiseSeedField.setText("0");
-    }
+    private ImageGenerationService imageGenerationService;
 
     @FXML
     @Override
@@ -33,20 +30,10 @@ public class Img2ImgGeneratorController extends AbstractGenerationController{
         generateButton.setDisable(true);
         new Thread(() -> {
             try {
-                byte[] responseData = apiClient.generateImg2Img(this);
-                if (responseData == null || responseData.length == 0) {
+                Image image = imageGenerationService.generateImg2Img(this);
+                if (image == null) {
                     return;
                 }
-
-                byte[] imageData;
-                try {
-                    imageData = ImageUtils.extractImageFromZip(responseData);
-                } catch (IOException e) {
-                    log.info("數據不是 ZIP 格式，假定它是直接的圖像數據");
-                    imageData = responseData;
-                }
-
-                Image image = ImageUtils.byteArrayToImage(imageData);
 
                 Platform.runLater(() -> {
                     mainImageView.setImage(image);
