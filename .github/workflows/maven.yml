@@ -20,7 +20,8 @@ jobs:
         java: [21]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
@@ -29,12 +30,45 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Display Java version
+        run: java -version
+
+      - name: Display Maven version
+        run: mvn --version
+
+      - name: Clean Maven project
+        run: mvn clean
+
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml -e
         timeout-minutes: 30
+
+      - name: Run tests
+        run: mvn test
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: Package-JDK${{ matrix.java }}-${{ matrix.os }}
           path: target/*.jar
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.java }}
+          path: target/surefire-reports
+
+      - name: Upload Maven logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-logs-${{ matrix.os }}-${{ matrix.java }}
+          path: ~/.m2/repository/.m2.log
