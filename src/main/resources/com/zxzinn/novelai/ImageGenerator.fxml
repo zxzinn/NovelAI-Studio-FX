@@ -5,85 +5,81 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.controller.ImageGeneratorController">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.controller.ImageGeneratorController" stylesheets="@styles.css">
     <left>
-        <VBox spacing="10.0" minWidth="300.0" maxWidth="350.0">
-            <padding>
-                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
-            </padding>
-            <TitledPane text="API Settings" collapsible="false">
-                <GridPane hgap="10.0" vgap="10.0">
-                    <Label text="API Key" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <TextField fx:id="apiKeyField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                    <Label text="模型" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <ComboBox fx:id="modelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                </GridPane>
-            </TitledPane>
-            <TitledPane text="Output Settings" collapsible="false">
-                <GridPane hgap="10.0" vgap="10.0">
-                    <Label text="寬度" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <TextField fx:id="widthField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                    <Label text="高度" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <TextField fx:id="heightField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                    <Label text="比例" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <TextField fx:id="ratioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                    <Label text="每次生成圖像數" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <TextField fx:id="countField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                </GridPane>
-            </TitledPane>
-            <TitledPane text="Sampling Settings" collapsible="false">
-                <GridPane hgap="10.0" vgap="10.0">
-                    <Label text="採樣器" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <ComboBox fx:id="samplerComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                    <CheckBox fx:id="smeaCheckBox" text="SMEA" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                    <Label text="步驟" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <TextField fx:id="stepsField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                    <Label text="種子" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <TextField fx:id="seedField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                </GridPane>
-            </TitledPane>
-            <HBox spacing="10.0" alignment="CENTER">
-                <Button text="生成" fx:id="generateButton" onAction="#handleGenerate" minWidth="100.0"/>
-                <ComboBox fx:id="generateCountComboBox" promptText="生成數量"/>
-            </HBox>
-        </VBox>
+        <ScrollPane fitToWidth="true" styleClass="side-panel">
+            <VBox spacing="10.0" styleClass="settings-panel">
+                <TitledPane text="API Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <Label text="API Key" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="apiKeyField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="模型" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="modelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
+                <TitledPane text="Output Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <Label text="寬度" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="widthField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label text="高度" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="heightField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="比例" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="ratioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="每次生成圖像數" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <TextField fx:id="countField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
+                <TitledPane text="Sampling Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <Label text="採樣器" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="samplerComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <CheckBox fx:id="smeaCheckBox" text="SMEA" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="步驟" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="stepsField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <Label text="種子" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <TextField fx:id="seedField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
+                <HBox spacing="10.0" alignment="CENTER">
+                    <Button text="生成" fx:id="generateButton" onAction="#handleGenerate" styleClass="generate-button"/>
+                    <ComboBox fx:id="generateCountComboBox" promptText="生成數量"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
     </left>
     <center>
-        <VBox spacing="10.0">
-            <padding>
-                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
-            </padding>
+        <VBox spacing="10.0" styleClass="main-content">
             <HBox spacing="10.0" VBox.vgrow="NEVER">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="正面提示詞:"/>
-                    <TextArea fx:id="positivePromptArea" prefHeight="100"/>
+                    <TextArea fx:id="positivePromptArea" prefHeight="100" styleClass="prompt-area"/>
                 </VBox>
-                <VBox spacing="5.0" HBox.hgrow="NEVER">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="正面提示詞預覽"/>
-                    <TextArea fx:id="positivePromptPreviewArea" prefHeight="100"/>
+                    <TextArea fx:id="positivePromptPreviewArea" prefHeight="100" styleClass="prompt-preview"/>
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="NEVER">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="負面提示詞:"/>
-                    <TextArea fx:id="negativePromptArea" prefHeight="100"/>
+                    <TextArea fx:id="negativePromptArea" prefHeight="100" styleClass="prompt-area"/>
                 </VBox>
-                <VBox spacing="5.0" HBox.hgrow="NEVER">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="負面提示詞預覽"/>
-                    <TextArea fx:id="negativePromptPreviewArea" prefHeight="100"/>
+                    <TextArea fx:id="negativePromptPreviewArea" prefHeight="100" styleClass="prompt-preview"/>
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
-                <ScrollPane fx:id="mainScrollPane" HBox.hgrow="ALWAYS" pannable="true" fitToWidth="true" fitToHeight="true">
+                <ScrollPane fx:id="mainScrollPane" HBox.hgrow="ALWAYS" pannable="true" fitToWidth="true" fitToHeight="true" styleClass="image-scroll-pane">
                     <AnchorPane>
                         <ImageView fx:id="mainImageView" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
                                    AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                     </AnchorPane>
                 </ScrollPane>
-                <VBox spacing="5.0" minWidth="150.0" maxWidth="200.0">
+                <VBox spacing="5.0" styleClass="history-panel">
                     <Label text="歷史圖片"/>
-                    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true">
+                    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" styleClass="history-scroll-pane">
                         <VBox fx:id="historyImagesContainer" spacing="5.0"/>
                     </ScrollPane>
                 </VBox>

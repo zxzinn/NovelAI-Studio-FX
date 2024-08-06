@@ -1,0 +1,99 @@
+.root {
+    -fx-background-color: #f0f0f0;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.side-panel {
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+}
+
+.settings-panel {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+}
+
+.settings-section {
+    -fx-background-color: #f8f8f8;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5;
+}
+
+.settings-section > .title {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.text-field, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 3;
+}
+
+.generate-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+}
+
+.generate-button:hover {
+    -fx-background-color: #45a049;
+}
+
+.upload-button {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.upload-button:hover {
+    -fx-background-color: #1976D2;
+}
+
+.main-content {
+    -fx-padding: 20;
+    -fx-background-color: white;
+}
+
+.prompt-area, .prompt-preview {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 3;
+}
+
+.image-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 3;
+}
+
+.history-panel {
+    -fx-background-color: #f8f8f8;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5;
+    -fx-padding: 10;
+}
+
+.history-scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 3;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #4a90e2;
+}
+
+.titled-pane > .title {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+}
+
+.titled-pane > .title > .arrow-button .arrow {
+    -fx-background-color: white;
+}
