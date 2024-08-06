@@ -4,15 +4,15 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,35 +22,29 @@ public class TitleBarController extends HBox {
     private static final Logger logger = LogManager.getLogger(TitleBarController.class);
     private double xOffset = 0;
     private double yOffset = 0;
+    @Setter
     private Stage stage;
     private Rectangle2D previousBounds;
     private static final long ANIMATION_DURATION = 20_000_000L; // 150ms in nanoseconds
 
-    // 添加title屬性
+    @FXML private Label titleLabel;
+    @FXML private Button minimizeButton;
+    @FXML private Button maximizeButton;
+    @FXML private Button closeButton;
+
     private StringProperty title = new SimpleStringProperty();
 
-    public TitleBarController() {
-        Label titleLabel = new Label();
+    @FXML
+    private void initialize() {
         titleLabel.textProperty().bind(titleProperty());
-        titleLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-
-        Button minimizeButton = createButton("fas-window-minimize", this::minimizeStage);
-        Button maximizeButton = createButton("fas-window-maximize", this::toggleMaximize);
-        Button closeButton = createButton("fas-times", this::closeStage);
-
-        this.getChildren().addAll(titleLabel, minimizeButton, maximizeButton, closeButton);
+        setupEventHandlers();
     }
 
-    private Button createButton(String iconLiteral, Runnable action) {
-        Button button = new Button();
-        button.setGraphic(new FontIcon(iconLiteral));
-        button.getStyleClass().add("window-button");
-        button.setOnAction(e -> action.run());
-        return button;
-    }
+    private void setupEventHandlers() {
+        minimizeButton.setOnAction(event -> minimizeStage());
+        maximizeButton.setOnAction(event -> toggleMaximize());
+        closeButton.setOnAction(event -> closeStage());
 
-    private void setupDraggable() {
         this.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -59,9 +53,6 @@ public class TitleBarController extends HBox {
             stage.setX(event.getScreenX() - xOffset);
             stage.setY(event.getScreenY() - yOffset);
         });
-    }
-
-    private void setupDoubleClickMaximize() {
         this.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 toggleMaximize();
@@ -117,12 +108,6 @@ public class TitleBarController extends HBox {
             }
         }.start();
     }
-    // 添加setStage()方法
-    public void setStage(Stage stage) {
-        this.stage = stage;
-        setupDraggable();
-        setupDoubleClickMaximize();
-    }
 
     private void closeStage() {
         stage.close();
@@ -130,7 +115,6 @@ public class TitleBarController extends HBox {
         System.exit(0);
     }
 
-    // 添加title屬性的getter和setter方法
     public String getTitle() {
         return title.get();
     }
@@ -142,6 +126,4 @@ public class TitleBarController extends HBox {
     public void setTitle(String title) {
         this.title.set(title);
     }
-
-
 }
