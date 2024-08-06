@@ -10,81 +10,28 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
-public class NovelAIAPIClient {
+public class NovelAIAPIClient implements APIClient {
     private static final String API_URL = "https://api.novelai.net/ai/generate-image";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-    private final OkHttpClient httpClient = new OkHttpClient.Builder()
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .build();
-    private final Gson gson = new Gson();
+    private final OkHttpClient httpClient;
+    private final Gson gson;
 
-    public byte[] generateImage(AbstractGenerationController controller) throws IOException {
-        ImageGenerationPayload payload = createImageGenerationPayload(controller);
-        Request request = createRequest(payload, controller.apiKeyField.getText());
+    public NovelAIAPIClient(OkHttpClient httpClient, Gson gson) {
+        this.httpClient = httpClient;
+        this.gson = gson;
+    }
+
+    @Override
+    public byte[] generateImage(ImageGenerationPayload payload, String apiKey) throws IOException {
+        Request request = createRequest(payload, apiKey);
         return sendRequest(request);
     }
 
-    public byte[] generateImg2Img(AbstractGenerationController controller) throws IOException {
-        Img2ImgGenerationPayload payload = createImg2ImgGenerationPayload(controller);
-        Request request = createRequest(payload, controller.apiKeyField.getText());
+    @Override
+    public byte[] generateImg2Img(Img2ImgGenerationPayload payload, String apiKey) throws IOException {
+        Request request = createRequest(payload, apiKey);
         return sendRequest(request);
-    }
-
-    private ImageGenerationPayload createImageGenerationPayload(AbstractGenerationController controller) {
-        ImageGenerationPayload payload = new ImageGenerationPayload();
-        payload.setInput(controller.positivePromptPreviewArea.getText());
-        payload.setModel(controller.modelComboBox.getValue());
-        payload.setAction("generate");
-
-        ImageGenerationPayload.ImageGenerationParameters parameters = new ImageGenerationPayload.ImageGenerationParameters();
-        parameters.setWidth(Integer.parseInt(controller.widthField.getText()));
-        parameters.setHeight(Integer.parseInt(controller.heightField.getText()));
-        parameters.setScale(Integer.parseInt(controller.ratioField.getText()));
-        parameters.setSampler(controller.samplerComboBox.getValue());
-        parameters.setSteps(Integer.parseInt(controller.stepsField.getText()));
-        parameters.setN_samples(Integer.parseInt(controller.countField.getText()));
-        parameters.setUcPreset(false);
-        parameters.setQualityToggle(false);
-        parameters.setSm(controller.smeaCheckBox.isSelected());
-        parameters.setSm_dyn(controller.smeaDynCheckBox.isSelected());
-        parameters.setSeed(Long.parseLong(controller.seedField.getText()));
-        parameters.setNegative_prompt(controller.negativePromptPreviewArea.getText());
-
-        payload.setParameters(parameters);
-        return payload;
-    }
-
-    private Img2ImgGenerationPayload createImg2ImgGenerationPayload(AbstractGenerationController controller) {
-        Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
-        payload.setInput(controller.positivePromptPreviewArea.getText());
-        payload.setModel(controller.modelComboBox.getValue());
-        payload.setAction("img2img");
-
-        Img2ImgGenerationPayload.Img2ImgGenerationParameters parameters = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
-        parameters.setWidth(Integer.parseInt(controller.widthField.getText()));
-        parameters.setHeight(Integer.parseInt(controller.heightField.getText()));
-        parameters.setScale(Integer.parseInt(controller.ratioField.getText()));
-        parameters.setSampler(controller.samplerComboBox.getValue());
-        parameters.setSteps(Integer.parseInt(controller.stepsField.getText()));
-        parameters.setN_samples(Integer.parseInt(controller.countField.getText()));
-        parameters.setUcPreset(false);
-        parameters.setQualityToggle(false);
-        parameters.setSm(controller.smeaCheckBox.isSelected());
-        parameters.setSm_dyn(controller.smeaDynCheckBox.isSelected());
-        parameters.setSeed(Long.parseLong(controller.seedField.getText()));
-        parameters.setNegative_prompt(controller.negativePromptPreviewArea.getText());
-
-        if (controller instanceof Img2ImgGeneratorController) {
-            Img2ImgGeneratorController img2ImgController = (Img2ImgGeneratorController) controller;
-            parameters.setImage(img2ImgController.base64Image);
-            parameters.setExtra_noise_seed(Long.parseLong(img2ImgController.extraNoiseSeedField.getText()));
-        }
-
-        payload.setParameters(parameters);
-        return payload;
     }
 
     private Request createRequest(Object payload, String apiKey) {
@@ -100,8 +47,10 @@ public class NovelAIAPIClient {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-            assert response.body() != null;
-            return response.body().bytes();
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) throw new IOException("Response body is null");
+
+            return responseBody.bytes();
         }
     }
 }

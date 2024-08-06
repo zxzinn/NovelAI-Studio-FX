@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.NAIConstants;
+import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import javafx.collections.FXCollections;
@@ -12,7 +13,8 @@ import javafx.scene.layout.VBox;
 public abstract class AbstractGenerationController {
     public VBox historyImagesContainer;
     public ImageView mainImageView;
-    NovelAIAPIClient apiClient = new NovelAIAPIClient();
+    protected final APIClient apiClient;
+    protected final EmbedProcessor embedProcessor;
 
     @FXML public TextField apiKeyField;
     @FXML public ComboBox<String> modelComboBox;
@@ -30,7 +32,11 @@ public abstract class AbstractGenerationController {
     @FXML public TextArea positivePromptPreviewArea;
     @FXML public TextArea negativePromptPreviewArea;
     @FXML public ComboBox<String> generateCountComboBox;
-    EmbedProcessor embedProcessor = new EmbedProcessor();
+
+    public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor) {
+        this.apiClient = apiClient;
+        this.embedProcessor = embedProcessor;
+    }
 
     @FXML
     public void initialize() {

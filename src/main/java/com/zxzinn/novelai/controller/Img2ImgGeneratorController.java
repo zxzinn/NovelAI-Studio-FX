@@ -1,6 +1,10 @@
 package com.zxzinn.novelai.controller;
 
+import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.service.ImageGenerationService;
+import com.zxzinn.novelai.utils.SettingsManager;
+import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -22,7 +26,18 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     @FXML public Button uploadImageButton;
 
     public String base64Image;
-    private ImageGenerationService imageGenerationService;
+    private final ImageGenerationService imageGenerationService;
+    private final ImageUtils imageUtils;
+    private final SettingsManager settingsManager;
+
+    public Img2ImgGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
+                                      ImageGenerationService imageGenerationService,
+                                      ImageUtils imageUtils, SettingsManager settingsManager) {
+        super(apiClient, embedProcessor);
+        this.imageGenerationService = imageGenerationService;
+        this.imageUtils = imageUtils;
+        this.settingsManager = settingsManager;
+    }
 
     @FXML
     @Override
@@ -30,25 +45,11 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
         generateButton.setDisable(true);
         new Thread(() -> {
             try {
-                Image image = imageGenerationService.generateImg2Img(this);
-                if (image == null) {
-                    return;
+                Img2ImgGenerationPayload payload = createImg2ImgGenerationPayload();
+                Image image = imageGenerationService.generateImg2Img(payload, apiKeyField.getText());
+                if (image != null) {
+                    handleGeneratedImage(image);
                 }
-
-                Platform.runLater(() -> {
-                    mainImageView.setImage(image);
-
-                    ImageView historyImageView = new ImageView(image);
-                    historyImageView.setFitWidth(150);
-                    historyImageView.setFitHeight(150);
-                    historyImagesContainer.getChildren().add(historyImageView);
-
-                    try {
-                        ImageUtils.saveImage(image, "generated_image.png");
-                    } catch (IOException e) {
-                        log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
-                    }
-                });
             } catch (IOException e) {
                 log.error("生成圖像時發生錯誤：" + e.getMessage(), e);
             } finally {
@@ -57,10 +58,35 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
         }).start();
     }
 
+    private Img2ImgGenerationPayload createImg2ImgGenerationPayload() {
+        Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
+        // 設置payload的各個屬性
+        // ...
+        return payload;
+    }
+
+    private void handleGeneratedImage(Image image) {
+        Platform.runLater(() -> {
+            mainImageView.setImage(image);
+            addImageToHistory(image);
+            try {
+                imageUtils.saveImage(image, "generated_img2img.png");
+            } catch (IOException e) {
+                log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
+            }
+        });
+    }
+
+    private void addImageToHistory(Image image) {
+        ImageView historyImageView = new ImageView(image);
+        historyImageView.setFitWidth(150);
+        historyImageView.setFitHeight(150);
+        historyImageView.setOnMouseClicked(event -> mainImageView.setImage(image));
+        historyImagesContainer.getChildren().add(historyImageView);
+    }
+
     @FXML
     private void handleUploadImage() {
-        // 這裡添加處理圖片上傳的邏輯
-        // 將選擇的圖片轉換為 base64 編碼並存儲在 base64Image 字段中
-        System.out.println("Upload Image button clicked");
+        // 實現圖片上傳邏輯
     }
 }

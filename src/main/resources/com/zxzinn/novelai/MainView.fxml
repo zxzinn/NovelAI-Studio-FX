@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<AnchorPane fx:id="rootPane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.zxzinn.novelai.MainController">
+<AnchorPane fx:id="rootPane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1">
     <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
         <!-- Custom Title Bar -->
         <HBox fx:id="titleBar" alignment="CENTER_LEFT" onMouseClicked="#handleMouseClicked" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" spacing="5" styleClass="title-bar">
@@ -42,19 +42,16 @@
                 <graphic>
                     <FontIcon iconLiteral="fas-image" iconSize="16" />
                 </graphic>
-                <fx:include fx:id="generatorTabContent" source="ImageGenerator.fxml" />
             </Tab>
             <Tab fx:id="Img2ImgTab" closable="false" text="Img2Img">
                 <graphic>
                     <FontIcon iconLiteral="fas-exchange-alt" iconSize="16" />
                 </graphic>
-                <fx:include fx:id="Img2ImgTabContent" source="Img2ImgGenerator.fxml" />
             </Tab>
             <Tab fx:id="fileManagerTab" closable="false" text="File Manager">
                 <graphic>
                     <FontIcon iconLiteral="fas-folder-open" iconSize="16" />
                 </graphic>
-                <fx:include fx:id="fileManagerTabContent" source="FileManager.fxml" />
             </Tab>
         </TabPane>
     </VBox>
