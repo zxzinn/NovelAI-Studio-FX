@@ -1,0 +1,26 @@
+tagset:
+  negative_preset:
+    tags:
+      - lowres
+      - +bad
+      - error
+      - fewer
+      - extra
+      - missing
+      - worst quality
+      - jpeg artifacts
+      - bad quality
+      - watermark
+      - unfinished
+      - displeasing
+      - chromatic aberration
+      - signature
+      - extra digits
+      - artistic error
+      - username
+      - scan
+      - --abstract
+    Sampling: all
+
+condition:
+  negative_preset

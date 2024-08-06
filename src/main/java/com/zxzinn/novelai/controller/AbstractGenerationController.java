@@ -1,28 +1,36 @@
 package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.NAIConstants;
+import com.zxzinn.novelai.api.NovelAIAPIClient;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+
+import java.io.IOException;
 
 public abstract class AbstractGenerationController {
+    public VBox historyImagesContainer;
+    public ImageView mainImageView;
+    NovelAIAPIClient apiClient = new NovelAIAPIClient();
 
-    @FXML private TextField apiKeyField;
-    @FXML private ComboBox<String> modelComboBox;
-    @FXML private TextField widthField;
-    @FXML private TextField heightField;
-    @FXML private TextField ratioField;
-    @FXML private TextField countField;
-    @FXML private ComboBox<String> samplerComboBox;
-    @FXML private CheckBox smeaCheckBox;
-    @FXML private CheckBox smeaDynCheckBox;
-    @FXML private TextField stepsField;
-    @FXML private TextField seedField;
-    @FXML private TextArea positivePromptArea;
-    @FXML private TextArea negativePromptArea;
-    @FXML private TextArea positivePromptPreviewArea;
-    @FXML private TextArea negativePromptPreviewArea;
-    @FXML private ComboBox<String> generateCountComboBox;
+    @FXML public TextField apiKeyField;
+    @FXML public ComboBox<String> modelComboBox;
+    @FXML public TextField widthField;
+    @FXML public TextField heightField;
+    @FXML public TextField ratioField;
+    @FXML public TextField countField;
+    @FXML public ComboBox<String> samplerComboBox;
+    @FXML public CheckBox smeaCheckBox;
+    @FXML public CheckBox smeaDynCheckBox;
+    @FXML public TextField stepsField;
+    @FXML public TextField seedField;
+    @FXML public TextArea positivePromptArea;
+    @FXML public TextArea negativePromptArea;
+    @FXML public TextArea positivePromptPreviewArea;
+    @FXML public TextArea negativePromptPreviewArea;
+    @FXML public ComboBox<String> generateCountComboBox;
 
     @FXML
     public void initialize() {
@@ -53,10 +61,7 @@ public abstract class AbstractGenerationController {
     }
 
     @FXML
-    private void handleGenerate() {
-        // 處理生成按鈕點擊事件
-        System.out.println("生成按鈕被點擊");
-    }
+    protected abstract void handleGenerate() throws IOException;
 
     @FXML
     private void handleRefreshEmbed() {

@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 
 public class FileManagerController {
+    public Button originalSizeButton;
+    public Button fitButton;
     @FXML private TreeView<String> fileTreeView;
     @FXML private ImageView previewImageView;
     @FXML private ListView<String> metadataListView;

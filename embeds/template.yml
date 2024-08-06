@@ -1,0 +1,40 @@
+tagset:
+  test_preset_1:
+    tags:
+      - best quality
+      - amazing quality
+      - very aesthetic
+      - absurdres
+    # 在每個tag前面加上 "artist:" 前綴
+    ArtistTagPrefix: false
+    # 隨機取樣數量，all為全部取樣
+    Sampling: all
+    # 如果為true則啟動RandomWeight
+
+    # !!!未完成
+    RandomWeight: true
+    # 如果為true則啟動RandomWeight的權重範圍，為 整數~整數
+    # 在Sampling得到的結果外面加上brackets
+    # 如果為正的，，則在外面加上{}，例如2的話，則變成{{tag}}
+    # 如果為負的，，則在外面加上[]，例如-1的話，則變成tag
+    # 如果為0，則不在外面加上brackets
+    RandomWeightRange: -2 ~ 2
+    # 如果為true，則所有得到的tag都加上一樣的bracket
+    # 如果為false，則所有得到的tag都得到一個專屬的bracket
+    SameRandomWeight: false
+
+  test_preset_2:
+    tags:
+      - best quality
+      - amazing quality
+      - very aesthetic
+      - absurdres
+    ArtistTagPrefix: false
+    Sampling: all
+    RandomWeight: true
+    RandomWeightRange: -2 ~ 2
+    SameRandomWeight: false
+
+condition:
+  # 選擇要使用的tag組，支持or邏輯，and邏輯為在後面增加該tag組，而不是邏輯判斷式
+  test_preset_1 and test_preset_2

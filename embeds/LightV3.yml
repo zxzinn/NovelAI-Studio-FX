@@ -1,0 +1,13 @@
+tagset:
+  negative_preset:
+    tags:
+      - lowres
+      - jpeg artifacts
+      - worst quality
+      - watermark
+      - blurry
+      - very displeasing
+    ArtistTags: false
+    Sampling: all
+
+condition: negative_preset
