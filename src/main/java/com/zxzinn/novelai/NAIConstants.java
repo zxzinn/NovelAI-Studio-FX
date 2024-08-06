@@ -1,4 +1,4 @@
-package com.zxzinn.novelaidesktopfx;
+package com.zxzinn.novelai;
 
 public class NAIConstants {
     public static final String[] MODELS = {"nai-diffusion", "safe-diffusion", "nai-diffusion-furry", "custom",

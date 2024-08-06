@@ -1,4 +1,4 @@
-package com.zxzinn.novelaidesktopfx;
+package com.zxzinn.novelai.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

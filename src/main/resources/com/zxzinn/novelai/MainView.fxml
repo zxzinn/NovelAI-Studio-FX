@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 
-<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelaidesktopfx.MainController">
+<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.MainController">
     <tabs>
         <Tab fx:id="generatorTab" text="generator">
             <content>
                 <fx:include source="ImageGenerator.fxml" fx:id="generatorTabContent"/>
+            </content>
+        </Tab>
+        <Tab fx:id="Img2ImgTab" text="img2img">
+            <content>
+                <fx:include source="Img2ImgGenerator.fxml" fx:id="Img2ImgTabContent"/>
             </content>
         </Tab>
         <Tab fx:id="fileManagerTab" text="fileManager">
@@ -15,5 +19,7 @@
                 <fx:include source="FileManager.fxml" fx:id="fileManagerTabContent"/>
             </content>
         </Tab>
+
+
     </tabs>
 </TabPane>

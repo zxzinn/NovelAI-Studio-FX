@@ -1,16 +1,15 @@
-package com.zxzinn.novelaidesktopfx;
+package com.zxzinn.novelai;
 
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class ImageGeneratorApp extends Application {
+public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/com/zxzinn/novelaidesktopfx/MainView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/com/zxzinn/novelai/MainView.fxml"));
         primaryStage.setTitle("圖像生成器");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();

@@ -60,7 +60,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.zxzinn.novelaidesktopfx/com.zxzinn.novelaidesktopfx.HelloApplication
+                            <mainClass>com.zxzinn.novelaidesktopfx/com.zxzinn.novelai.HelloApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

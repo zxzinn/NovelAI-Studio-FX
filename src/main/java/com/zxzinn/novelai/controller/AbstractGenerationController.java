@@ -1,10 +1,11 @@
-package com.zxzinn.novelaidesktopfx;
+package com.zxzinn.novelai.controller;
 
+import com.zxzinn.novelai.NAIConstants;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-public class ImageGeneratorController {
+public abstract class AbstractGenerationController {
 
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
@@ -24,7 +25,7 @@ public class ImageGeneratorController {
     @FXML private ComboBox<String> generateCountComboBox;
 
     @FXML
-    private void initialize() {
+    public void initialize() {
         if (apiKeyField != null) apiKeyField.setText("");
 
         if (modelComboBox != null) {
