@@ -8,8 +8,14 @@ module com.zxzinn.novelaidesktopfx {
     requires javafx.swing;
     requires org.apache.logging.log4j;
     requires org.yaml.snakeyaml;
+    requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.fontawesome5;
+    requires org.kordamp.ikonli.core;
+    requires com.jfoenix;
 
     opens com.zxzinn.novelai to javafx.fxml;
+    exports com.zxzinn.novelai.ui to javafx.fxml;
+    opens com.zxzinn.novelai.ui to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
     exports com.zxzinn.novelai;
     exports com.zxzinn.novelai.controller;

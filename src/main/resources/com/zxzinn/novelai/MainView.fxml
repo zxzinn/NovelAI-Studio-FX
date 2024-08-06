@@ -3,24 +3,60 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
+<?import org.kordamp.ikonli.fontawesome5.*?>
+<?import com.zxzinn.novelai.ui.TitleBarController?>
 
-<TabPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.MainController" stylesheets="@styles.css">
-    <Tab fx:id="generatorTab" text="Generator" closable="false">
-        <graphic>
-            <FontIcon iconLiteral="fas-image" iconSize="16"/>
-        </graphic>
-        <fx:include source="ImageGenerator.fxml" fx:id="generatorTabContent"/>
-    </Tab>
-    <Tab fx:id="Img2ImgTab" text="Img2Img" closable="false">
-        <graphic>
-            <FontIcon iconLiteral="fas-exchange-alt" iconSize="16"/>
-        </graphic>
-        <fx:include source="Img2ImgGenerator.fxml" fx:id="Img2ImgTabContent"/>
-    </Tab>
-    <Tab fx:id="fileManagerTab" text="File Manager" closable="false">
-        <graphic>
-            <FontIcon iconLiteral="fas-folder-open" iconSize="16"/>
-        </graphic>
-        <fx:include source="FileManager.fxml" fx:id="fileManagerTabContent"/>
-    </Tab>
-</TabPane>
+
+<?import javafx.geometry.Insets?>
+<AnchorPane fx:id="rootPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.MainController" stylesheets="@styles.css">
+    <VBox AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+        <!-- Custom Title Bar -->
+        <HBox fx:id="titleBar" spacing="5" alignment="CENTER_RIGHT" styleClass="title-bar">
+            <padding>
+                <Insets top="5" right="10" bottom="5" left="10"/>
+            </padding>
+            <Label fx:id="titleLabel" text="圖像生成器" styleClass="title-label" HBox.hgrow="ALWAYS">
+                <graphic>
+                    <FontIcon iconLiteral="fas-image" />
+                </graphic>
+            </Label>
+            <Button fx:id="minimizeButton" styleClass="window-button">
+                <graphic>
+                    <FontIcon iconLiteral="fas-window-minimize" />
+                </graphic>
+            </Button>
+            <Button fx:id="maximizeButton" styleClass="window-button">
+                <graphic>
+                    <FontIcon iconLiteral="fas-window-maximize" />
+                </graphic>
+            </Button>
+            <Button fx:id="closeButton" styleClass="window-button">
+                <graphic>
+                    <FontIcon iconLiteral="fas-times" />
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Main Content -->
+        <TabPane VBox.vgrow="ALWAYS">
+            <Tab fx:id="generatorTab" text="Generator" closable="false">
+                <graphic>
+                    <FontIcon iconLiteral="fas-image" iconSize="16"/>
+                </graphic>
+                <fx:include source="ImageGenerator.fxml" fx:id="generatorTabContent"/>
+            </Tab>
+            <Tab fx:id="Img2ImgTab" text="Img2Img" closable="false">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exchange-alt" iconSize="16"/>
+                </graphic>
+                <fx:include source="Img2ImgGenerator.fxml" fx:id="Img2ImgTabContent"/>
+            </Tab>
+            <Tab fx:id="fileManagerTab" text="File Manager" closable="false">
+                <graphic>
+                    <FontIcon iconLiteral="fas-folder-open" iconSize="16"/>
+                </graphic>
+                <fx:include source="FileManager.fxml" fx:id="fileManagerTabContent"/>
+            </Tab>
+        </TabPane>
+    </VBox>
+</AnchorPane>
