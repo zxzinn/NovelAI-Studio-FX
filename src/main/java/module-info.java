@@ -11,6 +11,7 @@ module com.zxzinn.novelai {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.ikonli.core;
+    requires atlantafx.base;
 
     opens com.zxzinn.novelai to javafx.fxml;
     exports com.zxzinn.novelai.ui to javafx.fxml;

@@ -1,5 +1,6 @@
 package com.zxzinn.novelai;
 
+import atlantafx.base.theme.PrimerDark;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
