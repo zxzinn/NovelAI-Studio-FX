@@ -45,20 +45,16 @@ jobs:
       - name: Display Maven version
         run: mvn --version
 
-      - name: Set version (Windows)
-        if: runner.os == 'Windows'
+      - name: Set version
         run: |
-          $env:VERSION = $(git describe --tags --always --dirty)
-          echo "PROJECT_VERSION=$env:VERSION" >> $env:GITHUB_ENV
-          mvn versions:set -DnewVersion=$env:VERSION
-        shell: pwsh
-
-      - name: Set version (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          VERSION=$(git describe --tags --always --dirty)
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          VERSION=$(git describe --tags --always --dirty | sed 's/-/./g')
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
-          mvn versions:set -DnewVersion=$VERSION
+        shell: bash
+
+      - name: Update pom.xml version
+        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
 
       - name: Clean and compile Maven project
         run: mvn clean compile
