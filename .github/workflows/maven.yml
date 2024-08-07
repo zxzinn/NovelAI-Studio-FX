@@ -60,24 +60,17 @@ jobs:
           echo "Set version to $CLEAN_VERSION"
         shell: pwsh
 
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+      - name: Update pom.xml version
+        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
+
+      - name: Build with Maven
+        run: mvn clean install -B -V
 
       - name: Display Java version
         run: java -version
 
       - name: Display Maven version
         run: mvn --version
-
-      - name: Update pom.xml version
-        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
-
-      - name: Build with Maven
-        run: mvn clean install
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
