@@ -45,7 +45,16 @@ jobs:
       - name: Display Maven version
         run: mvn --version
 
-      - name: Set version
+      - name: Set version (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $env:VERSION = $(git describe --tags --always --dirty)
+          echo "PROJECT_VERSION=$env:VERSION" >> $env:GITHUB_ENV
+          mvn versions:set -DnewVersion=$env:VERSION
+        shell: pwsh
+
+      - name: Set version (Linux)
+        if: runner.os == 'Linux'
         run: |
           VERSION=$(git describe --tags --always --dirty)
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
