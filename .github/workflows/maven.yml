@@ -32,7 +32,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Set version
+      - name: Set version (Linux)
+        if: runner.os == 'Linux'
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
@@ -44,6 +45,20 @@ jobs:
           echo "PROJECT_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "Set version to $CLEAN_VERSION"
         shell: bash
+
+      - name: Set version (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          $VERSION = (git describe --tags --always --dirty) -replace '^v','' -replace '-','.'
+          $CLEAN_VERSION = $VERSION -replace '[^0-9.]',''
+          if ($CLEAN_VERSION -notmatch '^\d+\.\d+\.\d+$') {
+            $CLEAN_VERSION = "0.1.0-SNAPSHOT"
+          }
+          echo "PROJECT_VERSION=$CLEAN_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "Set version to $CLEAN_VERSION"
+        shell: pwsh
 
       - name: Cache Maven packages
         uses: actions/cache@v3
