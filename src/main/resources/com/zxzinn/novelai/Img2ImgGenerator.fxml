@@ -5,7 +5,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.controller.Img2ImgGeneratorController" stylesheets="@styles.css">
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            xmlns="http://javafx.com/javafx"
+            xmlns:ikonli="http://ikonli.org/javafx"
+            fx:controller="com.zxzinn.novelai.controller.Img2ImgGeneratorController"
+            stylesheets="@styles.css">
     <left>
         <ScrollPane fitToWidth="true" styleClass="side-panel">
             <VBox spacing="10.0" styleClass="settings-panel">

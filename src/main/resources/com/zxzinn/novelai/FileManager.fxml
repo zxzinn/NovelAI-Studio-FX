@@ -6,7 +6,11 @@
 <?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.zxzinn.novelai.controller.FileManagerController" stylesheets="@styles.css">
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            xmlns="http://javafx.com/javafx"
+            xmlns:ikonli="http://ikonli.org/javafx"
+            fx:controller="com.zxzinn.novelai.controller.FileManagerController"
+            stylesheets="@styles.css">
     <left>
         <VBox spacing="10" styleClass="side-panel">
             <padding>

@@ -1,4 +1,4 @@
-module com.zxzinn.novelaidesktopfx {
+module com.zxzinn.novelai {
     requires javafx.controls;
     requires javafx.fxml;
     requires static lombok;
@@ -11,7 +11,6 @@ module com.zxzinn.novelaidesktopfx {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.ikonli.core;
-    requires com.jfoenix;
 
     opens com.zxzinn.novelai to javafx.fxml;
     exports com.zxzinn.novelai.ui to javafx.fxml;

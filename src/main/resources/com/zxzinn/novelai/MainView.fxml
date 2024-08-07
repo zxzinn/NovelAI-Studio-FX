@@ -5,7 +5,10 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<AnchorPane fx:id="rootPane" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="rootPane" stylesheets="@styles.css"
+            xmlns="http://javafx.com/javafx/11.0.14-internal"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns:ikonli="http://ikonli.org/javafx">
     <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
         <!-- Custom Title Bar -->
         <HBox fx:id="titleBar" alignment="CENTER_LEFT" onMouseClicked="#handleMouseClicked" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" spacing="5" styleClass="title-bar">
