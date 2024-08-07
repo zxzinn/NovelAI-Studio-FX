@@ -32,6 +32,19 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Set version
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          VERSION=$(git describe --tags --always --dirty | sed 's/^v//; s/-/./')
+          CLEAN_VERSION=$(echo $VERSION | sed 's/[^0-9.]//g')
+          if [[ ! $CLEAN_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            CLEAN_VERSION="0.1.0-SNAPSHOT"
+          fi
+          echo "PROJECT_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
+          echo "Set version to $CLEAN_VERSION"
+        shell: bash
+
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -39,24 +52,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Set version
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          VERSION=$(git describe --tags --always --dirty | sed 's/^v//; s/-/./')
-          CLEAN_VERSION=$(echo $VERSION | sed 's/[^0-9.]//g')
-          echo "PROJECT_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
-          echo "Set version to $CLEAN_VERSION"
-        shell: bash
-
-      - name: Update pom.xml version
-        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
-
       - name: Display Java version
         run: java -version
 
       - name: Display Maven version
         run: mvn --version
+
+      - name: Update pom.xml version
+        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
 
       - name: Clean and compile Maven project
         run: mvn clean compile
