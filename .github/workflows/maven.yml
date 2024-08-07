@@ -60,9 +60,6 @@ jobs:
           echo "Set version to $CLEAN_VERSION"
         shell: pwsh
 
-      - name: Update pom.xml version
-        run: mvn versions:set -DnewVersion=${{ env.PROJECT_VERSION }}
-
       - name: Build with Maven
         run: mvn clean install -B -V
 
