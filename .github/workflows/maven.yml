@@ -72,8 +72,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NovelAIDesktopFX-${{ matrix.os }}-${{ env.PROJECT_VERSION }}
-          path: target/NovelAIDesktopFX-*.jar
+          name: NovelAI-Studio-FX-${{ matrix.os }}-${{ env.PROJECT_VERSION }}
+          path: target/NovelAI-Studio-FX-*.jar
 
       - name: Run tests
         run: mvn test
@@ -96,11 +96,34 @@ jobs:
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         run: |
           git fetch --tags
-          VERSION=$(git describe --tags --abbrev=0)
-          VERSION=${VERSION:-"v0.0.0"}
-          NEW_VERSION=$(echo $VERSION | awk -F. '{ printf "v%d.%d.%d", $1, $2, $3+1 }')
-          git tag $NEW_VERSION
-          git push origin $NEW_VERSION
+          LAST_TAG=$(git describe --tags --abbrev=0)
+          LAST_TAG=${LAST_TAG:-"v0.0.0"}
+          NEW_TAG=$(echo $LAST_TAG | awk -F. '{ printf "v%d.%d.%d", $1, $2, $3+1 }')
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create_tag.outputs.NEW_TAG }}
+          release_name: Release ${{ steps.create_tag.outputs.NEW_TAG }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/NovelAI-Studio-FX-*.jar
+          asset_name: NovelAI-Studio-FX-${{ matrix.os }}-${{ env.PROJECT_VERSION }}.jar
+          asset_content_type: application/java-archive
