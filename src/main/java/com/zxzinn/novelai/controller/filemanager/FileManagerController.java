@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.controller;
+package com.zxzinn.novelai.controller.filemanager;
 
 import com.zxzinn.novelai.service.FileManagerService;
 import com.zxzinn.novelai.utils.SettingsManager;
@@ -136,6 +136,9 @@ public class FileManagerController {
             } catch (IOException e) {
                 log.error("無法添加監視目錄", e);
                 showAlert("錯誤", "無法添加監視目錄: " + e.getMessage());
+            } catch (Exception e) {
+                log.error("添加監視目錄時發生未知錯誤", e);
+                showAlert("錯誤", "添加監視目錄時發生未知錯誤: " + e.getMessage());
             }
         }
     }

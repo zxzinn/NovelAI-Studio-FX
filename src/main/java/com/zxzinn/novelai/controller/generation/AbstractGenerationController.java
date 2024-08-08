@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.controller;
+package com.zxzinn.novelai.controller.generation;
 
 import com.zxzinn.novelai.NAIConstants;
 import com.zxzinn.novelai.api.APIClient;

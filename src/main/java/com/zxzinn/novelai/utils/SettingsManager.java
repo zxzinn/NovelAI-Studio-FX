@@ -136,9 +136,9 @@ public class SettingsManager {
     public List<String> getStringList(String key, List<String> defaultValue) {
         String value = getString(key, null);
         if (value == null) {
-            return defaultValue;
+            return new ArrayList<>(defaultValue);
         }
-        return Arrays.asList(value.split(","));
+        return new ArrayList<>(Arrays.asList(value.split(",")));
     }
 
     public void addToStringList(String key, String value) {

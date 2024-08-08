@@ -1,17 +1,16 @@
-package com.zxzinn.novelai.controller;
+package com.zxzinn.novelai.controller.generation.text2img;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
+import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -20,19 +19,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
-public class Img2ImgGeneratorController extends AbstractGenerationController {
+public class ImageGeneratorController extends AbstractGenerationController {
 
     @FXML private Button generateButton;
     @FXML private ScrollPane mainScrollPane;
@@ -43,8 +43,9 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     private final SettingsManager settingsManager;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
+    private CountDownLatch promptUpdateLatch;
 
-    public Img2ImgGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
+    public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
                                     ImageGenerationService imageGenerationService,
                                     ImageUtils imageUtils) {
@@ -84,13 +85,22 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     protected void handleGenerate() {
         generateButton.setDisable(true);
         currentGeneratedCount = 0;
+        promptUpdateLatch = new CountDownLatch(1);
         generateImages();
     }
 
     private void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-                ImageGenerationPayload payload = createImageGenerationPayload(positivePromptPreviewArea.getText(), negativePromptPreviewArea.getText());
+                // 等待提示詞更新完成，最多等待5秒
+                if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
+                    log.warn("等待提示詞更新超時");
+                }
+
+                ImageGenerationPayload payload = createImageGenerationPayload(
+                        positivePromptPreviewArea.getText(),
+                        negativePromptPreviewArea.getText()
+                );
                 BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
                 if (image != null) {
@@ -98,29 +108,30 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
                 }
 
                 currentGeneratedCount++;
-                updatePromptPreviewsAsync();
                 String selectedCount = generateCountComboBox.getValue();
                 int maxCount = "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
                 if (currentGeneratedCount < maxCount) {
+                    promptUpdateLatch = new CountDownLatch(1);
+                    updatePromptPreviewsAsync();
                     generateImages();
                 }
-            } catch (IOException e) {
-                log.error("生成圖像時發生錯誤：" + e.getMessage(), e);
+            } catch (IOException | InterruptedException e) {
+                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
             }
         });
     }
 
-    private void handleGeneratedImage(BufferedImage image) {
+    private void handleGeneratedImage(BufferedImage originalImage) {
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            BufferedImage watermarkedImage = addWatermark(image, timeStamp);
+            BufferedImage processedImage = processImage(originalImage, timeStamp);
 
-            Image fxImage = SwingFXUtils.toFXImage(watermarkedImage, null);
+            Image fxImage = SwingFXUtils.toFXImage(processedImage, null);
             mainImageView.setImage(fxImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -131,17 +142,30 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
 
             try {
                 String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-                ImageUtils.saveImage(watermarkedImage, fileName);
+                ImageProcessor.saveImage(processedImage, new File("output", fileName));
             } catch (IOException e) {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
     }
 
+    private BufferedImage processImage(BufferedImage image, String timeStamp) {
+        if (!watermarkTextField.getText().isEmpty()) {
+            ImageProcessor.addWatermark(image, watermarkTextField.getText());
+        }
+
+        if (clearLSBCheckBox.isSelected()) {
+            ImageProcessor.clearMetadata(image);
+        }
+
+        return image;
+    }
+
     private void updatePromptPreviewsAsync() {
         Platform.runLater(() -> {
             positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
             negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
+            promptUpdateLatch.countDown();
         });
     }
 

@@ -1,9 +1,8 @@
 package com.zxzinn.novelai;
 
 import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.controller.FileManagerController;
-import com.zxzinn.novelai.controller.ImageGeneratorController;
-import com.zxzinn.novelai.controller.Img2ImgGeneratorController;
+import com.zxzinn.novelai.controller.filemanager.FileManagerController;
+import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
 import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;

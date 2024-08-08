@@ -8,7 +8,7 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
-            fx:controller="com.zxzinn.novelai.controller.Img2ImgGeneratorController"
+            fx:controller="com.zxzinn.novelai.controller.generation.img2img.Img2ImgGeneratorController"
             stylesheets="@styles.css">
     <left>
         <ScrollPane fitToWidth="true" styleClass="side-panel">

@@ -1,11 +1,11 @@
-package com.zxzinn.novelai.controller;
+package com.zxzinn.novelai.controller.generation.img2img;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
-import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -22,16 +22,13 @@ import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
-public class ImageGeneratorController extends AbstractGenerationController {
+public class Img2ImgGeneratorController extends AbstractGenerationController {
 
     @FXML private Button generateButton;
     @FXML private ScrollPane mainScrollPane;
@@ -42,9 +39,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
     private final SettingsManager settingsManager;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
-    private CountDownLatch promptUpdateLatch;
 
-    public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
+    public Img2ImgGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
                                     ImageGenerationService imageGenerationService,
                                     ImageUtils imageUtils) {
@@ -84,22 +80,13 @@ public class ImageGeneratorController extends AbstractGenerationController {
     protected void handleGenerate() {
         generateButton.setDisable(true);
         currentGeneratedCount = 0;
-        promptUpdateLatch = new CountDownLatch(1);
         generateImages();
     }
 
     private void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-                // 等待提示詞更新完成，最多等待5秒
-                if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
-                    log.warn("等待提示詞更新超時");
-                }
-
-                ImageGenerationPayload payload = createImageGenerationPayload(
-                        positivePromptPreviewArea.getText(),
-                        negativePromptPreviewArea.getText()
-                );
+                ImageGenerationPayload payload = createImageGenerationPayload(positivePromptPreviewArea.getText(), negativePromptPreviewArea.getText());
                 BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
                 if (image != null) {
@@ -107,30 +94,29 @@ public class ImageGeneratorController extends AbstractGenerationController {
                 }
 
                 currentGeneratedCount++;
+                updatePromptPreviewsAsync();
                 String selectedCount = generateCountComboBox.getValue();
                 int maxCount = "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
                 if (currentGeneratedCount < maxCount) {
-                    promptUpdateLatch = new CountDownLatch(1);
-                    updatePromptPreviewsAsync();
                     generateImages();
                 }
-            } catch (IOException | InterruptedException e) {
-                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
+            } catch (IOException e) {
+                log.error("生成圖像時發生錯誤：" + e.getMessage(), e);
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
             }
         });
     }
 
-    private void handleGeneratedImage(BufferedImage originalImage) {
+    private void handleGeneratedImage(BufferedImage image) {
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            BufferedImage processedImage = processImage(originalImage, timeStamp);
+            BufferedImage watermarkedImage = addWatermark(image, timeStamp);
 
-            Image fxImage = SwingFXUtils.toFXImage(processedImage, null);
+            Image fxImage = SwingFXUtils.toFXImage(watermarkedImage, null);
             mainImageView.setImage(fxImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -141,30 +127,17 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
             try {
                 String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-                ImageProcessor.saveImage(processedImage, new File("output", fileName));
+                ImageUtils.saveImage(watermarkedImage, fileName);
             } catch (IOException e) {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
     }
 
-    private BufferedImage processImage(BufferedImage image, String timeStamp) {
-        if (!watermarkTextField.getText().isEmpty()) {
-            ImageProcessor.addWatermark(image, watermarkTextField.getText());
-        }
-
-        if (clearLSBCheckBox.isSelected()) {
-            ImageProcessor.clearMetadata(image);
-        }
-
-        return image;
-    }
-
     private void updatePromptPreviewsAsync() {
         Platform.runLater(() -> {
             positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
             negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
-            promptUpdateLatch.countDown();
         });
     }
 
