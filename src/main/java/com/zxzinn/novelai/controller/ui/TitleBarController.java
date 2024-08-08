@@ -115,15 +115,7 @@ public class TitleBarController extends HBox {
         System.exit(0);
     }
 
-    public String getTitle() {
-        return title.get();
-    }
-
     public StringProperty titleProperty() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title.set(title);
     }
 }

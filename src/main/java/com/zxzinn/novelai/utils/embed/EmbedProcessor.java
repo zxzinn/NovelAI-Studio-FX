@@ -81,6 +81,4 @@ public class EmbedProcessor {
 
         return result;
     }
-
-
 }

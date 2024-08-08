@@ -37,7 +37,7 @@ public class FileManagerController {
     @FXML private CheckBox clearLSBCheckBox;
     @FXML private Button processButton;
 
-    private SettingsManager settingsManager;
+    private final SettingsManager settingsManager;
     private FileManagerService fileManagerService;
     private FilteredList<TreeItem<String>> filteredTreeItems;
 
@@ -67,11 +67,6 @@ public class FileManagerController {
             log.error("無法初始化FileManagerService", e);
             showAlert("錯誤", "無法初始化文件管理服務: " + e.getMessage());
         }
-    }
-
-    public void setSettingsManager(SettingsManager settingsManager) {
-        this.settingsManager = settingsManager;
-        initializeFileManagerService();
     }
 
     private void setupEventHandlers() {
@@ -108,7 +103,7 @@ public class FileManagerController {
                 try {
                     BufferedImage image = ImageIO.read(file);
                     if (!watermarkTextField.getText().isEmpty()) {
-                        image = ImageProcessor.addWatermark(image, watermarkTextField.getText());
+                        ImageProcessor.addWatermark(image, watermarkTextField.getText());
                     }
                     if (clearLSBCheckBox.isSelected()) {
                         ImageProcessor.clearMetadata(image);

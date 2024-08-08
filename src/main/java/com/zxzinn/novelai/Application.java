@@ -65,7 +65,10 @@ public class Application extends javafx.application.Application {
         root.getStyleClass().add("loading-background");
 
         Scene scene = new Scene(root, 300, 200);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/com/zxzinn/novelai/loading-styles.css")).toExternalForm());
+        scene.getStylesheets()
+                .add(Objects
+                .requireNonNull(getClass()
+                        .getResource("/com/zxzinn/novelai/loading-styles.css")).toExternalForm());
 
         Stage loadingStage = new Stage(StageStyle.UNDECORATED);
         loadingStage.setScene(scene);
@@ -86,13 +89,21 @@ public class Application extends javafx.application.Application {
             APIClient apiClient = new NovelAIAPIClient(httpClient, gson);
             EmbedProcessor embedProcessor = new EmbedProcessor();
             ImageUtils imageUtils = new ImageUtils();
-            ImageGenerationService imageGenerationService = new ImageGenerationService(apiClient, imageUtils);
+            ImageGenerationService imageGenerationService = new ImageGenerationService(
+                    apiClient,
+                    imageUtils);
 
-            MainController mainController = new MainController(settingsManager, apiClient, embedProcessor, imageGenerationService, imageUtils);
+            MainController mainController = new MainController(
+                    settingsManager,
+                    apiClient,
+                    embedProcessor,
+                    imageGenerationService,
+                    imageUtils);
 
             Platform.runLater(() -> {
                 try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/MainView.fxml"));
+                    FXMLLoader loader = new FXMLLoader(getClass().
+                            getResource("/com/zxzinn/novelai/MainView.fxml"));
                     loader.setController(mainController);
                     Parent root = loader.load();
 
@@ -105,7 +116,10 @@ public class Application extends javafx.application.Application {
 
                     Scene scene = new Scene(root, width, height);
                     scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
-                    scene.getStylesheets().add(getClass().getResource("/com/zxzinn/novelai/styles.css").toExternalForm());
+                    scene.getStylesheets().add(Objects
+                            .requireNonNull(getClass()
+                            .getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
+
                     primaryStage.setScene(scene);
                     primaryStage.setX(x);
                     primaryStage.setY(y);

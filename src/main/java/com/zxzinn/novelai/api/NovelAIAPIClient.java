@@ -20,13 +20,7 @@ public class NovelAIAPIClient implements APIClient {
     }
 
     @Override
-    public byte[] generateImage(ImageGenerationPayload payload, String apiKey) throws IOException {
-        Request request = createRequest(payload, apiKey);
-        return sendRequest(request);
-    }
-
-    @Override
-    public byte[] generateImg2Img(Img2ImgGenerationPayload payload, String apiKey) throws IOException {
+    public byte[] generateImage(GenerationPayload payload, String apiKey) throws IOException {
         Request request = createRequest(payload, apiKey);
         return sendRequest(request);
     }

@@ -8,7 +8,6 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
-            xmlns:ikonli="http://ikonli.org/javafx"
             stylesheets="@styles.css">
     <left>
         <VBox spacing="10" styleClass="side-panel">

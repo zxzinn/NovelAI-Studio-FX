@@ -17,7 +17,7 @@ import java.io.IOException;
 @Log4j2
 public class ImageProcessor {
 
-    public static BufferedImage addWatermark(BufferedImage image, String watermarkText) {
+    public static void addWatermark(BufferedImage image, String watermarkText) {
         Graphics2D g2d = image.createGraphics();
         AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f);
         g2d.setComposite(alphaChannel);
@@ -29,7 +29,6 @@ public class ImageProcessor {
         int centerY = (image.getHeight() - (int) rect.getHeight()) / 2;
         g2d.drawString(watermarkText, centerX, centerY);
         g2d.dispose();
-        return image;
     }
 
     public static void clearMetadata(BufferedImage image) {
