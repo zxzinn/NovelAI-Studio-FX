@@ -14,8 +14,6 @@ module com.zxzinn.novelai {
     requires atlantafx.base;
 
     opens com.zxzinn.novelai to javafx.fxml;
-    exports com.zxzinn.novelai.ui to javafx.fxml;
-    opens com.zxzinn.novelai.ui to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
     exports com.zxzinn.novelai;
     exports com.zxzinn.novelai.api to com.google.gson;
@@ -27,4 +25,8 @@ module com.zxzinn.novelai {
     opens com.zxzinn.novelai.controller.generation.text2img to javafx.fxml;
     exports com.zxzinn.novelai.controller.filemanager;
     opens com.zxzinn.novelai.controller.filemanager to javafx.fxml;
+    opens com.zxzinn.novelai.controller.ui to javafx.fxml;
+    exports com.zxzinn.novelai.controller.ui;
+    exports com.zxzinn.novelai.utils.common;
+    opens com.zxzinn.novelai.utils.common to javafx.fxml;
 }

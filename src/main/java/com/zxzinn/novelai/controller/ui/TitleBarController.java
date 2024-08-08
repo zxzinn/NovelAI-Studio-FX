@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.ui;
+package com.zxzinn.novelai.controller.ui;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;

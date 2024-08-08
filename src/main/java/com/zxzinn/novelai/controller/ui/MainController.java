@@ -1,10 +1,10 @@
-package com.zxzinn.novelai;
+package com.zxzinn.novelai.controller.ui;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
-import com.zxzinn.novelai.service.ImageGenerationService;
-import com.zxzinn.novelai.utils.SettingsManager;
+import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.animation.*;

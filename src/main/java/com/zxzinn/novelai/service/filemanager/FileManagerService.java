@@ -1,6 +1,6 @@
-package com.zxzinn.novelai.service;
+package com.zxzinn.novelai.service.filemanager;
 
-import com.zxzinn.novelai.utils.SettingsManager;
+import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import lombok.extern.log4j.Log4j2;
@@ -12,12 +12,14 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class FileManagerService {
     private static final String WATCHED_DIRECTORIES_KEY = "watchedDirectories";
     private static final String EXPANDED_PREFIX = "expanded_";
     private static final int BATCH_SIZE = 100;
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private final Set<Path> watchedDirectories;
     private final Map<WatchKey, Path> watchKeyToPath;
@@ -31,7 +33,11 @@ public class FileManagerService {
         this.watchKeyToPath = new ConcurrentHashMap<>();
         this.watchService = FileSystems.getDefault().newWatchService();
         this.settingsManager = settingsManager;
-        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.executorService = new ThreadPoolExecutor(
+                THREAD_POOL_SIZE, THREAD_POOL_SIZE,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
         loadWatchedDirectories();
@@ -143,7 +149,7 @@ public class FileManagerService {
         TreeItem<String> item = new TreeItem<>(file.getName(), getFileIcon(file));
         if (file.isDirectory()) {
             item.setExpanded(isDirectoryExpanded(file.getAbsolutePath()));
-            loadChildrenInBatches(item, file);
+            CompletableFuture.runAsync(() -> loadChildrenInBatches(item, file), executorService);
         }
         return item;
     }

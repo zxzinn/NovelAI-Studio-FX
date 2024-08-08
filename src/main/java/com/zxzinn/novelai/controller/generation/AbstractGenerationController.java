@@ -1,6 +1,6 @@
 package com.zxzinn.novelai.controller.generation;
 
-import com.zxzinn.novelai.NAIConstants;
+import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import javafx.collections.FXCollections;

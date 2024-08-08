@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.utils;
+package com.zxzinn.novelai.utils.common;
 
 import lombok.extern.log4j.Log4j2;
 

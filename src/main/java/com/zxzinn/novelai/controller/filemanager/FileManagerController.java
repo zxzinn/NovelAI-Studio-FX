@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.controller.filemanager;
 
-import com.zxzinn.novelai.service.FileManagerService;
-import com.zxzinn.novelai.utils.SettingsManager;
+import com.zxzinn.novelai.service.filemanager.FileManagerService;
+import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
