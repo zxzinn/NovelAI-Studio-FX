@@ -3,6 +3,10 @@ package com.zxzinn.novelai.controller.filemanager;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -14,6 +18,9 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 @Log4j2
 public class FileManagerController {
@@ -32,6 +39,7 @@ public class FileManagerController {
 
     private SettingsManager settingsManager;
     private FileManagerService fileManagerService;
+    private FilteredList<TreeItem<String>> filteredTreeItems;
 
     public FileManagerController(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
@@ -83,8 +91,11 @@ public class FileManagerController {
         fileTreeView.addEventHandler(TreeItem.branchCollapsedEvent(), this::handleBranchCollapsed);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            // TODO: 實現搜尋功能
+            if (filteredTreeItems != null) {
+                filteredTreeItems.setPredicate(createFilterPredicate(newValue));
+            }
         });
+
         processButton.setOnAction(event -> processSelectedImage());
     }
 
@@ -143,29 +154,62 @@ public class FileManagerController {
         }
     }
 
+    private void refreshTreeView() {
+        fileManagerService.getDirectoryTree().thenAccept(root -> {
+            Platform.runLater(() -> {
+                ObservableList<TreeItem<String>> observableList = FXCollections.observableArrayList(root.getChildren());
+                filteredTreeItems = new FilteredList<>(observableList);
+                TreeItem<String> filteredRoot = new TreeItem<>("監視的目錄");
+                filteredRoot.setExpanded(true);
+                filteredRoot.getChildren().addAll(filteredTreeItems);
+                fileTreeView.setRoot(filteredRoot);
+                log.info("已刷新檔案樹視圖");
+            });
+        });
+    }
+
+    private Predicate<TreeItem<String>> createFilterPredicate(String searchText) {
+        return treeItem -> {
+            if (searchText == null || searchText.isEmpty()) {
+                return true;
+            }
+            return treeItem.getValue().toLowerCase().contains(searchText.toLowerCase());
+        };
+    }
+
     private void removeWatchedDirectory() {
         TreeItem<String> selectedItem = fileTreeView.getSelectionModel().getSelectedItem();
-        if (selectedItem != null && selectedItem.getParent() != null) {
+        if (selectedItem != null) {
             String path = buildFullPath(selectedItem);
+            log.info("嘗試移除監視目錄: {}", path);
+            if (path.isEmpty()) {
+                // 如果路徑為空，說明選中的是根目錄 "監視的目錄"
+                log.warn("無法移除根目錄");
+                showAlert("警告", "無法移除根目錄。請選擇一個具體的監視目錄。");
+                return;
+            }
             fileManagerService.removeWatchedDirectory(path);
             refreshTreeView();
+        } else {
+            log.warn("嘗試移除監視目錄時未選中任何項目");
+            showAlert("警告", "請選擇一個要移除的監視目錄。");
         }
     }
 
     private String buildFullPath(TreeItem<String> item) {
-        StringBuilder path = new StringBuilder(item.getValue());
-        TreeItem<String> parent = item.getParent();
-        while (parent != null && !parent.getValue().equals("監視的目錄")) {
-            path.insert(0, parent.getValue() + File.separator);
-            parent = parent.getParent();
+        if (item.getParent() == null || item.getParent().getValue().equals("監視的目錄")) {
+            // 這是直接選中的監視目錄
+            return item.getValue();
         }
-        return path.toString();
-    }
 
-    private void refreshTreeView() {
-        fileManagerService.getDirectoryTree().thenAccept(root -> {
-            javafx.application.Platform.runLater(() -> fileTreeView.setRoot(root));
-        });
+        List<String> pathParts = new ArrayList<>();
+        TreeItem<String> current = item;
+        while (current != null && !current.getValue().equals("監視的目錄")) {
+            pathParts.addFirst(current.getValue());
+            current = current.getParent();
+        }
+
+        return String.join(File.separator, pathParts);
     }
 
     private void updatePreview(TreeItem<String> item) {

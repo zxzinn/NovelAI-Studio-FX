@@ -3,6 +3,8 @@ package com.zxzinn.novelai.utils.common;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -158,8 +160,16 @@ public class SettingsManager {
         lock.writeLock().lock();
         try {
             List<String> currentList = getStringList(key, new ArrayList<>());
-            if (currentList.remove(value)) {
+            Path valuePath = Paths.get(value);
+            boolean removed = currentList.removeIf(item -> {
+                Path itemPath = Paths.get(item);
+                return itemPath.getFileName().equals(valuePath.getFileName());
+            });
+            if (removed) {
                 setStringList(key, currentList);
+                log.info("從 {} 列表中移除了項目: {}", key, value);
+            } else {
+                log.warn("嘗試從 {} 列表中移除不存在的項目: {}", key, value);
             }
         } finally {
             lock.writeLock().unlock();

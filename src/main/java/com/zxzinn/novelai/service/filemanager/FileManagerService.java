@@ -113,12 +113,43 @@ public class FileManagerService {
     }
 
     public void removeWatchedDirectory(String path) {
-        Path directory = Paths.get(path);
-        if (watchedDirectories.remove(directory)) {
-            watchKeyToPath.entrySet().removeIf(entry -> entry.getValue().equals(directory));
-            log.info("已移除監視目錄: {}", directory);
+        Path directory = Paths.get(path).toAbsolutePath().normalize();
+        log.info("嘗試移除監視目錄: {}", directory);
 
-            settingsManager.removeFromStringList(WATCHED_DIRECTORIES_KEY, path);
+        // 檢查是否為直接監視的目錄
+        Optional<Path> watchedDir = watchedDirectories.stream()
+                .filter(dir -> dir.endsWith(directory.getFileName()))
+                .findFirst();
+
+        if (watchedDir.isPresent()) {
+            Path dirToRemove = watchedDir.get();
+            watchedDirectories.remove(dirToRemove);
+            removeWatchKey(dirToRemove);
+            log.info("已移除監視目錄: {}", dirToRemove);
+            settingsManager.removeFromStringList(WATCHED_DIRECTORIES_KEY, dirToRemove.toString());
+        } else {
+            log.warn("嘗試移除不存在的監視目錄: {}", directory);
+        }
+    }
+
+    private void removeWatchKey(Path directory) {
+        WatchKey keyToRemove = null;
+        for (Map.Entry<WatchKey, Path> entry : watchKeyToPath.entrySet()) {
+            if (entry.getValue().equals(directory)) {
+                keyToRemove = entry.getKey();
+                break;
+            }
+        }
+        if (keyToRemove != null) {
+            keyToRemove.cancel();
+            Path removedPath = watchKeyToPath.remove(keyToRemove);
+            if (removedPath != null) {
+                log.info("已從 watchKeyToPath 中移除路徑: {}", removedPath);
+            } else {
+                log.warn("無法從 watchKeyToPath 中移除路徑: {}", directory);
+            }
+        } else {
+            log.warn("未找到與路徑 {} 對應的 WatchKey", directory);
         }
     }
 
