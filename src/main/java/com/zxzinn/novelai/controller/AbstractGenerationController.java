@@ -27,6 +27,8 @@ public abstract class AbstractGenerationController {
     @FXML public TextArea positivePromptPreviewArea;
     @FXML public TextArea negativePromptPreviewArea;
     @FXML public ComboBox<String> generateCountComboBox;
+    @FXML public TextField watermarkTextField;
+    @FXML public CheckBox clearLSBCheckBox;
 
     public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor) {
         this.apiClient = apiClient;
@@ -59,6 +61,8 @@ public abstract class AbstractGenerationController {
             generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
             generateCountComboBox.setValue("1");
         }
+        if (watermarkTextField != null) watermarkTextField.setText("");
+        if (clearLSBCheckBox != null) clearLSBCheckBox.setSelected(false);
     }
 
     @FXML

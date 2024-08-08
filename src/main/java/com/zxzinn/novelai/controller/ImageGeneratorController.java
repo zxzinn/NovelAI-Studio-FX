@@ -5,13 +5,11 @@ import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
+import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
@@ -20,12 +18,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -125,15 +122,15 @@ public class ImageGeneratorController extends AbstractGenerationController {
         });
     }
 
-    private void handleGeneratedImage(BufferedImage image) {
+    private void handleGeneratedImage(BufferedImage originalImage) {
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            BufferedImage watermarkedImage = addWatermark(image, timeStamp);
+            BufferedImage processedImage = processImage(originalImage, timeStamp);
 
-            Image fxImage = SwingFXUtils.toFXImage(watermarkedImage, null);
+            Image fxImage = SwingFXUtils.toFXImage(processedImage, null);
             mainImageView.setImage(fxImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -144,11 +141,23 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
             try {
                 String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-                ImageUtils.saveImage(watermarkedImage, fileName);
+                ImageProcessor.saveImage(processedImage, new File("output", fileName));
             } catch (IOException e) {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
+    }
+
+    private BufferedImage processImage(BufferedImage image, String timeStamp) {
+        if (!watermarkTextField.getText().isEmpty()) {
+            ImageProcessor.addWatermark(image, watermarkTextField.getText());
+        }
+
+        if (clearLSBCheckBox.isSelected()) {
+            ImageProcessor.clearMetadata(image);
+        }
+
+        return image;
     }
 
     private void updatePromptPreviewsAsync() {

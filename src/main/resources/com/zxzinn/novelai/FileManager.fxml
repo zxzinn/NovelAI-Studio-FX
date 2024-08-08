@@ -28,11 +28,6 @@
                     </graphic>
                 </Button>
             </HBox>
-            <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity">
-                <graphic>
-                    <FontIcon iconLiteral="fas-eraser" iconSize="12"/>
-                </graphic>
-            </Button>
             <Button fx:id="constructDatabaseButton" text="構建數據庫" maxWidth="Infinity">
                 <graphic>
                     <FontIcon iconLiteral="fas-database" iconSize="12"/>
@@ -72,6 +67,12 @@
             </padding>
             <TextField promptText="過濾元數據..."/>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
+            <HBox spacing="5">
+                <Label text="水印文字"/>
+                <TextField fx:id="watermarkTextField" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata"/>
+            <Button fx:id="processButton" text="處理圖像" maxWidth="Infinity"/>
         </VBox>
     </right>
 </BorderPane>

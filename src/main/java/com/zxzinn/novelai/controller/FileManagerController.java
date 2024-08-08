@@ -2,6 +2,7 @@ package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.service.FileManagerService;
 import com.zxzinn.novelai.utils.SettingsManager;
+import com.zxzinn.novelai.utils.image.ImageProcessor;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -9,6 +10,8 @@ import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import lombok.extern.log4j.Log4j2;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,10 +23,12 @@ public class FileManagerController {
     @FXML private TextField searchField;
     @FXML private Button addButton;
     @FXML private Button removeButton;
-    @FXML private Button clearMetadataButton;
     @FXML private Button constructDatabaseButton;
     @FXML private Button fitButton;
     @FXML private Button originalSizeButton;
+    @FXML private TextField watermarkTextField;
+    @FXML private CheckBox clearLSBCheckBox;
+    @FXML private Button processButton;
 
     private SettingsManager settingsManager;
     private FileManagerService fileManagerService;
@@ -64,7 +69,6 @@ public class FileManagerController {
     private void setupEventHandlers() {
         addButton.setOnAction(event -> addWatchedDirectory());
         removeButton.setOnAction(event -> removeWatchedDirectory());
-        clearMetadataButton.setOnAction(event -> clearMetadata());
         constructDatabaseButton.setOnAction(event -> constructDatabase());
         fitButton.setOnAction(event -> fitImage());
         originalSizeButton.setOnAction(event -> showOriginalSize());
@@ -81,6 +85,33 @@ public class FileManagerController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             // TODO: 實現搜尋功能
         });
+        processButton.setOnAction(event -> processSelectedImage());
+    }
+
+    private void processSelectedImage() {
+        TreeItem<String> selectedItem = fileTreeView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null && selectedItem.getParent() != null) {
+            String path = buildFullPath(selectedItem);
+            File file = new File(path);
+            if (file.isFile()) {
+                try {
+                    BufferedImage image = ImageIO.read(file);
+                    if (!watermarkTextField.getText().isEmpty()) {
+                        image = ImageProcessor.addWatermark(image, watermarkTextField.getText());
+                    }
+                    if (clearLSBCheckBox.isSelected()) {
+                        ImageProcessor.clearMetadata(image);
+                    }
+                    File outputFile = new File(file.getParentFile(), "processed_" + file.getName());
+                    ImageProcessor.saveImage(image, outputFile);
+                    showAlert("成功", "圖像處理完成: " + outputFile.getName());
+                    refreshTreeView();
+                } catch (IOException e) {
+                    log.error("處理圖像時發生錯誤", e);
+                    showAlert("錯誤", "處理圖像時發生錯誤: " + e.getMessage());
+                }
+            }
+        }
     }
 
     private void handleBranchExpanded(TreeItem.TreeModificationEvent<String> event) {
@@ -160,10 +191,6 @@ public class FileManagerController {
         // 添加更多元數據...
     }
 
-    private void clearMetadata() {
-        // TODO: 實現清除元數據功能
-        showAlert("提示", "清除元數據功能尚未實現");
-    }
 
     private void constructDatabase() {
         // TODO: 實現構建數據庫功能

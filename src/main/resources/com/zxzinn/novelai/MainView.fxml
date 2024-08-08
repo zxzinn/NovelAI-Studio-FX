@@ -15,7 +15,7 @@
                     <padding>
                         <Insets bottom="5" left="10" right="10" top="5" />
                     </padding>
-                    <Label fx:id="titleLabel" styleClass="title-label" text="NovelAI-DesktopFX-Remake v 1.0.0 by zxzinn" HBox.hgrow="ALWAYS">
+                    <Label fx:id="titleLabel" styleClass="title-label" text="NovelAI-Studio-FX" HBox.hgrow="ALWAYS">
                         <graphic>
                             <FontIcon iconLiteral="fas-image" />
                         </graphic>

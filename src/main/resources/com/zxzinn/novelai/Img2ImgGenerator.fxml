@@ -50,6 +50,13 @@
                                 GridPane.rowIndex="5" GridPane.columnIndex="1" styleClass="upload-button"/>
                     </GridPane>
                 </TitledPane>
+                <TitledPane text="Advanced Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <Label text="水印文字" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="watermarkTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
                 <HBox spacing="10.0" alignment="CENTER">
                     <Button text="生成" fx:id="generateButton" onAction="#handleGenerate" styleClass="generate-button"/>
                     <ComboBox fx:id="generateCountComboBox" promptText="生成數量"/>
