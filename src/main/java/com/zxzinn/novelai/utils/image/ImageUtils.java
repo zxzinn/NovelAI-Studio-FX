@@ -26,20 +26,14 @@ public class ImageUtils {
         return Base64.getEncoder().encodeToString(fileContent);
     }
 
-    public static byte[] extractImageFromZip(byte[] zipData) throws IOException {
+    public static BufferedImage extractImageFromZip(byte[] zipData) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
             ZipEntry entry = zis.getNextEntry();
             if (entry == null) {
                 throw new IOException("Zip 文件是空的");
             }
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                baos.write(buffer, 0, len);
-            }
-            return baos.toByteArray();
+            return ImageIO.read(zis);
         }
     }
 
@@ -52,7 +46,7 @@ public class ImageUtils {
         return SwingFXUtils.toFXImage(bufferedImage, null);
     }
 
-    public static void saveImage(Image image, String fileName) throws IOException {
+    public static void saveImage(BufferedImage image, String fileName) throws IOException {
         if (image == null) {
             log.error("無法保存圖像：圖像對象為null");
             return;
@@ -65,17 +59,13 @@ public class ImageUtils {
         }
 
         File outputFile = new File(outputDir, fileName);
-        BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
 
-        if (bufferedImage == null) {
-            log.error("無法將JavaFX圖像轉換為BufferedImage");
-            return;
-        }
-
-        if (!ImageIO.write(bufferedImage, "png", outputFile)) {
+        if (!ImageIO.write(image, "png", outputFile)) {
             log.error("沒有合適的寫入器來保存PNG圖像");
         }
     }
 
-
+    public static BufferedImage javafxImageToBufferedImage(Image fxImage) {
+        return SwingFXUtils.fromFXImage(fxImage, null);
+    }
 }

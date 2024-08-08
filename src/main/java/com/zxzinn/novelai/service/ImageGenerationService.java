@@ -6,6 +6,9 @@ import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.scene.image.Image;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class ImageGenerationService {
@@ -17,28 +20,28 @@ public class ImageGenerationService {
         this.imageUtils = imageUtils;
     }
 
-    public Image generateImage(ImageGenerationPayload payload, String apiKey) throws IOException {
+    public BufferedImage generateImage(ImageGenerationPayload payload, String apiKey) throws IOException {
         byte[] responseData = apiClient.generateImage(payload, apiKey);
         return processResponseData(responseData);
     }
 
-    public Image generateImg2Img(Img2ImgGenerationPayload payload, String apiKey) throws IOException {
+    public BufferedImage generateImg2Img(Img2ImgGenerationPayload payload, String apiKey) throws IOException {
         byte[] responseData = apiClient.generateImg2Img(payload, apiKey);
         return processResponseData(responseData);
     }
 
-    private Image processResponseData(byte[] responseData) throws IOException {
+    private BufferedImage processResponseData(byte[] responseData) throws IOException {
         if (responseData == null || responseData.length == 0) {
             return null;
         }
 
-        byte[] imageData;
+        BufferedImage image;
         try {
-            imageData = ImageUtils.extractImageFromZip(responseData);
+            image = ImageUtils.extractImageFromZip(responseData);
         } catch (IOException e) {
-            imageData = responseData;
+            image = ImageIO.read(new ByteArrayInputStream(responseData));
         }
 
-        return ImageUtils.byteArrayToImage(imageData);
+        return image;
     }
 }

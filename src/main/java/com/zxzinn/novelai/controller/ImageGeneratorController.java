@@ -7,10 +7,14 @@ import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
@@ -20,6 +24,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import lombok.extern.log4j.Log4j2;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,9 +90,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
     private void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-
                 ImageGenerationPayload payload = createImageGenerationPayload(positivePromptPreviewArea.getText(), negativePromptPreviewArea.getText());
-                Image image = imageGenerationService.generateImage(payload, apiKeyField.getText());
+                BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
                 if (image != null) {
                     handleGeneratedImage(image);
@@ -100,9 +105,35 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     generateImages();
                 }
             } catch (IOException e) {
-                log.error("生成圖像時發生錯誤：" + e.getMessage(), e);
+                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
+            }
+        });
+    }
+
+    private void handleGeneratedImage(BufferedImage image) {
+        Platform.runLater(() -> {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String timeStamp = now.format(formatter);
+
+            BufferedImage watermarkedImage = addWatermark(image, timeStamp);
+
+            Image fxImage = SwingFXUtils.toFXImage(watermarkedImage, null);
+            mainImageView.setImage(fxImage);
+            mainImageView.setPreserveRatio(true);
+            mainImageView.setSmooth(true);
+            mainImageView.fitWidthProperty().bind(((AnchorPane) mainImageView.getParent()).widthProperty());
+            mainImageView.fitHeightProperty().bind(((AnchorPane) mainImageView.getParent()).heightProperty());
+
+            addImageToHistory(fxImage);
+
+            try {
+                String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
+                ImageUtils.saveImage(watermarkedImage, fileName);
+            } catch (IOException e) {
+                log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
     }
@@ -138,47 +169,18 @@ public class ImageGeneratorController extends AbstractGenerationController {
         return payload;
     }
 
-    private void handleGeneratedImage(Image image) {
-        Platform.runLater(() -> {
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            String timeStamp = now.format(formatter);
+    private BufferedImage addWatermark(BufferedImage image, String timeStamp) {
+        Graphics2D g2d = image.createGraphics();
 
-            Image watermarkedImage = addWatermark(image, timeStamp);
-
-            mainImageView.setImage(watermarkedImage);
-            mainImageView.setPreserveRatio(true);
-            mainImageView.setSmooth(true);
-            mainImageView.fitWidthProperty().bind(((AnchorPane) mainImageView.getParent()).widthProperty());
-            mainImageView.fitHeightProperty().bind(((AnchorPane) mainImageView.getParent()).heightProperty());
-
-            addImageToHistory(watermarkedImage);
-
-            try {
-                String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-                ImageUtils.saveImage(watermarkedImage, fileName);
-            } catch (IOException e) {
-                log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
-            }
-        });
-    }
-
-    private Image addWatermark(Image image, String timeStamp) {
-        Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-
-        gc.drawImage(image, 0, 0);
-
-        gc.setFill(Color.WHITE);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(1);
-        gc.setFont(new Font("Arial", 20));
+        g2d.setColor(java.awt.Color.WHITE);
+        g2d.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 20));
 
         String text = timeStamp + " _" + (currentGeneratedCount);
-        gc.strokeText(text, 10, 30);
-        gc.fillText(text, 10, 30);
+        g2d.drawString(text, 10, 30);
 
-        return canvas.snapshot(null, null);
+        g2d.dispose();
+
+        return image;
     }
 
     private void addImageToHistory(Image image) {

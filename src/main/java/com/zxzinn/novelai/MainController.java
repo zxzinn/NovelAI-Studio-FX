@@ -162,10 +162,10 @@ public class MainController {
     }
 
     private void loadImg2ImgTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
-        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, imageGenerationService, imageUtils, settingsManager));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
+        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
         BorderPane content = loader.load();
-        img2ImgTab.setContent(content);
+        generatorTab.setContent(content);
     }
 
     private void loadFileManagerTab() throws IOException {
