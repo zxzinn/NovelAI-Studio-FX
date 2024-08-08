@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="baseDir">logs</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="RollingFile"
+                     fileName="${baseDir}/NovelAI-Studio-FX-${date:yyyy-MM-dd_HH-mm-ss}.log"
+                     filePattern="${baseDir}/$${date:yyyy-MM}/app-%d{yyyy-MM-dd_HH-mm-ss}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.zxzinn.novelai" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
