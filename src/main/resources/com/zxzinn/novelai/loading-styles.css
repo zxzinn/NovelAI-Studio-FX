@@ -1,0 +1,20 @@
+.loading-background {
+    -fx-background-color: #2C3E50;
+}
+
+.custom-progress-indicator {
+    -fx-progress-color: #3498DB;
+}
+
+.custom-progress-indicator .percentage {
+    -fx-fill: null;
+}
+
+.custom-progress-indicator .spinner {
+    -fx-background-color: #3498DB;
+}
+
+.loading-label {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+}

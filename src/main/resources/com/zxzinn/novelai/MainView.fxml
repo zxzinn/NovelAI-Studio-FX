@@ -5,48 +5,51 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<AnchorPane fx:id="rootPane" stylesheets="@styles.css"
+<BorderPane fx:id="rootPane" stylesheets="@styles.css"
             xmlns="http://javafx.com/javafx/11.0.14-internal"
-            xmlns:fx="http://javafx.com/fxml/1"
-            xmlns:ikonli="http://ikonli.org/javafx">
-    <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <!-- Custom Title Bar -->
-        <HBox fx:id="titleBar" alignment="CENTER_LEFT" onMouseClicked="#handleMouseClicked" onMouseDragged="#handleMouseDragged" onMousePressed="#handleMousePressed" spacing="5" styleClass="title-bar">
-            <padding>
-                <Insets bottom="5" left="10" right="10" top="5" />
-            </padding>
-            <Label fx:id="titleLabel" styleClass="title-label" text="NovelAI-DesktopFX-Remake v 1.0.0 by zxzinn" HBox.hgrow="ALWAYS">
-                <graphic>
-                    <FontIcon iconLiteral="fas-image" />
-                </graphic>
-            </Label>
-            <HBox alignment="CENTER_RIGHT" spacing="5" HBox.hgrow="ALWAYS">
-                <Button fx:id="minimizeButton" onAction="#handleMinimize" styleClass="window-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-window-minimize" />
-                    </graphic>
-                </Button>
-                <Button fx:id="maximizeButton" onAction="#handleMaximize" styleClass="window-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-window-maximize" />
-                    </graphic>
-                </Button>
-                <Button fx:id="closeButton" onAction="#handleClose" styleClass="window-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-times" />
-                    </graphic>
-                </Button>
-            </HBox>
-        </HBox>
+            xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <VBox>
+            <VBox fx:id="titleBar" styleClass="title-bar">
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <padding>
+                        <Insets bottom="5" left="10" right="10" top="5" />
+                    </padding>
+                    <Label fx:id="titleLabel" styleClass="title-label" text="NovelAI-DesktopFX-Remake v 1.0.0 by zxzinn" HBox.hgrow="ALWAYS">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-image" />
+                        </graphic>
+                    </Label>
+                    <HBox alignment="CENTER_RIGHT" spacing="5" HBox.hgrow="ALWAYS">
+                        <Button fx:id="minimizeButton" styleClass="window-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-window-minimize" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="maximizeButton" styleClass="window-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-window-maximize" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="closeButton" styleClass="window-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-times" />
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </HBox>
+            </VBox>
+        </VBox>
+    </top>
 
-        <!-- Main Content -->
-        <TabPane VBox.vgrow="ALWAYS">
+    <center>
+        <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS">
             <Tab fx:id="generatorTab" closable="false" text="Generator">
                 <graphic>
                     <FontIcon iconLiteral="fas-image" iconSize="16" />
                 </graphic>
             </Tab>
-            <Tab fx:id="Img2ImgTab" closable="false" text="Img2Img">
+            <Tab fx:id="img2ImgTab" closable="false" text="Img2Img">
                 <graphic>
                     <FontIcon iconLiteral="fas-exchange-alt" iconSize="16" />
                 </graphic>
@@ -57,5 +60,5 @@
                 </graphic>
             </Tab>
         </TabPane>
-    </VBox>
-</AnchorPane>
+    </center>
+</BorderPane>

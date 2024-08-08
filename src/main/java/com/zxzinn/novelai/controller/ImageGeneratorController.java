@@ -1,6 +1,5 @@
 package com.zxzinn.novelai.controller;
 
-import com.zxzinn.novelai.Application;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.service.ImageGenerationService;
@@ -19,30 +18,24 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.Window;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 public class ImageGeneratorController extends AbstractGenerationController {
 
-    @FXML public Button generateButton;
-    @FXML public ScrollPane mainScrollPane;
-    @FXML public VBox historyImagesContainer;
+    @FXML private Button generateButton;
+    @FXML private ScrollPane mainScrollPane;
+    @FXML private VBox historyImagesContainer;
+    @FXML private ImageView mainImageView;
 
     private int currentGeneratedCount = 0;
-    @Setter
-    private Window mainWindow;
     private final SettingsManager settingsManager;
     private final ImageGenerationService imageGenerationService;
-    private final List<Image> generatedImages;
     private final ImageUtils imageUtils;
 
     public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
@@ -53,7 +46,6 @@ public class ImageGeneratorController extends AbstractGenerationController {
         this.settingsManager = settingsManager;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
-        this.generatedImages = new ArrayList<>();
     }
 
     @FXML
@@ -67,23 +59,18 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
     private void setupZoomHandler() {
         mainScrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
-            double deltaY = event.getDeltaY();
-            double zoomFactor = 1.1;
-            double direction = deltaY > 0 ? 1 : -1;
-            double scale = Math.pow(zoomFactor, direction);
+            if (event.isControlDown()) {
+                double deltaY = event.getDeltaY();
+                double zoomFactor = 1.1;
+                double direction = deltaY > 0 ? 1 : -1;
+                double scale = Math.pow(zoomFactor, direction);
 
-            mainImageView.setScaleX(mainImageView.getScaleX() * scale);
-            mainImageView.setScaleY(mainImageView.getScaleY() * scale);
+                mainImageView.setScaleX(mainImageView.getScaleX() * scale);
+                mainImageView.setScaleY(mainImageView.getScaleY() * scale);
 
-            event.consume();
+                event.consume();
+            }
         });
-    }
-
-    public void setMainWindow(Window window) {
-        this.mainWindow = window;
-        if (mainWindow != null) {
-            mainWindow.setOnCloseRequest(e -> settingsManager.shutdown());
-        }
     }
 
     @FXML
@@ -91,20 +78,14 @@ public class ImageGeneratorController extends AbstractGenerationController {
     protected void handleGenerate() {
         generateButton.setDisable(true);
         currentGeneratedCount = 0;
-        String positivePrompt = positivePromptArea.getText();
-        String negativePrompt = negativePromptArea.getText();
-        generateImages(positivePrompt, negativePrompt);
+        generateImages();
     }
 
-    private void generateImages(String positivePrompt, String negativePrompt) {
-        new Thread(() -> {
+    private void generateImages() {
+        CompletableFuture.runAsync(() -> {
             try {
-                String processedPositivePrompt = embedProcessor.processPrompt(positivePrompt);
-                String processedNegativePrompt = embedProcessor.processPrompt(negativePrompt);
 
-                updatePromptPreviewsAsync(processedPositivePrompt, processedNegativePrompt);
-
-                ImageGenerationPayload payload = createImageGenerationPayload(processedPositivePrompt, processedNegativePrompt);
+                ImageGenerationPayload payload = createImageGenerationPayload(positivePromptPreviewArea.getText(), negativePromptPreviewArea.getText());
                 Image image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
                 if (image != null) {
@@ -112,33 +93,25 @@ public class ImageGeneratorController extends AbstractGenerationController {
                 }
 
                 currentGeneratedCount++;
+                updatePromptPreviewsAsync();
                 String selectedCount = generateCountComboBox.getValue();
                 int maxCount = "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
                 if (currentGeneratedCount < maxCount) {
-                    generateImages(positivePromptArea.getText(), negativePromptArea.getText());
+                    generateImages();
                 }
             } catch (IOException e) {
                 log.error("生成圖像時發生錯誤：" + e.getMessage(), e);
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
             }
-        }).start();
+        });
     }
 
-    private void updatePromptPreviewsAsync(String processedPositivePrompt, String processedNegativePrompt) {
-        CountDownLatch latch = new CountDownLatch(1);
+    private void updatePromptPreviewsAsync() {
         Platform.runLater(() -> {
-            positivePromptPreviewArea.setText(processedPositivePrompt);
-            negativePromptPreviewArea.setText(processedNegativePrompt);
-            latch.countDown();
+            positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
+            negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
         });
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            log.error("等待預覽區域更新時發生中斷：" + e.getMessage(), e);
-            Thread.currentThread().interrupt();
-        }
     }
 
     private ImageGenerationPayload createImageGenerationPayload(String processedPositivePrompt, String processedNegativePrompt) {
@@ -166,36 +139,13 @@ public class ImageGeneratorController extends AbstractGenerationController {
     }
 
     private void handleGeneratedImage(Image image) {
-        generatedImages.add(image);
-
         Platform.runLater(() -> {
-            // 獲取當前時間
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            // 創建一個新的 Canvas 來繪製圖片和文字
-            Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
-            GraphicsContext gc = canvas.getGraphicsContext2D();
+            Image watermarkedImage = addWatermark(image, timeStamp);
 
-            // 繪製原始圖片
-            gc.drawImage(image, 0, 0);
-
-            // 設置文字樣式
-            gc.setFill(Color.WHITE);
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            gc.setFont(new Font("Arial", 20));
-
-            // 繪製時間戳和批次號
-            String text = timeStamp + " _" + (currentGeneratedCount);
-            gc.strokeText(text, 10, 30);
-            gc.fillText(text, 10, 30);
-
-            // 將 Canvas 轉換為 Image
-            Image watermarkedImage = canvas.snapshot(null, null);
-
-            // 更新 UI
             mainImageView.setImage(watermarkedImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -205,13 +155,30 @@ public class ImageGeneratorController extends AbstractGenerationController {
             addImageToHistory(watermarkedImage);
 
             try {
-                // 修改文件名以包含時間戳和批次號
-                String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount + 1) + ".png";
-                imageUtils.saveImage(watermarkedImage, fileName);
+                String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
+                ImageUtils.saveImage(watermarkedImage, fileName);
             } catch (IOException e) {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
+    }
+
+    private Image addWatermark(Image image, String timeStamp) {
+        Canvas canvas = new Canvas(image.getWidth(), image.getHeight());
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.drawImage(image, 0, 0);
+
+        gc.setFill(Color.WHITE);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.setFont(new Font("Arial", 20));
+
+        String text = timeStamp + " _" + (currentGeneratedCount);
+        gc.strokeText(text, 10, 30);
+        gc.fillText(text, 10, 30);
+
+        return canvas.snapshot(null, null);
     }
 
     private void addImageToHistory(Image image) {
@@ -224,7 +191,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
         historyImageView.setOnMouseClicked(event -> mainImageView.setImage(image));
 
-        historyImagesContainer.getChildren().add(historyImageView);
+        historyImagesContainer.getChildren().add(0, historyImageView);
     }
 
     private void loadSettings() {

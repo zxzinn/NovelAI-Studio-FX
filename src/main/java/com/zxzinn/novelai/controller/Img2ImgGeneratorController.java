@@ -13,19 +13,22 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 public class Img2ImgGeneratorController extends AbstractGenerationController {
-    public VBox historyImagesContainer;
-    public ImageView mainImageView;
-    public Button generateButton;
+    @FXML public VBox historyImagesContainer;
+    @FXML public ImageView mainImageView;
+    @FXML public Button generateButton;
     @FXML public TextField extraNoiseSeedField;
     @FXML public Button uploadImageButton;
 
-    public String base64Image;
+    private String base64Image;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final SettingsManager settingsManager;
@@ -40,10 +43,16 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     }
 
     @FXML
+    public void initialize() {
+        super.initialize();
+        uploadImageButton.setOnAction(event -> handleUploadImage());
+    }
+
+    @FXML
     @Override
     protected void handleGenerate() {
         generateButton.setDisable(true);
-        new Thread(() -> {
+        CompletableFuture.runAsync(() -> {
             try {
                 Img2ImgGenerationPayload payload = createImg2ImgGenerationPayload();
                 Image image = imageGenerationService.generateImg2Img(payload, apiKeyField.getText());
@@ -55,13 +64,29 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
             }
-        }).start();
+        });
     }
 
     private Img2ImgGenerationPayload createImg2ImgGenerationPayload() {
         Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
         // 設置payload的各個屬性
-        // ...
+        payload.setInput(positivePromptArea.getText());
+        payload.setModel(modelComboBox.getValue());
+        payload.setAction("img2img");
+
+        Img2ImgGenerationPayload.Img2ImgGenerationParameters parameters = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
+        parameters.setWidth(Integer.parseInt(widthField.getText()));
+        parameters.setHeight(Integer.parseInt(heightField.getText()));
+        parameters.setScale(Integer.parseInt(ratioField.getText()));
+        parameters.setSampler(samplerComboBox.getValue());
+        parameters.setSteps(Integer.parseInt(stepsField.getText()));
+        parameters.setN_samples(Integer.parseInt(countField.getText()));
+        parameters.setSeed(Long.parseLong(seedField.getText()));
+        parameters.setExtra_noise_seed(Long.parseLong(extraNoiseSeedField.getText()));
+        parameters.setNegative_prompt(negativePromptArea.getText());
+        parameters.setImage(base64Image);
+
+        payload.setParameters(parameters);
         return payload;
     }
 
@@ -87,6 +112,20 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
 
     @FXML
     private void handleUploadImage() {
-        // 實現圖片上傳邏輯
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("選擇圖片");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("圖片文件", "*.png", "*.jpg", "*.jpeg")
+        );
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null) {
+            try {
+                base64Image = imageUtils.fileToBase64(selectedFile);
+                Image image = new Image(selectedFile.toURI().toString());
+                mainImageView.setImage(image);
+            } catch (IOException e) {
+                log.error("上傳圖片時發生錯誤：" + e.getMessage(), e);
+            }
+        }
     }
 }

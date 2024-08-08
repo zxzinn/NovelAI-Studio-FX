@@ -8,10 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URLConnection;
 import java.util.Base64;
 import java.util.zip.ZipEntry;
@@ -22,6 +19,14 @@ public class ImageUtils {
     public static Image base64ToImage(String base64Data) throws IOException {
         byte[] imageData = Base64.getDecoder().decode(base64Data);
         return byteArrayToImage(imageData);
+    }
+
+    public String fileToBase64(File file) throws IOException {
+        byte[] fileContent = new byte[(int) file.length()];
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            inputStream.read(fileContent);
+        }
+        return Base64.getEncoder().encodeToString(fileContent);
     }
 
     public static byte[] extractImageFromZip(byte[] zipData) throws IOException {

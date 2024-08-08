@@ -4,18 +4,21 @@ import atlantafx.base.theme.PrimerDark;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
-import com.zxzinn.novelai.controller.FileManagerController;
 import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
@@ -33,79 +36,104 @@ public class Application extends javafx.application.Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.settingsManager = SettingsManager.getInstance(); // 確保在這裡初始化
+        this.settingsManager = SettingsManager.getInstance();
         primaryStage.initStyle(StageStyle.UNDECORATED);
         showLoadingScreen();
         initializeComponents();
+
+        primaryStage.setOnCloseRequest(event -> {
+            settingsManager.shutdown();
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     private void showLoadingScreen() {
         ProgressIndicator progressIndicator = new ProgressIndicator();
-        StackPane root = new StackPane(progressIndicator);
+        progressIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+        progressIndicator.getStyleClass().add("custom-progress-indicator");
+
+        Label loadingLabel = new Label("正在載入...");
+        loadingLabel.getStyleClass().add("loading-label");
+
+        VBox loadingBox = new VBox(20, progressIndicator, loadingLabel);
+        loadingBox.setAlignment(Pos.CENTER);
+
+        StackPane root = new StackPane(loadingBox);
+        root.getStyleClass().add("loading-background");
+
         Scene scene = new Scene(root, 300, 200);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        scene.getStylesheets().add(getClass().getResource("/com/zxzinn/novelai/loading-styles.css").toExternalForm());
+
+        Stage loadingStage = new Stage(StageStyle.UNDECORATED);
+        loadingStage.setScene(scene);
+        loadingStage.show();
+
+        primaryStage.setOnShown(e -> loadingStage.close());
     }
 
     private void initializeComponents() {
-        Task<Void> initTask = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                // 使用已初始化的 settingsManager
-                OkHttpClient httpClient = new OkHttpClient.Builder()
-                        .readTimeout(60, TimeUnit.SECONDS)
-                        .writeTimeout(60, TimeUnit.SECONDS)
-                        .connectTimeout(60, TimeUnit.SECONDS)
-                        .build();
-                Gson gson = new Gson();
-                APIClient apiClient = new NovelAIAPIClient(httpClient, gson);
-                EmbedProcessor embedProcessor = new EmbedProcessor();
-                ImageUtils imageUtils = new ImageUtils();
-                ImageGenerationService imageGenerationService = new ImageGenerationService(apiClient, imageUtils);
+        closeLoadingScreen();
+        CompletableFuture.runAsync(() -> {
+            OkHttpClient httpClient = new OkHttpClient.Builder()
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .build();
+            Gson gson = new Gson();
+            APIClient apiClient = new NovelAIAPIClient(httpClient, gson);
+            EmbedProcessor embedProcessor = new EmbedProcessor();
+            ImageUtils imageUtils = new ImageUtils();
+            ImageGenerationService imageGenerationService = new ImageGenerationService(apiClient, imageUtils);
 
-                MainController mainController = new MainController(settingsManager, apiClient, embedProcessor, imageGenerationService, imageUtils);
+            MainController mainController = new MainController(settingsManager, apiClient, embedProcessor, imageGenerationService, imageUtils);
 
-                Platform.runLater(() -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/MainView.fxml"));
-                        loader.setController(mainController);
-                        Parent root = loader.load();
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/MainView.fxml"));
+                    loader.setController(mainController);
+                    Parent root = loader.load();
 
-                        Scene scene = new Scene(root, 800, 600);
-                        primaryStage.setScene(scene);
+                    // 設置初始視窗大小和位置
+                    Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+                    double width = screenBounds.getWidth() * 0.8;
+                    double height = screenBounds.getHeight() * 0.8;
+                    double x = (screenBounds.getWidth() - width) / 2;
+                    double y = (screenBounds.getHeight() - height) / 2;
 
-                        mainController.initializeUI();
+                    Scene scene = new Scene(root, width, height);
+                    scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
+                    scene.getStylesheets().add(getClass().getResource("/com/zxzinn/novelai/styles.css").toExternalForm());
+                    primaryStage.setScene(scene);
+                    primaryStage.setX(x);
+                    primaryStage.setY(y);
 
-                        primaryStage.setTitle("圖像生成器");
-                        primaryStage.show();
+                    mainController.setStageAndInit(primaryStage);
 
-                        primaryStage.setOnCloseRequest(event -> {
-                            settingsManager.shutdown();
-                            System.exit(0);
-                        });
-                    } catch (Exception e) {
-                        log.error("載入主要內容時發生錯誤", e);
-                    }
-                });
+                    primaryStage.setTitle("圖像生成器");
+                    primaryStage.show();
 
-                return null;
+                    primaryStage.setOnCloseRequest(event -> {
+                        settingsManager.shutdown();
+                        Platform.exit();
+                        System.exit(0);
+                    });
+                } catch (Exception e) {
+                    log.error("載入主要內容時發生錯誤", e);
+                }
+            });
+        });
+    }
+
+    private void closeLoadingScreen() {
+        Platform.runLater(() -> {
+            if (primaryStage.getScene() != null && primaryStage.getScene().getRoot() instanceof StackPane) {
+                ((StackPane) primaryStage.getScene().getRoot()).getChildren().clear();
             }
-        };
-
-        initTask.setOnSucceeded(e -> {
-            log.info("初始化完成");
         });
-
-        initTask.setOnFailed(e -> {
-            log.error("初始化失敗", initTask.getException());
-        });
-
-        new Thread(initTask).start();
     }
 
     public static void main(String[] args) {
-        System.setProperty("prism.order", "d3d,sw");
-        System.setProperty("prism.verbose", "true");
         launch(args);
     }
 }

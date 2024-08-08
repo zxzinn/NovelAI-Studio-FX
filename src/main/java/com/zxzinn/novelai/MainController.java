@@ -1,8 +1,6 @@
 package com.zxzinn.novelai;
 
-import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.controller.FileManagerController;
 import com.zxzinn.novelai.controller.ImageGeneratorController;
 import com.zxzinn.novelai.controller.Img2ImgGeneratorController;
@@ -10,57 +8,51 @@ import com.zxzinn.novelai.service.ImageGenerationService;
 import com.zxzinn.novelai.utils.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import javafx.animation.AnimationTimer;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.OkHttpClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
 public class MainController {
-    @FXML private AnchorPane rootPane;
-    @FXML private HBox titleBar;
-    @FXML private VBox mainVBox;
+    @FXML private TabPane mainTabPane;
     @FXML private Tab generatorTab;
-    @FXML private Tab Img2ImgTab;
+    @FXML private Tab img2ImgTab;
     @FXML private Tab fileManagerTab;
-    @FXML private Label titleLabel;
     @FXML private Button minimizeButton;
     @FXML private Button maximizeButton;
     @FXML private Button closeButton;
-
-    private double xOffset = 0;
-    private double yOffset = 0;
-    private Rectangle2D previousBounds;
+    @FXML private VBox titleBar;
 
     private final SettingsManager settingsManager;
     private final APIClient apiClient;
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
-    private FileManagerController fileManagerController;
+    @Setter
+    private Stage stage;
+    private double xOffset = 0;
+    private double yOffset = 0;
+    private Rectangle2D restoreBounds;
+    private boolean isMaximized = false;
+    private AnimationTimer resizeAnimationTimer;
 
-    private static final long ANIMATION_DURATION = 150_000_000L; // 150ms in nanoseconds
 
     public MainController(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
                           ImageGenerationService imageGenerationService, ImageUtils imageUtils) {
@@ -69,137 +61,188 @@ public class MainController {
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
-        this.fileManagerController = new FileManagerController(settingsManager);
     }
 
     @FXML
-    private void initialize() {}
+    public void initialize() {
+        setupWindowControls();
+        loadTabContent();
+        setupDraggableWindow();
+    }
 
-    public void initializeUI() {
-        Platform.runLater(() -> {
-            setupUI();
-            loadTabContent();
+    public void setStageAndInit(Stage stage) {
+        this.stage = stage;
+        setupResizeableWindow();
+    }
+
+    private void setupWindowControls() {
+        minimizeButton.setOnAction(event -> stage.setIconified(true));
+        maximizeButton.setOnAction(event -> toggleMaximize());
+        closeButton.setOnAction(event -> {
+            settingsManager.shutdown();
+            stage.close();
+            Platform.exit();
+            System.exit(0);
         });
     }
 
-    private void setupUI() {
-        if (rootPane == null || titleBar == null) {
-            log.error("錯誤：rootPane或titleBar為null。請檢查FXML中的fx:id設置是否正確。");
-            return;
-        }
+    private void toggleMaximize() {
+        if (!isMaximized) {
+            // 保存當前位置和大小
+            restoreBounds = new Rectangle2D(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
 
-        setupTabListeners();
-    }
-
-    private void loadTabContent() {
-        try {
-            FXMLLoader generatorLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
-            generatorLoader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
-            BorderPane generatorContent = generatorLoader.load();
-            generatorTab.setContent(generatorContent);
-
-            FXMLLoader img2ImgLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
-            img2ImgLoader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, imageGenerationService, imageUtils, settingsManager));
-            BorderPane img2ImgContent = img2ImgLoader.load();
-            Img2ImgTab.setContent(img2ImgContent);
-
-            FXMLLoader fileManagerLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
-            fileManagerLoader.setController(fileManagerController);
-            BorderPane fileManagerContent = fileManagerLoader.load();
-            fileManagerTab.setContent(fileManagerContent);
-        } catch (IOException e) {
-            log.error("載入標籤內容時發生錯誤", e);
-        }
-    }
-
-    private void setupTabListeners() {
-        generatorTab.setOnSelectionChanged(event -> {
-            if (generatorTab.isSelected()) {
-                ImageGeneratorController controller = (ImageGeneratorController) generatorTab.getContent().getUserData();
-                if (controller != null) {
-                    controller.setMainWindow(rootPane.getScene().getWindow());
-                }
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            stage.setX(screenBounds.getMinX());
+            stage.setY(screenBounds.getMinY());
+            stage.setWidth(screenBounds.getWidth());
+            stage.setHeight(screenBounds.getHeight());
+            isMaximized = true;
+        } else {
+            if (restoreBounds != null) {
+                stage.setX(restoreBounds.getMinX());
+                stage.setY(restoreBounds.getMinY());
+                stage.setWidth(restoreBounds.getWidth());
+                stage.setHeight(restoreBounds.getHeight());
             }
-        });
+            isMaximized = false;
+        }
     }
 
-    @FXML
+    private void setupDraggableWindow() {
+        titleBar.setOnMousePressed(this::handleMousePressed);
+        titleBar.setOnMouseDragged(this::handleMouseDragged);
+        titleBar.setOnMouseReleased(this::handleMouseReleased);
+    }
+
     private void handleMousePressed(MouseEvent event) {
         xOffset = event.getSceneX();
         yOffset = event.getSceneY();
     }
 
-    @FXML
+    private void handleMouseReleased(MouseEvent event) {
+        if (event.getScreenY() <= 0) {
+            toggleMaximize();
+        }
+    }
+
     private void handleMouseDragged(MouseEvent event) {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.setX(event.getScreenX() - xOffset);
-        stage.setY(event.getScreenY() - yOffset);
-    }
-
-    @FXML
-    private void handleMouseClicked(MouseEvent event) {
-        if (event.getClickCount() == 2) {
-            handleMaximize();
-        }
-    }
-
-    @FXML
-    private void handleMinimize() {
-        ((Stage) rootPane.getScene().getWindow()).setIconified(true);
-    }
-
-    @FXML
-    private void handleMaximize() {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        Scene scene = stage.getScene();
-        if (scene == null) return;
-
-        if (!stage.isMaximized()) {
-            previousBounds = new Rectangle2D(stage.getX(), stage.getY(), scene.getWidth(), scene.getHeight());
-            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-            animateResize(screenBounds.getMinX(), screenBounds.getMinY(),
-                    screenBounds.getWidth(), screenBounds.getHeight(), true);
+        if (!isMaximized) {
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
         } else {
-            animateResize(previousBounds.getMinX(), previousBounds.getMinY(),
-                    previousBounds.getWidth(), previousBounds.getHeight(), false);
+            // 如果窗口是最大化的，拖動時應該恢復到正常大小
+            double percentX = event.getScreenX() / Screen.getPrimary().getVisualBounds().getWidth();
+            restoreBounds = new Rectangle2D(
+                    event.getScreenX() - stage.getWidth() * percentX,
+                    event.getScreenY(),
+                    restoreBounds.getWidth(),
+                    restoreBounds.getHeight());
+            toggleMaximize();
+
+            // 確保鼠標仍然在標題欄上
+            xOffset = stage.getWidth() * percentX;
+            yOffset = event.getSceneY();
         }
     }
 
-    @FXML
-    private void handleClose() {
-        settingsManager.shutdown();
-        Platform.exit();
-        System.exit(0);
+    private void loadTabContent() {
+        try {
+            loadGeneratorTab();
+            loadImg2ImgTab();
+            loadFileManagerTab();
+        } catch (IOException e) {
+            log.error("載入標籤內容時發生錯誤", e);
+        }
     }
 
-    private void animateResize(double toX, double toY, double toWidth, double toHeight, boolean maximize) {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        final double startX = stage.getX();
-        final double startY = stage.getY();
-        final double startWidth = stage.getWidth();
-        final double startHeight = stage.getHeight();
-        final long startTime = System.nanoTime();
+    private void loadGeneratorTab() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
+        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
+        BorderPane content = loader.load();
+        generatorTab.setContent(content);
+    }
 
-        new AnimationTimer() {
+    private void loadImg2ImgTab() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
+        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, imageGenerationService, imageUtils, settingsManager));
+        BorderPane content = loader.load();
+        img2ImgTab.setContent(content);
+    }
+
+    private void loadFileManagerTab() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
+        FileManagerController controller = new FileManagerController(settingsManager);
+        loader.setController(controller);
+        BorderPane content = loader.load();
+        fileManagerTab.setContent(content);
+    }
+
+    private void setupResizeableWindow() {
+        Cursor defaultCursor = Cursor.DEFAULT;
+        Cursor resizeCursor = Cursor.SE_RESIZE;
+        AtomicBoolean resizing = new AtomicBoolean(false);
+
+        class ResizeAnimationTimer extends AnimationTimer {
+            private double targetWidth;
+            private double targetHeight;
+
             @Override
             public void handle(long now) {
-                long elapsedTime = now - startTime;
-                if (elapsedTime > ANIMATION_DURATION) {
-                    stage.setX(toX);
-                    stage.setY(toY);
-                    stage.setWidth(toWidth);
-                    stage.setHeight(toHeight);
-                    stage.setMaximized(maximize);
-                    this.stop();
-                    log.info("Animation completed in {} ms", elapsedTime / 1_000_000.0);
-                } else {
-                    double fraction = (double) elapsedTime / ANIMATION_DURATION;
-                    stage.setX(startX + (toX - startX) * fraction);
-                    stage.setY(startY + (toY - startY) * fraction);
-                    stage.setWidth(startWidth + (toWidth - startWidth) * fraction);
-                    stage.setHeight(startHeight + (toHeight - startHeight) * fraction);
+                double currentWidth = stage.getWidth();
+                double currentHeight = stage.getHeight();
+
+                stage.setWidth(currentWidth + (targetWidth - currentWidth) * 0.2);
+                stage.setHeight(currentHeight + (targetHeight - currentHeight) * 0.2);
+
+                if (Math.abs(stage.getWidth() - targetWidth) < 0.1 &&
+                        Math.abs(stage.getHeight() - targetHeight) < 0.1) {
+                    stop();
                 }
             }
-        }.start();
+
+            public void setTarget(double width, double height) {
+                this.targetWidth = width;
+                this.targetHeight = height;
+            }
+        }
+
+        ResizeAnimationTimer resizeAnimationTimer = new ResizeAnimationTimer();
+
+        stage.getScene().setOnMouseMoved(event -> {
+            if (isInResizeZone(event)) {
+                stage.getScene().setCursor(resizeCursor);
+            } else {
+                stage.getScene().setCursor(defaultCursor);
+            }
+        });
+
+        stage.getScene().setOnMousePressed(event -> {
+            if (isInResizeZone(event)) {
+                resizing.set(true);
+                event.consume();
+            }
+        });
+
+        stage.getScene().setOnMouseDragged(event -> {
+            if (resizing.get()) {
+                double newWidth = Math.max(stage.getMinWidth(), event.getSceneX());
+                double newHeight = Math.max(stage.getMinHeight(), event.getSceneY());
+
+                resizeAnimationTimer.stop();
+                resizeAnimationTimer.setTarget(newWidth, newHeight);
+                resizeAnimationTimer.start();
+
+                event.consume();
+            }
+        });
+
+        stage.getScene().setOnMouseReleased(event -> {
+            resizing.set(false);
+            stage.getScene().setCursor(defaultCursor);
+        });
+    }
+
+    private boolean isInResizeZone(MouseEvent event) {
+        return event.getSceneX() > stage.getWidth() - 20 && event.getSceneY() > stage.getHeight() - 20;
     }
 }
