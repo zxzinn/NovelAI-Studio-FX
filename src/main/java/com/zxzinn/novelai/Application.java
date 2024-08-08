@@ -24,6 +24,7 @@ import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ public class Application extends javafx.application.Application {
         root.getStyleClass().add("loading-background");
 
         Scene scene = new Scene(root, 300, 200);
-        scene.getStylesheets().add(getClass().getResource("/com/zxzinn/novelai/loading-styles.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/com/zxzinn/novelai/loading-styles.css")).toExternalForm());
 
         Stage loadingStage = new Stage(StageStyle.UNDECORATED);
         loadingStage.setScene(scene);

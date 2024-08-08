@@ -2,17 +2,12 @@ package com.zxzinn.novelai.controller;
 
 import com.zxzinn.novelai.NAIConstants;
 import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
 
 public abstract class AbstractGenerationController {
-    public VBox historyImagesContainer;
-    public ImageView mainImageView;
     protected final APIClient apiClient;
     protected final EmbedProcessor embedProcessor;
 

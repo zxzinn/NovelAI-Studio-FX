@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Log4j2
 public class FileManagerService {
@@ -28,7 +27,7 @@ public class FileManagerService {
     private final ScheduledExecutorService scheduledExecutorService;
 
     public FileManagerService(SettingsManager settingsManager) throws IOException {
-        this.watchedDirectories = new ConcurrentHashMap().newKeySet();
+        this.watchedDirectories = ConcurrentHashMap.newKeySet();
         this.watchKeyToPath = new ConcurrentHashMap<>();
         this.watchService = FileSystems.getDefault().newWatchService();
         this.settingsManager = settingsManager;
@@ -124,7 +123,7 @@ public class FileManagerService {
 
             List<CompletableFuture<TreeItem<String>>> futures = watchedDirectories.stream()
                     .map(this::createTreeItemAsync)
-                    .collect(Collectors.toList());
+                    .toList();
 
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
@@ -162,7 +161,7 @@ public class FileManagerService {
             CompletableFuture.runAsync(() -> {
                 List<TreeItem<String>> batch = childList.subList(start, end).stream()
                         .map(this::createTreeItem)
-                        .collect(Collectors.toList());
+                        .toList();
                 Platform.runLater(() -> parentItem.getChildren().addAll(batch));
             }, executorService);
         }
@@ -173,17 +172,11 @@ public class FileManagerService {
             return new FontIcon(FontAwesomeSolid.FOLDER);
         } else {
             String extension = getFileExtension(file);
-            switch (extension.toLowerCase()) {
-                case "png":
-                case "jpg":
-                case "jpeg":
-                case "gif":
-                    return new FontIcon(FontAwesomeSolid.IMAGE);
-                case "txt":
-                    return new FontIcon(FontAwesomeSolid.FILE_ALT);
-                default:
-                    return new FontIcon(FontAwesomeSolid.FILE);
-            }
+            return switch (extension.toLowerCase()) {
+                case "png", "jpg", "jpeg", "gif" -> new FontIcon(FontAwesomeSolid.IMAGE);
+                case "txt" -> new FontIcon(FontAwesomeSolid.FILE_ALT);
+                default -> new FontIcon(FontAwesomeSolid.FILE);
+            };
         }
     }
 

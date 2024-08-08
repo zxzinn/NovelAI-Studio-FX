@@ -3,8 +3,6 @@ package com.zxzinn.novelai.service;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
-import com.zxzinn.novelai.api.NovelAIAPIClient;
-import com.zxzinn.novelai.controller.AbstractGenerationController;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.scene.image.Image;
 
@@ -36,11 +34,11 @@ public class ImageGenerationService {
 
         byte[] imageData;
         try {
-            imageData = imageUtils.extractImageFromZip(responseData);
+            imageData = ImageUtils.extractImageFromZip(responseData);
         } catch (IOException e) {
             imageData = responseData;
         }
 
-        return imageUtils.byteArrayToImage(imageData);
+        return ImageUtils.byteArrayToImage(imageData);
     }
 }

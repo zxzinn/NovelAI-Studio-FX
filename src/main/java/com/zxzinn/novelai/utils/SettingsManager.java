@@ -166,32 +166,4 @@ public class SettingsManager {
         }
     }
 
-    public void clearStringList(String key) {
-        lock.writeLock().lock();
-        try {
-            settingsCache.remove(key);
-            isDirty = true;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    public Set<String> getKeys() {
-        lock.readLock().lock();
-        try {
-            return new HashSet<>(settingsCache.keySet());
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    public void remove(String key) {
-        lock.writeLock().lock();
-        try {
-            settingsCache.remove(key);
-            isDirty = true;
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
 }

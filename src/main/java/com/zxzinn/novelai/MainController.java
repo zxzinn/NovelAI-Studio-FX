@@ -20,7 +20,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import javafx.scene.layout.VBox;

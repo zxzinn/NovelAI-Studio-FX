@@ -9,6 +9,7 @@ import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -27,6 +28,7 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     @FXML public Button generateButton;
     @FXML public TextField extraNoiseSeedField;
     @FXML public Button uploadImageButton;
+    public ScrollPane mainScrollPane;
 
     private String base64Image;
     private final ImageGenerationService imageGenerationService;
@@ -95,7 +97,7 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
             mainImageView.setImage(image);
             addImageToHistory(image);
             try {
-                imageUtils.saveImage(image, "generated_img2img.png");
+                ImageUtils.saveImage(image, "generated_img2img.png");
             } catch (IOException e) {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }

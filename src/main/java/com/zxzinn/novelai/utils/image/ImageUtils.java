@@ -3,13 +3,10 @@ package com.zxzinn.novelai.utils.image;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URLConnection;
 import java.util.Base64;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -77,18 +74,6 @@ public class ImageUtils {
 
         if (!ImageIO.write(bufferedImage, "png", outputFile)) {
             log.error("沒有合適的寫入器來保存PNG圖像");
-        }
-    }
-
-    public static String getMimeType(byte[] data) {
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(data);
-            String mimeType = URLConnection.guessContentTypeFromStream(bis);
-            bis.reset();
-            return mimeType;
-        } catch (IOException e) {
-            log.error("無法檢測MIME類型：" + e.getMessage(), e);
-            return null;
         }
     }
 

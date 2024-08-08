@@ -1,13 +1,10 @@
 package com.zxzinn.novelai.api;
 
 import com.google.gson.Gson;
-import com.zxzinn.novelai.controller.AbstractGenerationController;
-import com.zxzinn.novelai.controller.Img2ImgGeneratorController;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class NovelAIAPIClient implements APIClient {

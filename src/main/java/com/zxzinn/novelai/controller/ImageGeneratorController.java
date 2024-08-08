@@ -191,7 +191,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
 
         historyImageView.setOnMouseClicked(event -> mainImageView.setImage(image));
 
-        historyImagesContainer.getChildren().add(0, historyImageView);
+        historyImagesContainer.getChildren().addFirst(historyImageView);
     }
 
     private void loadSettings() {
