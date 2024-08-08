@@ -9,7 +9,6 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
-            fx:controller="com.zxzinn.novelai.controller.FileManagerController"
             stylesheets="@styles.css">
     <left>
         <VBox spacing="10" styleClass="side-panel">
@@ -17,24 +16,24 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <HBox spacing="5" alignment="CENTER_LEFT">
-                <TextField HBox.hgrow="ALWAYS" promptText="Search..."/>
-                <Button styleClass="icon-button">
+                <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="搜尋..."/>
+                <Button fx:id="addButton" styleClass="icon-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-plus" iconSize="12"/>
                     </graphic>
                 </Button>
-                <Button styleClass="icon-button">
+                <Button fx:id="removeButton" styleClass="icon-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-minus" iconSize="12"/>
                     </graphic>
                 </Button>
             </HBox>
-            <Button text="Clear Metadata" maxWidth="Infinity">
+            <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity">
                 <graphic>
                     <FontIcon iconLiteral="fas-eraser" iconSize="12"/>
                 </graphic>
             </Button>
-            <Button text="Construct Database" maxWidth="Infinity">
+            <Button fx:id="constructDatabaseButton" text="構建數據庫" maxWidth="Infinity">
                 <graphic>
                     <FontIcon iconLiteral="fas-database" iconSize="12"/>
                 </graphic>
@@ -52,12 +51,12 @@
                 <ImageView fx:id="previewImageView" preserveRatio="true"/>
             </ScrollPane>
             <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button text="Fit" fx:id="fitButton" styleClass="action-button">
+                <Button fx:id="fitButton" text="適應" styleClass="action-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-compress-arrows-alt" iconSize="12"/>
                     </graphic>
                 </Button>
-                <Button text="Original Size" fx:id="originalSizeButton" styleClass="action-button">
+                <Button fx:id="originalSizeButton" text="原始大小" styleClass="action-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-expand-arrows-alt" iconSize="12"/>
                     </graphic>
@@ -71,7 +70,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <TextField promptText="Filter metadata..."/>
+            <TextField promptText="過濾元數據..."/>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
         </VBox>
     </right>

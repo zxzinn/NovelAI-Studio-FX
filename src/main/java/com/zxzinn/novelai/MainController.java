@@ -15,6 +15,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -57,6 +58,7 @@ public class MainController {
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
+    private FileManagerController fileManagerController;
 
     private static final long ANIMATION_DURATION = 150_000_000L; // 150ms in nanoseconds
 
@@ -67,11 +69,17 @@ public class MainController {
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
+        this.fileManagerController = new FileManagerController(settingsManager);
     }
 
     @FXML
-    private void initialize() {
-        Platform.runLater(this::setupUI);
+    private void initialize() {}
+
+    public void initializeUI() {
+        Platform.runLater(() -> {
+            setupUI();
+            loadTabContent();
+        });
     }
 
     private void setupUI() {
@@ -80,34 +88,28 @@ public class MainController {
             return;
         }
 
-        try {
-            Stage stage = (Stage) rootPane.getScene().getWindow();
-            if (stage == null) {
-                log.error("錯誤：無法獲取Stage。請確保已設置Scene。");
-                return;
-            }
-
-            loadTabContent();
-            setupTabListeners();
-        } catch (Exception e) {
-            log.error("設置UI時發生錯誤", e);
-        }
+        setupTabListeners();
     }
 
-    private void loadTabContent() throws IOException {
-        FXMLLoader generatorLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
-        generatorLoader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
-        BorderPane generatorContent = generatorLoader.load();
-        generatorTab.setContent(generatorContent);
+    private void loadTabContent() {
+        try {
+            FXMLLoader generatorLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
+            generatorLoader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
+            BorderPane generatorContent = generatorLoader.load();
+            generatorTab.setContent(generatorContent);
 
-        FXMLLoader img2ImgLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
-        img2ImgLoader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, imageGenerationService, imageUtils, settingsManager));
-        BorderPane img2ImgContent = img2ImgLoader.load();
-        Img2ImgTab.setContent(img2ImgContent);
+            FXMLLoader img2ImgLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
+            img2ImgLoader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, imageGenerationService, imageUtils, settingsManager));
+            BorderPane img2ImgContent = img2ImgLoader.load();
+            Img2ImgTab.setContent(img2ImgContent);
 
-        FXMLLoader fileManagerLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
-        BorderPane fileManagerContent = fileManagerLoader.load();
-        fileManagerTab.setContent(fileManagerContent);
+            FXMLLoader fileManagerLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
+            fileManagerLoader.setController(fileManagerController);
+            BorderPane fileManagerContent = fileManagerLoader.load();
+            fileManagerTab.setContent(fileManagerContent);
+        } catch (IOException e) {
+            log.error("載入標籤內容時發生錯誤", e);
+        }
     }
 
     private void setupTabListeners() {
