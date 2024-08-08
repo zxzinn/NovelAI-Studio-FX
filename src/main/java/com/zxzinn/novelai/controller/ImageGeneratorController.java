@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ImageGeneratorController extends AbstractGenerationController {
@@ -43,6 +45,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
     private final SettingsManager settingsManager;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
+    private CountDownLatch promptUpdateLatch;
 
     public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
@@ -84,13 +87,22 @@ public class ImageGeneratorController extends AbstractGenerationController {
     protected void handleGenerate() {
         generateButton.setDisable(true);
         currentGeneratedCount = 0;
+        promptUpdateLatch = new CountDownLatch(1);
         generateImages();
     }
 
     private void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-                ImageGenerationPayload payload = createImageGenerationPayload(positivePromptPreviewArea.getText(), negativePromptPreviewArea.getText());
+                // 等待提示詞更新完成，最多等待5秒
+                if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
+                    log.warn("等待提示詞更新超時");
+                }
+
+                ImageGenerationPayload payload = createImageGenerationPayload(
+                        positivePromptPreviewArea.getText(),
+                        negativePromptPreviewArea.getText()
+                );
                 BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
                 if (image != null) {
@@ -98,13 +110,14 @@ public class ImageGeneratorController extends AbstractGenerationController {
                 }
 
                 currentGeneratedCount++;
-                updatePromptPreviewsAsync();
                 String selectedCount = generateCountComboBox.getValue();
                 int maxCount = "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
                 if (currentGeneratedCount < maxCount) {
+                    promptUpdateLatch = new CountDownLatch(1);
+                    updatePromptPreviewsAsync();
                     generateImages();
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
             } finally {
                 Platform.runLater(() -> generateButton.setDisable(false));
@@ -142,6 +155,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
         Platform.runLater(() -> {
             positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
             negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
+            promptUpdateLatch.countDown();
         });
     }
 
