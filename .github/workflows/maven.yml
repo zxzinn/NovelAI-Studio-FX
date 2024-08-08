@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -91,3 +91,16 @@ jobs:
         with:
           name: maven-logs-${{ matrix.os }}-${{ matrix.java }}-${{ env.PROJECT_VERSION }}
           path: ~/.m2/repository/.m2.log
+
+      - name: Create and push tag
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+        run: |
+          git fetch --tags
+          VERSION=$(git describe --tags --abbrev=0)
+          VERSION=${VERSION:-"v0.0.0"}
+          NEW_VERSION=$(echo $VERSION | awk -F. '{ printf "v%d.%d.%d", $1, $2, $3+1 }')
+          git tag $NEW_VERSION
+          git push origin $NEW_VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
