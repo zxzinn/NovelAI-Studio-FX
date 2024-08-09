@@ -234,6 +234,15 @@ public class FileManagerService {
         return settingsManager.getBoolean(EXPANDED_PREFIX + path, false);
     }
 
+    public String getWatchedDirectoryFullPath(String dirName) {
+        for (Path path : watchedDirectories) {
+            if (path.getFileName().toString().equals(dirName)) {
+                return path.toString();
+            }
+        }
+        return null;
+    }
+
     public void shutdown() {
         executorService.shutdown();
         scheduledExecutorService.shutdown();
