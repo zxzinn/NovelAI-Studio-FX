@@ -5,10 +5,14 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
+<?import javafx.scene.web.WebView?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             stylesheets="@styles.css">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
     <left>
         <VBox spacing="10" styleClass="side-panel">
             <padding>
@@ -41,9 +45,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="image-scroll-pane">
-                <StackPane fx:id="previewPane" VBox.vgrow="ALWAYS"/>
-            </ScrollPane>
+            <StackPane fx:id="previewPane" VBox.vgrow="ALWAYS" styleClass="preview-pane"/>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="fitButton" text="適應" styleClass="action-button">
                     <graphic>
@@ -64,7 +66,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <TextField promptText="過濾元數據..."/>
+            <TextField fx:id="metadataFilterField" promptText="過濾元數據..."/>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
             <HBox spacing="5">
                 <Label text="水印文字"/>

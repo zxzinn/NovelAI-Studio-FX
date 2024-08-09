@@ -5,15 +5,15 @@ module com.zxzinn.novelai {
     requires okhttp3;
     requires com.google.gson;
     requires java.desktop;
-    requires javafx.swing;
     requires org.apache.logging.log4j;
     requires org.yaml.snakeyaml;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.ikonli.core;
-    requires atlantafx.base;
     requires org.apache.tika.core;
     requires org.apache.commons.io;
+    requires javafx.web;
+    requires atlantafx.base;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;

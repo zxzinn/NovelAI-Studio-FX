@@ -124,7 +124,7 @@ public class Application extends javafx.application.Application {
                     scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
                     scene.getStylesheets().add(Objects
                             .requireNonNull(getClass()
-                            .getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
+                                    .getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
 
                     primaryStage.setScene(scene);
                     primaryStage.setX(x);

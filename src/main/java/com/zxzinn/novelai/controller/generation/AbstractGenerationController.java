@@ -11,11 +11,12 @@ import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -26,9 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public abstract class AbstractGenerationController {
@@ -147,7 +146,7 @@ public abstract class AbstractGenerationController {
 
             BufferedImage processedImage = processImage(originalImage);
 
-            Image fxImage = SwingFXUtils.toFXImage(processedImage, null);
+            WritableImage fxImage = convertToFxImage(processedImage);
             mainImageView.setImage(fxImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -163,6 +162,17 @@ public abstract class AbstractGenerationController {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
+    }
+
+    private WritableImage convertToFxImage(BufferedImage image) {
+        WritableImage wr = new WritableImage(image.getWidth(), image.getHeight());
+        PixelWriter pw = wr.getPixelWriter();
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                pw.setArgb(x, y, image.getRGB(x, y));
+            }
+        }
+        return wr;
     }
 
     protected BufferedImage processImage(BufferedImage image) {

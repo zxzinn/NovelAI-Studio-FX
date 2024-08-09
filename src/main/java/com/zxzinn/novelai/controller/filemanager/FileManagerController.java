@@ -12,8 +12,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
@@ -52,6 +54,7 @@ public class FileManagerController {
     private FileManagerService fileManagerService;
     private FilteredList<TreeItem<String>> filteredTreeItems;
     private Tika tika;
+    private WebView webView;
 
     public FileManagerController(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
@@ -65,6 +68,7 @@ public class FileManagerController {
         }
         initializeFileManagerService();
         setupEventHandlers();
+        webView = new WebView();
     }
 
     private void initializeFileManagerService() {
@@ -273,10 +277,71 @@ public class FileManagerController {
 
     private void displayText(File file) throws IOException {
         String content = Files.readString(file.toPath());
-        TextArea textArea = new TextArea(content);
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-        Platform.runLater(() -> previewPane.getChildren().setAll(textArea));
+        String extension = FilenameUtils.getExtension(file.getName());
+        String mimeType = tika.detect(file);
+
+        Platform.runLater(() -> {
+            webView.getEngine().loadContent(formatContent(content, extension, mimeType), "text/html");
+            previewPane.getChildren().setAll(webView);
+        });
+    }
+
+    private String formatContent(String content, String extension, String mimeType) {
+        String highlightLanguage = getHighlightLanguage(extension, mimeType);
+        String escapedContent = escapeHtml(content);
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        padding: 20px;
+                        background-color: #f0f0f0;
+                    }
+                    pre {
+                        background-color: #ffffff;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        padding: 16px;
+                        font-size: 14px;
+                    }
+                    code {
+                        font-family: 'Courier New', Courier, monospace;
+                    }
+                </style>
+            </head>
+            <body>
+                <pre><code class="%s">%s</code></pre>
+                <script>hljs.highlightAll();</script>
+            </body>
+            </html>
+            """.formatted(highlightLanguage, escapedContent);
+    }
+
+    private String getHighlightLanguage(String extension, String mimeType) {
+        return switch (extension.toLowerCase()) {
+            case "java" -> "java";
+            case "py" -> "python";
+            case "js" -> "javascript";
+            case "html" -> "html";
+            case "css" -> "css";
+            case "json" -> "json";
+            case "xml" -> "xml";
+            default -> mimeType.startsWith("text/") ? "plaintext" : "";
+        };
+    }
+
+    private String escapeHtml(String content) {
+        return content.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private void displayUnsupportedFormat(String mimeType) {
