@@ -87,11 +87,12 @@
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
-                <VBox HBox.hgrow="ALWAYS">
-                    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="image-scroll-pane">
-                        <ImageView fx:id="mainImageView" preserveRatio="true"/>
-                    </ScrollPane>
-                </VBox>
+                <ScrollPane fx:id="mainScrollPane" HBox.hgrow="ALWAYS" fitToWidth="true" fitToHeight="true" styleClass="image-scroll-pane">
+                    <AnchorPane>
+                        <ImageView fx:id="mainImageView" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                                   AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" preserveRatio="true"/>
+                    </AnchorPane>
+                </ScrollPane>
                 <VBox spacing="5.0" styleClass="history-panel">
                     <Label text="歷史圖片"/>
                     <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" styleClass="history-scroll-pane">

@@ -116,7 +116,6 @@ public class FileManagerService {
         Path directory = Paths.get(path).toAbsolutePath().normalize();
         log.info("嘗試移除監視目錄: {}", directory);
 
-        // 檢查是否為直接監視的目錄
         Optional<Path> watchedDir = watchedDirectories.stream()
                 .filter(dir -> dir.endsWith(directory.getFileName()))
                 .findFirst();

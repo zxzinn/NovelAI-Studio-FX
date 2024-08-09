@@ -30,39 +30,34 @@ public class FileManagerController {
     @FXML private Button processButton;
 
     private final SettingsManager settingsManager;
-    private FileManagerService fileManagerService;
-    private FilePreviewService filePreviewService;
-    private MetadataService metadataService;
-    private ImageProcessingService imageProcessingService;
-    private AlertService alertService;
-    private FileTreeController fileTreeController;
+    private final FileManagerService fileManagerService;
+    private final FilePreviewService filePreviewService;
+    private final MetadataService metadataService;
+    private final ImageProcessingService imageProcessingService;
+    private final AlertService alertService;
+    private final FileTreeController fileTreeController;
 
-    public FileManagerController(SettingsManager settingsManager) {
+    public FileManagerController(SettingsManager settingsManager,
+                                 FileManagerService fileManagerService,
+                                 FilePreviewService filePreviewService,
+                                 MetadataService metadataService,
+                                 ImageProcessingService imageProcessingService,
+                                 AlertService alertService) {
         this.settingsManager = settingsManager;
+        this.fileManagerService = fileManagerService;
+        this.filePreviewService = filePreviewService;
+        this.metadataService = metadataService;
+        this.imageProcessingService = imageProcessingService;
+        this.alertService = alertService;
+        // 將 this.fileTreeView 傳遞給 FileTreeController
+        this.fileTreeController = new FileTreeController(fileManagerService);
     }
 
     @FXML
     public void initialize() {
-        if (settingsManager == null) {
-            log.error("SettingsManager is null in FileManagerController");
-            return;
-        }
-        initializeServices();
         setupEventHandlers();
-    }
-
-    private void initializeServices() {
-        try {
-            fileManagerService = new FileManagerService(settingsManager);
-            filePreviewService = new FilePreviewService();
-            metadataService = new MetadataService();
-            imageProcessingService = new ImageProcessingService();
-            alertService = new AlertService();
-            fileTreeController = new FileTreeController(fileManagerService, fileTreeView);
-        } catch (IOException e) {
-            log.error("無法初始化服務", e);
-            alertService.showAlert("錯誤", "無法初始化服務: " + e.getMessage());
-        }
+        fileTreeController.setFileTreeView(fileTreeView);
+        fileTreeController.refreshTreeView();
     }
 
     private void setupEventHandlers() {
@@ -172,8 +167,6 @@ public class FileManagerController {
     }
 
     public void shutdown() {
-        if (fileManagerService != null) {
-            fileManagerService.shutdown();
-        }
+        fileManagerService.shutdown();
     }
 }

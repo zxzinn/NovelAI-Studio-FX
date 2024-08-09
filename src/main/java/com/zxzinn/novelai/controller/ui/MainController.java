@@ -2,8 +2,15 @@ package com.zxzinn.novelai.controller.ui;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
+import com.zxzinn.novelai.controller.generation.img2img.Img2ImgGeneratorController;
 import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
+import com.zxzinn.novelai.service.filemanager.FileManagerService;
+import com.zxzinn.novelai.service.filemanager.FilePreviewService;
+import com.zxzinn.novelai.service.filemanager.ImageProcessingService;
+import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.AlertService;
+import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -43,104 +50,34 @@ public class MainController {
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
-    @Setter
-    private Stage stage;
-    private double xOffset = 0;
-    private double yOffset = 0;
-    private Rectangle2D restoreBounds;
-    private boolean isMaximized = false;
-    private AnimationTimer resizeAnimationTimer;
-
+    private final WindowService windowService;
 
     public MainController(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
-                          ImageGenerationService imageGenerationService, ImageUtils imageUtils) {
+                          ImageGenerationService imageGenerationService, ImageUtils imageUtils, WindowService windowService) {
         this.settingsManager = settingsManager;
         this.apiClient = apiClient;
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
+        this.windowService = windowService;
     }
 
     @FXML
     public void initialize() {
         setupWindowControls();
         loadTabContent();
-        setupDraggableWindow();
+        windowService.setupDraggableWindow(titleBar);
     }
 
-    public void setStageAndInit(Stage stage) {
-        this.stage = stage;
-        setupResizeableWindow();
+    public void setStage(Stage stage) {
+        windowService.setStage(stage);
+        windowService.setupResizeableWindow();
     }
 
     private void setupWindowControls() {
-        minimizeButton.setOnAction(event -> stage.setIconified(true));
-        maximizeButton.setOnAction(event -> toggleMaximize());
-        closeButton.setOnAction(event -> {
-            settingsManager.shutdown();
-            stage.close();
-            Platform.exit();
-            System.exit(0);
-        });
-    }
-
-    private void toggleMaximize() {
-        if (!isMaximized) {
-            // 保存當前位置和大小
-            restoreBounds = new Rectangle2D(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-
-            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-            stage.setX(screenBounds.getMinX());
-            stage.setY(screenBounds.getMinY());
-            stage.setWidth(screenBounds.getWidth());
-            stage.setHeight(screenBounds.getHeight());
-            isMaximized = true;
-        } else {
-            if (restoreBounds != null) {
-                stage.setX(restoreBounds.getMinX());
-                stage.setY(restoreBounds.getMinY());
-                stage.setWidth(restoreBounds.getWidth());
-                stage.setHeight(restoreBounds.getHeight());
-            }
-            isMaximized = false;
-        }
-    }
-
-    private void setupDraggableWindow() {
-        titleBar.setOnMousePressed(this::handleMousePressed);
-        titleBar.setOnMouseDragged(this::handleMouseDragged);
-        titleBar.setOnMouseReleased(this::handleMouseReleased);
-    }
-
-    private void handleMousePressed(MouseEvent event) {
-        xOffset = event.getSceneX();
-        yOffset = event.getSceneY();
-    }
-
-    private void handleMouseReleased(MouseEvent event) {
-        if (event.getScreenY() <= 0) {
-            toggleMaximize();
-        }
-    }
-
-    private void handleMouseDragged(MouseEvent event) {
-        if (!isMaximized) {
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
-        } else {
-            // 如果窗口是最大化的，拖動時應該恢復到正常大小
-            double percentX = event.getScreenX() / Screen.getPrimary().getVisualBounds().getWidth();
-            restoreBounds = new Rectangle2D(
-                    event.getScreenX() - stage.getWidth() * percentX,
-                    event.getScreenY(),
-                    restoreBounds.getWidth(),
-                    restoreBounds.getHeight());
-            toggleMaximize();
-
-            // 確保鼠標仍然在標題欄上
-            xOffset = stage.getWidth() * percentX;
-            yOffset = event.getSceneY();
-        }
+        minimizeButton.setOnAction(event -> windowService.minimizeWindow());
+        maximizeButton.setOnAction(event -> windowService.toggleMaximize());
+        closeButton.setOnAction(event -> windowService.closeWindow());
     }
 
     private void loadTabContent() {
@@ -161,86 +98,34 @@ public class MainController {
     }
 
     private void loadImg2ImgTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
-        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
+        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
         BorderPane content = loader.load();
-        generatorTab.setContent(content);
+        img2ImgTab.setContent(content);
     }
 
     private void loadFileManagerTab() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
-        FileManagerController controller = new FileManagerController(settingsManager);
+
+        // 創建所需的服務
+        FileManagerService fileManagerService = new FileManagerService(settingsManager);
+        FilePreviewService filePreviewService = new FilePreviewService();
+        MetadataService metadataService = new MetadataService();
+        ImageProcessingService imageProcessingService = new ImageProcessingService();
+        AlertService alertService = new AlertService();
+
+        // 創建 FileManagerController 實例
+        FileManagerController controller = new FileManagerController(
+                settingsManager,
+                fileManagerService,
+                filePreviewService,
+                metadataService,
+                imageProcessingService,
+                alertService
+        );
+
         loader.setController(controller);
         BorderPane content = loader.load();
         fileManagerTab.setContent(content);
-    }
-
-    private void setupResizeableWindow() {
-        Cursor defaultCursor = Cursor.DEFAULT;
-        Cursor resizeCursor = Cursor.SE_RESIZE;
-        AtomicBoolean resizing = new AtomicBoolean(false);
-
-        class ResizeAnimationTimer extends AnimationTimer {
-            private double targetWidth;
-            private double targetHeight;
-
-            @Override
-            public void handle(long now) {
-                double currentWidth = stage.getWidth();
-                double currentHeight = stage.getHeight();
-
-                stage.setWidth(currentWidth + (targetWidth - currentWidth) * 0.2);
-                stage.setHeight(currentHeight + (targetHeight - currentHeight) * 0.2);
-
-                if (Math.abs(stage.getWidth() - targetWidth) < 0.1 &&
-                        Math.abs(stage.getHeight() - targetHeight) < 0.1) {
-                    stop();
-                }
-            }
-
-            public void setTarget(double width, double height) {
-                this.targetWidth = width;
-                this.targetHeight = height;
-            }
-        }
-
-        ResizeAnimationTimer resizeAnimationTimer = new ResizeAnimationTimer();
-
-        stage.getScene().setOnMouseMoved(event -> {
-            if (isInResizeZone(event)) {
-                stage.getScene().setCursor(resizeCursor);
-            } else {
-                stage.getScene().setCursor(defaultCursor);
-            }
-        });
-
-        stage.getScene().setOnMousePressed(event -> {
-            if (isInResizeZone(event)) {
-                resizing.set(true);
-                event.consume();
-            }
-        });
-
-        stage.getScene().setOnMouseDragged(event -> {
-            if (resizing.get()) {
-                double newWidth = Math.max(stage.getMinWidth(), event.getSceneX());
-                double newHeight = Math.max(stage.getMinHeight(), event.getSceneY());
-
-                resizeAnimationTimer.stop();
-                resizeAnimationTimer.setTarget(newWidth, newHeight);
-                resizeAnimationTimer.start();
-
-                event.consume();
-            }
-        });
-
-        stage.getScene().setOnMouseReleased(event -> {
-            resizing.set(false);
-            stage.getScene().setCursor(defaultCursor);
-        });
-    }
-
-    private boolean isInResizeZone(MouseEvent event) {
-        return event.getSceneX() > stage.getWidth() - 20 && event.getSceneY() > stage.getHeight() - 20;
     }
 }

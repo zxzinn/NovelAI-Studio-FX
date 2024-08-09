@@ -6,6 +6,7 @@ import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.controller.ui.MainController;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -98,13 +99,15 @@ public class Application extends javafx.application.Application {
             ImageGenerationService imageGenerationService = new ImageGenerationService(
                     apiClient,
                     imageUtils);
+            WindowService windowService = new WindowService(settingsManager);
 
             MainController mainController = new MainController(
                     settingsManager,
                     apiClient,
                     embedProcessor,
                     imageGenerationService,
-                    imageUtils);
+                    imageUtils,
+                    windowService);
 
             Platform.runLater(() -> {
                 try {
@@ -130,7 +133,7 @@ public class Application extends javafx.application.Application {
                     primaryStage.setX(x);
                     primaryStage.setY(y);
 
-                    mainController.setStageAndInit(primaryStage);
+                    mainController.setStage(primaryStage);
 
                     primaryStage.setTitle("圖像生成器");
                     primaryStage.show();

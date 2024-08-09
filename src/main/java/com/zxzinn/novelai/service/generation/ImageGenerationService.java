@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 
@@ -11,12 +12,14 @@ import java.io.IOException;
 
 public class ImageGenerationService {
     private final APIClient apiClient;
+    private final ImageUtils imageUtils;
 
     public ImageGenerationService(APIClient apiClient, ImageUtils imageUtils) {
         this.apiClient = apiClient;
+        this.imageUtils = imageUtils;
     }
 
-    public BufferedImage generateImage(ImageGenerationPayload payload, String apiKey) throws IOException {
+    public BufferedImage generateImage(GenerationPayload payload, String apiKey) throws IOException {
         byte[] responseData = apiClient.generateImage(payload, apiKey);
         return processResponseData(responseData);
     }
@@ -28,7 +31,7 @@ public class ImageGenerationService {
 
         BufferedImage image;
         try {
-            image = ImageUtils.extractImageFromZip(responseData);
+            image = imageUtils.extractImageFromZip(responseData);
         } catch (IOException e) {
             image = ImageIO.read(new ByteArrayInputStream(responseData));
         }

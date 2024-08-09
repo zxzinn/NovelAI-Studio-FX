@@ -3,9 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
-<?import javafx.scene.web.WebView?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
@@ -45,8 +43,20 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <StackPane fx:id="previewPane" VBox.vgrow="ALWAYS" styleClass="preview-pane"/>
+            <ScrollPane fx:id="previewScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
+                <StackPane fx:id="previewPane" styleClass="preview-pane"/>
+            </ScrollPane>
             <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="zoomInButton" text="放大" styleClass="action-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-search-plus" iconSize="12"/>
+                    </graphic>
+                </Button>
+                <Button fx:id="zoomOutButton" text="縮小" styleClass="action-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-search-minus" iconSize="12"/>
+                    </graphic>
+                </Button>
                 <Button fx:id="fitButton" text="適應" styleClass="action-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-compress-arrows-alt" iconSize="12"/>
