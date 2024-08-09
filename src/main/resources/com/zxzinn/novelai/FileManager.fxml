@@ -42,7 +42,7 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="image-scroll-pane">
-                <ImageView fx:id="previewImageView" preserveRatio="true"/>
+                <StackPane fx:id="previewPane" VBox.vgrow="ALWAYS"/>
             </ScrollPane>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="fitButton" text="適應" styleClass="action-button">

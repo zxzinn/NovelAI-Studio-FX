@@ -25,6 +25,7 @@ import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 
+import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -65,10 +66,15 @@ public class Application extends javafx.application.Application {
         root.getStyleClass().add("loading-background");
 
         Scene scene = new Scene(root, 300, 200);
-        scene.getStylesheets()
-                .add(Objects
-                .requireNonNull(getClass()
-                        .getResource("/com/zxzinn/novelai/loading-styles.css")).toExternalForm());
+
+        // 修改這裡以處理可能的空值情況
+        String cssPath = "/com/zxzinn/novelai/loading-styles.css";
+        URL resource = getClass().getResource(cssPath);
+        if (resource != null) {
+            scene.getStylesheets().add(resource.toExternalForm());
+        } else {
+            log.warn("無法找到樣式文件: {}", cssPath);
+        }
 
         Stage loadingStage = new Stage(StageStyle.UNDECORATED);
         loadingStage.setScene(scene);

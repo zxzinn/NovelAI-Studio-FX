@@ -11,13 +11,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import lombok.extern.log4j.Log4j2;
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.sax.BodyContentHandler;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +35,7 @@ import java.util.function.Predicate;
 @Log4j2
 public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
+    @FXML private StackPane previewPane;
     @FXML private ImageView previewImageView;
     @FXML private ListView<String> metadataListView;
     @FXML private TextField searchField;
@@ -42,11 +51,12 @@ public class FileManagerController {
     private final SettingsManager settingsManager;
     private FileManagerService fileManagerService;
     private FilteredList<TreeItem<String>> filteredTreeItems;
+    private Tika tika;
 
     public FileManagerController(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
+        this.tika = new Tika();
     }
-
     @FXML
     public void initialize() {
         if (settingsManager == null) {
@@ -54,6 +64,7 @@ public class FileManagerController {
             return;
         }
         initializeFileManagerService();
+        setupEventHandlers();
     }
 
     private void initializeFileManagerService() {
@@ -230,35 +241,75 @@ public class FileManagerController {
 
     private void updatePreview(TreeItem<String> item) {
         String fullPath = buildFullPath(item);
-        log.info("選中的項目: {}", fullPath);
-
         File file = new File(fullPath);
-        log.info("檔案存在: {}", file.exists());
-        log.info("是檔案: {}", file.isFile());
-        log.info("是目錄: {}", file.isDirectory());
-
         if (file.isFile()) {
-            String fileExtension = getFileExtension(file);
-            log.info("檔案類型: {}", fileExtension);
-
-            if (isImageFile(fileExtension)) {
-                try {
-                    Image image = new Image(file.toURI().toString());
-                    previewImageView.setImage(image);
-                    log.info("成功載入圖片: {}", fullPath);
-                    updateMetadataList(file);
-                } catch (Exception e) {
-                    log.error("無法載入預覽圖片: {}", fullPath, e);
-                    previewImageView.setImage(null);
+            try {
+                String mimeType = tika.detect(file);
+                if (mimeType.startsWith("image/")) {
+                    displayImage(file);
+                } else if (mimeType.startsWith("text/") || mimeType.equals("application/pdf")) {
+                    displayText(file);
+                } else {
+                    displayUnsupportedFormat(mimeType);
                 }
-            } else {
-                log.info("不是圖片檔案，無法預覽: {}", fullPath);
-                previewImageView.setImage(null);
+                updateMetadataList(file);
+            } catch (Exception e) {
+                log.error("無法載入預覽", e);
+                displayError("無法載入預覽：" + e.getMessage());
             }
         } else {
-            log.info("選中的是目錄或不存在的檔案: {}", fullPath);
-            previewImageView.setImage(null);
-            metadataListView.getItems().clear();
+            clearPreview();
+        }
+    }
+
+    private void displayImage(File file) {
+        Image image = new Image(file.toURI().toString());
+        ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+        imageView.fitWidthProperty().bind(previewPane.widthProperty());
+        imageView.fitHeightProperty().bind(previewPane.heightProperty());
+        Platform.runLater(() -> previewPane.getChildren().setAll(imageView));
+    }
+
+    private void displayText(File file) throws IOException {
+        String content = Files.readString(file.toPath());
+        TextArea textArea = new TextArea(content);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        Platform.runLater(() -> previewPane.getChildren().setAll(textArea));
+    }
+
+    private void displayUnsupportedFormat(String mimeType) {
+        Label label = new Label("不支援的文件格式：" + mimeType);
+        Platform.runLater(() -> previewPane.getChildren().setAll(label));
+    }
+
+    private void displayError(String message) {
+        Label label = new Label(message);
+        Platform.runLater(() -> previewPane.getChildren().setAll(label));
+    }
+
+    private void clearPreview() {
+        Platform.runLater(() -> previewPane.getChildren().clear());
+    }
+
+    private void updateMetadataList(File file) {
+        metadataListView.getItems().clear();
+        try {
+            BodyContentHandler handler = new BodyContentHandler();
+            Metadata metadata = new Metadata();
+            FileInputStream inputstream = new FileInputStream(file);
+            ParseContext pcontext = new ParseContext();
+
+            AutoDetectParser parser = new AutoDetectParser();
+            parser.parse(inputstream, handler, metadata, pcontext);
+
+            for (String name : metadata.names()) {
+                metadataListView.getItems().add(name + ": " + metadata.get(name));
+            }
+        } catch (Exception e) {
+            log.error("無法讀取檔案元數據", e);
+            metadataListView.getItems().add("無法讀取元數據：" + e.getMessage());
         }
     }
 
@@ -280,15 +331,6 @@ public class FileManagerController {
         }
         return false;
     }
-
-    private void updateMetadataList(File file) {
-        // TODO: 實現讀取和顯示元數據的功能
-        metadataListView.getItems().clear();
-        metadataListView.getItems().add("文件名: " + file.getName());
-        metadataListView.getItems().add("大小: " + file.length() + " bytes");
-        // 添加更多元數據...
-    }
-
 
     private void constructDatabase() {
         // TODO: 實現構建數據庫功能
