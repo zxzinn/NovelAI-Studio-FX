@@ -160,6 +160,18 @@
 }
 
 .generate-button {
+    -fx-background-color: #3498DB; /* 藍色 */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.generate-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+.generate-button:disabled {
+    -fx-background-color: #7F8C8D; /* 禁用時的灰色 */
+    -fx-opacity: 0.7;
 }
 
 .settings-section {
@@ -176,3 +188,4 @@
 
 .upload-button {
 }
+

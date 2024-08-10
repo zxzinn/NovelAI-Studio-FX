@@ -31,35 +31,36 @@ public class ImageGeneratorController extends AbstractGenerationController {
     protected void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-                // 等待提示詞更新完成，最多等待5秒
-                if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
-                    log.warn("等待提示詞更新超時");
-                }
+                while (isGenerating && !stopRequested && currentGeneratedCount < getMaxCount()) {
+                    if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
+                        log.warn("等待提示詞更新超時");
+                    }
 
-                GenerationPayload payload = createGenerationPayload(
-                        positivePromptPreviewArea.getText(),
-                        negativePromptPreviewArea.getText()
-                );
-                BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
+                    GenerationPayload payload = createGenerationPayload(
+                            positivePromptPreviewArea.getText(),
+                            negativePromptPreviewArea.getText()
+                    );
+                    BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
 
-                if (image != null) {
-                    handleGeneratedImage(image);
-                }
+                    if (image != null) {
+                        handleGeneratedImage(image);
+                    }
 
-                currentGeneratedCount++;
-                String selectedCount = generateCountComboBox.getValue();
-                int maxCount = "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
-                if (currentGeneratedCount < maxCount) {
+                    currentGeneratedCount++;
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
-                    generateImages();
                 }
             } catch (IOException | InterruptedException e) {
                 log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
             } finally {
-                Platform.runLater(() -> generateButton.setDisable(false));
+                finishGeneration();
             }
         });
+    }
+
+    private int getMaxCount() {
+        String selectedCount = generateCountComboBox.getValue();
+        return "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
     }
 
     @Override
