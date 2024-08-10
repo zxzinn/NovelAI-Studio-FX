@@ -11,11 +11,12 @@ import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -26,9 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public abstract class AbstractGenerationController {
@@ -85,32 +84,23 @@ public abstract class AbstractGenerationController {
     }
 
     protected void initializeFields() {
-        if (apiKeyField != null) apiKeyField.setText("");
+        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
+        modelComboBox.setValue(NAIConstants.MODELS[0]);
 
-        if (modelComboBox != null) {
-            modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
-            modelComboBox.setValue(NAIConstants.MODELS[0]);
-        }
+        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
+        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
 
-        if (widthField != null) widthField.setText("832");
-        if (heightField != null) heightField.setText("1216");
-        if (ratioField != null) ratioField.setText("7");
-        if (countField != null) countField.setText("1");
+        generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
+        generateCountComboBox.setValue("1");
 
-        if (samplerComboBox != null) {
-            samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
-            samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
-        }
-
-        if (stepsField != null) stepsField.setText("28");
-        if (seedField != null) seedField.setText("0");
-
-        if (generateCountComboBox != null) {
-            generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
-            generateCountComboBox.setValue("1");
-        }
-        if (watermarkTextField != null) watermarkTextField.setText("");
-        if (clearLSBCheckBox != null) clearLSBCheckBox.setSelected(false);
+        widthField.setText("832");
+        heightField.setText("1216");
+        ratioField.setText("7");
+        countField.setText("1");
+        stepsField.setText("28");
+        seedField.setText("0");
+        watermarkTextField.setText("");
+        clearLSBCheckBox.setSelected(false);
     }
 
     protected void setupZoomHandler() {
@@ -139,6 +129,8 @@ public abstract class AbstractGenerationController {
 
     protected abstract void generateImages();
 
+    protected abstract GenerationPayload createGenerationPayload(String processedPositivePrompt, String processedNegativePrompt);
+
     protected void handleGeneratedImage(BufferedImage originalImage) {
         Platform.runLater(() -> {
             LocalDateTime now = LocalDateTime.now();
@@ -147,7 +139,7 @@ public abstract class AbstractGenerationController {
 
             BufferedImage processedImage = processImage(originalImage);
 
-            Image fxImage = SwingFXUtils.toFXImage(processedImage, null);
+            Image fxImage = imageUtils.convertToFxImage(processedImage);
             mainImageView.setImage(fxImage);
             mainImageView.setPreserveRatio(true);
             mainImageView.setSmooth(true);
@@ -183,30 +175,6 @@ public abstract class AbstractGenerationController {
             negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
             promptUpdateLatch.countDown();
         });
-    }
-
-    protected ImageGenerationPayload createImageGenerationPayload(String processedPositivePrompt, String processedNegativePrompt) {
-        ImageGenerationPayload payload = new ImageGenerationPayload();
-        payload.setInput(processedPositivePrompt);
-        payload.setModel(modelComboBox.getValue());
-        payload.setAction("generate");
-
-        GenerationPayload.GenerationParameters parameters = new GenerationPayload.GenerationParameters();
-        parameters.setWidth(Integer.parseInt(widthField.getText()));
-        parameters.setHeight(Integer.parseInt(heightField.getText()));
-        parameters.setScale(Integer.parseInt(ratioField.getText()));
-        parameters.setSampler(samplerComboBox.getValue());
-        parameters.setSteps(Integer.parseInt(stepsField.getText()));
-        parameters.setN_samples(Integer.parseInt(countField.getText()));
-        parameters.setUcPreset(false);
-        parameters.setQualityToggle(false);
-        parameters.setSm(smeaCheckBox.isSelected());
-        parameters.setSm_dyn(smeaDynCheckBox.isSelected());
-        parameters.setSeed(Long.parseLong(seedField.getText()));
-        parameters.setNegative_prompt(processedNegativePrompt);
-
-        payload.setParameters(parameters);
-        return payload;
     }
 
     protected void addImageToHistory(Image image) {

@@ -116,7 +116,6 @@ public class FileManagerService {
         Path directory = Paths.get(path).toAbsolutePath().normalize();
         log.info("嘗試移除監視目錄: {}", directory);
 
-        // 檢查是否為直接監視的目錄
         Optional<Path> watchedDir = watchedDirectories.stream()
                 .filter(dir -> dir.endsWith(directory.getFileName()))
                 .findFirst();
@@ -232,6 +231,15 @@ public class FileManagerService {
 
     private boolean isDirectoryExpanded(String path) {
         return settingsManager.getBoolean(EXPANDED_PREFIX + path, false);
+    }
+
+    public String getWatchedDirectoryFullPath(String dirName) {
+        for (Path path : watchedDirectories) {
+            if (path.getFileName().toString().equals(dirName)) {
+                return path.toString();
+            }
+        }
+        return null;
     }
 
     public void shutdown() {

@@ -6,6 +6,7 @@ import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.controller.ui.MainController;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -25,6 +26,7 @@ import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
 
+import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -65,10 +67,15 @@ public class Application extends javafx.application.Application {
         root.getStyleClass().add("loading-background");
 
         Scene scene = new Scene(root, 300, 200);
-        scene.getStylesheets()
-                .add(Objects
-                .requireNonNull(getClass()
-                        .getResource("/com/zxzinn/novelai/loading-styles.css")).toExternalForm());
+
+        // 修改這裡以處理可能的空值情況
+        String cssPath = "/com/zxzinn/novelai/loading-styles.css";
+        URL resource = getClass().getResource(cssPath);
+        if (resource != null) {
+            scene.getStylesheets().add(resource.toExternalForm());
+        } else {
+            log.warn("無法找到樣式文件: {}", cssPath);
+        }
 
         Stage loadingStage = new Stage(StageStyle.UNDECORATED);
         loadingStage.setScene(scene);
@@ -92,13 +99,15 @@ public class Application extends javafx.application.Application {
             ImageGenerationService imageGenerationService = new ImageGenerationService(
                     apiClient,
                     imageUtils);
+            WindowService windowService = new WindowService(settingsManager);
 
             MainController mainController = new MainController(
                     settingsManager,
                     apiClient,
                     embedProcessor,
                     imageGenerationService,
-                    imageUtils);
+                    imageUtils,
+                    windowService);
 
             Platform.runLater(() -> {
                 try {
@@ -118,13 +127,13 @@ public class Application extends javafx.application.Application {
                     scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
                     scene.getStylesheets().add(Objects
                             .requireNonNull(getClass()
-                            .getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
+                                    .getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
 
                     primaryStage.setScene(scene);
                     primaryStage.setX(x);
                     primaryStage.setY(y);
 
-                    mainController.setStageAndInit(primaryStage);
+                    mainController.setStage(primaryStage);
 
                     primaryStage.setTitle("圖像生成器");
                     primaryStage.show();
