@@ -3,6 +3,7 @@ package com.zxzinn.novelai.controller.generation;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.component.HistoryImagesPane;
 import com.zxzinn.novelai.component.ImageControlBar;
 import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
@@ -67,6 +68,7 @@ public abstract class AbstractGenerationController {
     @FXML protected VBox historyImagesContainer;
     @FXML protected StackPane previewContainer;
     @FXML private ImageControlBar imageControlBar;
+    @FXML private HistoryImagesPane historyImagesPane;
 
     protected PreviewPane previewPane;
 
@@ -279,21 +281,12 @@ public abstract class AbstractGenerationController {
     }
 
     protected void addImageToHistory(Image image) {
-        double aspectRatio = image.getWidth() / image.getHeight();
-        ImageView historyImageView = new ImageView(image);
-        historyImageView.setPreserveRatio(true);
-        historyImageView.setSmooth(true);
-        historyImageView.setFitWidth(150);
-        historyImageView.setFitHeight(150 / aspectRatio);
+        historyImagesPane.addImage(image);
+    }
 
-        historyImageView.setOnMouseClicked(event -> {
-            File tempFile = convertBufferedImageToFile(imageUtils.convertToBufferedImage(image));
-            if (tempFile != null) {
-                previewPane.updatePreview(tempFile);
-            }
-        });
-
-        historyImagesContainer.getChildren().addFirst(historyImageView);
+    // 如果需要清除歷史圖片，可以添加這個方法
+    public void clearHistoryImages() {
+        historyImagesPane.clear();
     }
 
     protected BufferedImage processImage(BufferedImage image) {
