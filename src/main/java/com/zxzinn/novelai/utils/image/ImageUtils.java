@@ -26,25 +26,6 @@ public class ImageUtils {
         }
     }
 
-    public void saveImage(BufferedImage image, String fileName) throws IOException {
-        if (image == null) {
-            log.error("無法保存圖像：圖像對象為null");
-            return;
-        }
-
-        File outputDir = new File("output");
-        if (!outputDir.exists() && !outputDir.mkdir()) {
-            log.error("無法創建輸出目錄");
-            return;
-        }
-
-        File outputFile = new File(outputDir, fileName);
-
-        if (!ImageIO.write(image, "png", outputFile)) {
-            log.error("沒有合適的寫入器來保存PNG圖像");
-        }
-    }
-
     public Image convertToFxImage(BufferedImage image) {
         WritableImage wr = new WritableImage(image.getWidth(), image.getHeight());
         PixelWriter pw = wr.getPixelWriter();

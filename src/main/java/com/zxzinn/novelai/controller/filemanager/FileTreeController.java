@@ -78,7 +78,7 @@ public class FileTreeController {
         List<String> pathParts = new ArrayList<>();
         TreeItem<String> current = item;
         while (current != null && !current.getValue().equals("監視的目錄")) {
-            pathParts.add(0, current.getValue());
+            pathParts.addFirst(current.getValue());
             current = current.getParent();
         }
 
@@ -87,7 +87,7 @@ public class FileTreeController {
             return String.join(File.separator, pathParts);
         }
 
-        String watchedDir = pathParts.remove(0);
+        String watchedDir = pathParts.removeFirst();
         String watchedDirFullPath = fileManagerService.getWatchedDirectoryFullPath(watchedDir);
 
         if (watchedDirFullPath == null) {

@@ -83,33 +83,11 @@ public class FileManagerController {
 
     private void zoom(double factor) {
         Node content = previewScrollPane.getContent();
-        if (content instanceof ImageView) {
-            ImageView imageView = (ImageView) content;
+        if (content instanceof ImageView imageView) {
             imageView.setFitWidth(imageView.getFitWidth() * factor);
             imageView.setFitHeight(imageView.getFitHeight() * factor);
         }
     }
-
-    private void fitToView() {
-        Node content = previewScrollPane.getContent();
-        if (content instanceof ImageView) {
-            ImageView imageView = (ImageView) content;
-            imageView.setFitWidth(previewScrollPane.getWidth());
-            imageView.setFitHeight(previewScrollPane.getHeight());
-        }
-    }
-
-    private void resetToOriginalSize() {
-        Node content = previewScrollPane.getContent();
-        if (content instanceof ImageView) {
-            ImageView imageView = (ImageView) content;
-            Image image = imageView.getImage();
-            imageView.setFitWidth(image.getWidth());
-            imageView.setFitHeight(image.getHeight());
-        }
-    }
-
-
 
     private void setupEventHandlers() {
         addButton.setOnAction(event -> addWatchedDirectory());
