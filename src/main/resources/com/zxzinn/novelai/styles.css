@@ -264,3 +264,26 @@
     -fx-icon-color: #FFFFFF;
 }
 
+.lock-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
+
+.lock-button:hover {
+    -fx-background-color: #3a5a7d;
+}
+
+.lock-button .ikonli-font-icon {
+    -fx-icon-color: #3498DB;
+}
+
+.lock-button:hover .ikonli-font-icon {
+    -fx-icon-color: #ECF0F1;
+}

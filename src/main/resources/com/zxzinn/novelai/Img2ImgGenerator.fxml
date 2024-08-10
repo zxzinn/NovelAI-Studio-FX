@@ -78,6 +78,11 @@
                             <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
                         </graphic>
                     </Button>
+                    <Button fx:id="lockPositivePromptButton" styleClass="lock-button">
+                        <graphic>
+                            <FontIcon fx:id="lockPositivePromptIcon" iconLiteral="fas-lock-open" iconSize="16"/>
+                        </graphic>
+                    </Button>
                 </VBox>
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="正面提示詞預覽"/>
@@ -93,6 +98,11 @@
                     <Button fx:id="refreshNegativePromptButton" styleClass="refresh-button">
                         <graphic>
                             <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
+                        </graphic>
+                    </Button>
+                    <Button fx:id="lockNegativePromptButton" styleClass="lock-button">
+                        <graphic>
+                            <FontIcon fx:id="lockNegativePromptIcon" iconLiteral="fas-lock-open" iconSize="16"/>
                         </graphic>
                     </Button>
                 </VBox>

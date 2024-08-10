@@ -23,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -67,6 +68,13 @@ public abstract class AbstractGenerationController {
     @FXML protected Button generateButton;
     @FXML protected Button refreshPositivePromptButton;
     @FXML protected Button refreshNegativePromptButton;
+    @FXML protected Button lockPositivePromptButton;
+    @FXML protected Button lockNegativePromptButton;
+    @FXML protected FontIcon lockPositivePromptIcon;
+    @FXML protected FontIcon lockNegativePromptIcon;
+
+    protected boolean isPositivePromptLocked = false;
+    protected boolean isNegativePromptLocked = false;
 
     protected volatile boolean isGenerating = false;
     protected volatile boolean stopRequested = false;
@@ -92,6 +100,38 @@ public abstract class AbstractGenerationController {
         setupRefreshButtons();
         setupTextAreas();
         updatePromptPreviews();
+        setupLockButtons();
+    }
+
+    private void setupLockButtons() {
+        lockPositivePromptButton.setOnAction(event -> toggleLock(true));
+        lockNegativePromptButton.setOnAction(event -> toggleLock(false));
+    }
+
+    private void toggleLock(boolean isPositive) {
+        if (isPositive) {
+            isPositivePromptLocked = !isPositivePromptLocked;
+            updateLockIcon(lockPositivePromptIcon, isPositivePromptLocked);
+        } else {
+            isNegativePromptLocked = !isNegativePromptLocked;
+            updateLockIcon(lockNegativePromptIcon, isNegativePromptLocked);
+        }
+    }
+
+    private void updateLockIcon(FontIcon icon, boolean isLocked) {
+        icon.setIconLiteral(isLocked ? "fas-lock" : "fas-lock-open");
+    }
+
+    protected void updatePromptPreviewsAsync() {
+        Platform.runLater(() -> {
+            if (!isPositivePromptLocked) {
+                positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
+            }
+            if (!isNegativePromptLocked) {
+                negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
+            }
+            promptUpdateLatch.countDown();
+        });
     }
 
     private void setupTextAreas() {
@@ -246,14 +286,6 @@ public abstract class AbstractGenerationController {
         }
 
         return image;
-    }
-
-    protected void updatePromptPreviewsAsync() {
-        Platform.runLater(() -> {
-            positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
-            negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
-            promptUpdateLatch.countDown();
-        });
     }
 
     protected void addImageToHistory(Image image) {
