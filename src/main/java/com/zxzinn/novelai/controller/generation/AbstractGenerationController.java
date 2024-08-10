@@ -65,6 +65,8 @@ public abstract class AbstractGenerationController {
     protected CountDownLatch promptUpdateLatch;
 
     @FXML protected Button generateButton;
+    @FXML protected Button refreshPositivePromptButton;
+    @FXML protected Button refreshNegativePromptButton;
 
     protected volatile boolean isGenerating = false;
     protected volatile boolean stopRequested = false;
@@ -87,7 +89,33 @@ public abstract class AbstractGenerationController {
         loadSettings();
         setupListeners();
         setupZoomHandler();
+        setupRefreshButtons();
+        setupTextAreas();
         updatePromptPreviews();
+    }
+
+    private void setupTextAreas() {
+        setupTextArea(positivePromptArea);
+        setupTextArea(negativePromptArea);
+        setupTextArea(positivePromptPreviewArea);
+        setupTextArea(negativePromptPreviewArea);
+    }
+
+    private void setupTextArea(TextArea textArea) {
+        textArea.setWrapText(true);
+        textArea.setMinHeight(100);
+        textArea.setPrefRowCount(5);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+    }
+
+    private void setupRefreshButtons() {
+        refreshPositivePromptButton.setOnAction(event -> refreshPromptPreview(positivePromptArea, positivePromptPreviewArea));
+        refreshNegativePromptButton.setOnAction(event -> refreshPromptPreview(negativePromptArea, negativePromptPreviewArea));
+    }
+
+    private void refreshPromptPreview(TextArea promptArea, TextArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(promptArea.getText());
+        previewArea.setText(processedPrompt);
     }
 
     protected void initializeFields() {

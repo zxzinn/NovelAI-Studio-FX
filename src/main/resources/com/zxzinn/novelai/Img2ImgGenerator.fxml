@@ -5,6 +5,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
 
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
@@ -52,7 +53,7 @@
                 </TitledPane>
                 <TitledPane text="Advanced Settings" styleClass="settings-section">
                     <GridPane hgap="10.0" vgap="10.0">
-                        <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
                         <Label text="水印文字" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                         <TextField fx:id="watermarkTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                     </GridPane>
@@ -69,21 +70,35 @@
             <HBox spacing="10.0" VBox.vgrow="NEVER">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="正面提示詞:"/>
-                    <TextArea fx:id="positivePromptArea" prefHeight="100" styleClass="prompt-area"/>
+                    <TextArea fx:id="positivePromptArea" styleClass="prompt-area" VBox.vgrow="ALWAYS"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Button fx:id="refreshPositivePromptButton" styleClass="refresh-button">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
+                        </graphic>
+                    </Button>
                 </VBox>
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="正面提示詞預覽"/>
-                    <TextArea fx:id="positivePromptPreviewArea" prefHeight="100" styleClass="prompt-preview"/>
+                    <TextArea fx:id="positivePromptPreviewArea" styleClass="prompt-preview" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="NEVER">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="負面提示詞:"/>
-                    <TextArea fx:id="negativePromptArea" prefHeight="100" styleClass="prompt-area"/>
+                    <TextArea fx:id="negativePromptArea" styleClass="prompt-area" VBox.vgrow="ALWAYS"/>
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Button fx:id="refreshNegativePromptButton" styleClass="refresh-button">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
+                        </graphic>
+                    </Button>
                 </VBox>
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                     <Label text="負面提示詞預覽"/>
-                    <TextArea fx:id="negativePromptPreviewArea" prefHeight="100" styleClass="prompt-preview"/>
+                    <TextArea fx:id="negativePromptPreviewArea" styleClass="prompt-preview" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
