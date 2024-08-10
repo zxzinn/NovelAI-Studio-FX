@@ -5,6 +5,7 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.*?>
 
+<?import javafx.scene.image.ImageView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             stylesheets="@styles.css">
@@ -44,7 +45,9 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <ScrollPane fx:id="previewScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
-                <StackPane fx:id="previewPane" styleClass="preview-pane"/>
+                <StackPane fx:id="previewPane">
+                    <ImageView fx:id="previewImageView" preserveRatio="true"/>
+                </StackPane>
             </ScrollPane>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="zoomInButton" text="放大" styleClass="action-button">

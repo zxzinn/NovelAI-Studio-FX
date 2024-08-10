@@ -14,6 +14,8 @@ module com.zxzinn.novelai {
     requires org.apache.commons.io;
     requires javafx.web;
     requires atlantafx.base;
+    requires jdk.jsobject;
+    requires org.controlsfx.controls;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;

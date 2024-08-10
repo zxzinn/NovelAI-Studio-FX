@@ -4,9 +4,15 @@ import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import lombok.extern.log4j.Log4j2;
 
@@ -16,6 +22,7 @@ import java.io.IOException;
 @Log4j2
 public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
+    @FXML private ScrollPane previewScrollPane;
     @FXML private StackPane previewPane;
     @FXML private ImageView previewImageView;
     @FXML private ListView<String> metadataListView;
@@ -23,11 +30,12 @@ public class FileManagerController {
     @FXML private Button addButton;
     @FXML private Button removeButton;
     @FXML private Button constructDatabaseButton;
-    @FXML private Button fitButton;
-    @FXML private Button originalSizeButton;
     @FXML private TextField watermarkTextField;
     @FXML private CheckBox clearLSBCheckBox;
     @FXML private Button processButton;
+    @FXML private Button zoomInButton;
+    @FXML private Button zoomOutButton;
+    @FXML private WebView metadataPreviewWebView;
 
     private final SettingsManager settingsManager;
     private final FileManagerService fileManagerService;
@@ -49,7 +57,6 @@ public class FileManagerController {
         this.metadataService = metadataService;
         this.imageProcessingService = imageProcessingService;
         this.alertService = alertService;
-        // 將 this.fileTreeView 傳遞給 FileTreeController
         this.fileTreeController = new FileTreeController(fileManagerService);
     }
 
@@ -58,14 +65,56 @@ public class FileManagerController {
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
+        setupZoomHandlers();
     }
+
+    private void setupZoomHandlers() {
+        zoomInButton.setOnAction(e -> zoom(1.1));
+        zoomOutButton.setOnAction(e -> zoom(0.9));
+
+        previewScrollPane.addEventFilter(ScrollEvent.ANY, event -> {
+            if (event.isControlDown()) {
+                event.consume();
+                double delta = event.getDeltaY() > 0 ? 1.1 : 0.9;
+                zoom(delta);
+            }
+        });
+    }
+
+    private void zoom(double factor) {
+        Node content = previewScrollPane.getContent();
+        if (content instanceof ImageView) {
+            ImageView imageView = (ImageView) content;
+            imageView.setFitWidth(imageView.getFitWidth() * factor);
+            imageView.setFitHeight(imageView.getFitHeight() * factor);
+        }
+    }
+
+    private void fitToView() {
+        Node content = previewScrollPane.getContent();
+        if (content instanceof ImageView) {
+            ImageView imageView = (ImageView) content;
+            imageView.setFitWidth(previewScrollPane.getWidth());
+            imageView.setFitHeight(previewScrollPane.getHeight());
+        }
+    }
+
+    private void resetToOriginalSize() {
+        Node content = previewScrollPane.getContent();
+        if (content instanceof ImageView) {
+            ImageView imageView = (ImageView) content;
+            Image image = imageView.getImage();
+            imageView.setFitWidth(image.getWidth());
+            imageView.setFitHeight(image.getHeight());
+        }
+    }
+
+
 
     private void setupEventHandlers() {
         addButton.setOnAction(event -> addWatchedDirectory());
         removeButton.setOnAction(event -> removeWatchedDirectory());
         constructDatabaseButton.setOnAction(event -> constructDatabase());
-        fitButton.setOnAction(event -> fitImage());
-        originalSizeButton.setOnAction(event -> showOriginalSize());
 
         fileTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -117,8 +166,16 @@ public class FileManagerController {
         String fullPath = fileTreeController.buildFullPath(item);
         File file = new File(fullPath);
         if (file.isFile()) {
-            previewPane.getChildren().setAll(filePreviewService.getPreview(file));
+            Node previewNode = filePreviewService.getPreview(file);
+            previewPane.getChildren().setAll(previewNode);
             updateMetadataList(file);
+
+            previewNode.prefWidth(previewPane.getWidth());
+            previewNode.prefHeight(previewPane.getHeight());
+
+            // 移除這些按鈕的事件處理器，因為我們現在直接在圖片上處理縮放
+            zoomInButton.setOnAction(null);
+            zoomOutButton.setOnAction(null);
         } else {
             previewPane.getChildren().clear();
             metadataListView.getItems().clear();
@@ -149,21 +206,6 @@ public class FileManagerController {
     private void constructDatabase() {
         // TODO: 實現構建數據庫功能
         alertService.showAlert("提示", "構建數據庫功能尚未實現");
-    }
-
-    private void fitImage() {
-        if (previewImageView.getImage() != null) {
-            previewImageView.setFitWidth(previewPane.getWidth());
-            previewImageView.setFitHeight(previewPane.getHeight());
-            previewImageView.setPreserveRatio(true);
-        }
-    }
-
-    private void showOriginalSize() {
-        if (previewImageView.getImage() != null) {
-            previewImageView.setFitWidth(0);
-            previewImageView.setFitHeight(0);
-        }
     }
 
     public void shutdown() {
