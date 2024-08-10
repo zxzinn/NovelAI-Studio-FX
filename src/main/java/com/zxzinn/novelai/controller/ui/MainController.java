@@ -14,25 +14,17 @@ import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import javafx.animation.*;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 import javafx.scene.layout.VBox;
-import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
 public class MainController {
@@ -51,15 +43,18 @@ public class MainController {
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final WindowService windowService;
+    private final FilePreviewService filePreviewService;
 
     public MainController(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
-                          ImageGenerationService imageGenerationService, ImageUtils imageUtils, WindowService windowService) {
+                          ImageGenerationService imageGenerationService, ImageUtils imageUtils,
+                          WindowService windowService, FilePreviewService filePreviewService) {
         this.settingsManager = settingsManager;
         this.apiClient = apiClient;
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
         this.windowService = windowService;
+        this.filePreviewService = filePreviewService;
     }
 
     @FXML
@@ -92,14 +87,16 @@ public class MainController {
 
     private void loadGeneratorTab() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
-        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
+        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager,
+                imageGenerationService, imageUtils, filePreviewService));
         BorderPane content = loader.load();
         generatorTab.setContent(content);
     }
 
     private void loadImg2ImgTab() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
-        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils));
+        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, settingsManager,
+                imageGenerationService, imageUtils, filePreviewService));
         BorderPane content = loader.load();
         img2ImgTab.setContent(content);
     }
@@ -107,14 +104,11 @@ public class MainController {
     private void loadFileManagerTab() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
 
-        // 創建所需的服務
         FileManagerService fileManagerService = new FileManagerService(settingsManager);
-        FilePreviewService filePreviewService = new FilePreviewService();
         MetadataService metadataService = new MetadataService();
         ImageProcessingService imageProcessingService = new ImageProcessingService();
         AlertService alertService = new AlertService();
 
-        // 創建 FileManagerController 實例
         FileManagerController controller = new FileManagerController(
                 settingsManager,
                 fileManagerService,

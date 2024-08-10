@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="javafx.scene.layout.HBox" xmlns:fx="http://javafx.com/fxml" spacing="10" alignment="CENTER_LEFT" styleClass="image-control-bar">
+    <Button fx:id="zoomInButton" styleClass="control-button" />
+    <Button fx:id="zoomOutButton" styleClass="control-button" />
+    <Button fx:id="fitButton" styleClass="control-button" />
+    <Button fx:id="lockButton" styleClass="control-button" />
+    <Button fx:id="infoButton" styleClass="control-button" />
+    <Button fx:id="saveButton" styleClass="control-button" />
+    <Separator orientation="VERTICAL" />
+    <Label fx:id="resolutionLabel" styleClass="resolution-label" />
+</fx:root>

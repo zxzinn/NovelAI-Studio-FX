@@ -287,3 +287,52 @@
 .lock-button:hover .ikonli-font-icon {
     -fx-icon-color: #ECF0F1;
 }
+
+.image-control-bar {
+    -fx-background-color: #34495E;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+.control-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+    -fx-background-radius: 15px;
+}
+
+.control-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+.control-button .ikonli-font-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 14px;
+}
+
+.resolution-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-min-width: 100px;  // 確保有足夠的空間顯示解析度
+}
+
+.size-label {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+.history-panel {
+    -fx-background-color: #2C3E50;
+    -fx-padding: 10px;
+}
+
+.history-scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.history-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}

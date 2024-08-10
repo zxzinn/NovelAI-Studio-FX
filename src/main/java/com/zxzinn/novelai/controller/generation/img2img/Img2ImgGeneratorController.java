@@ -5,6 +5,7 @@ import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
+import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
@@ -32,8 +33,9 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     public Img2ImgGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                       SettingsManager settingsManager,
                                       ImageGenerationService imageGenerationService,
-                                      ImageUtils imageUtils) {
-        super(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils);
+                                      ImageUtils imageUtils,
+                                      FilePreviewService filePreviewService) {
+        super(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils, filePreviewService);
     }
 
     @FXML

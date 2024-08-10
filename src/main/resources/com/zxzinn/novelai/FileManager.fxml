@@ -45,7 +45,7 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <ScrollPane fx:id="previewScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
-                <StackPane fx:id="previewPane">
+                <StackPane fx:id="previewContainer">
                     <ImageView fx:id="previewImageView" preserveRatio="true"/>
                 </StackPane>
             </ScrollPane>

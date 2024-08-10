@@ -1,16 +1,14 @@
 package com.zxzinn.novelai.controller.filemanager;
 
+import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.fxml.FXML;
-import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
@@ -22,9 +20,7 @@ import java.io.IOException;
 @Log4j2
 public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
-    @FXML private ScrollPane previewScrollPane;
-    @FXML private StackPane previewPane;
-    @FXML private ImageView previewImageView;
+    @FXML private StackPane previewContainer;
     @FXML private ListView<String> metadataListView;
     @FXML private TextField searchField;
     @FXML private Button addButton;
@@ -35,7 +31,6 @@ public class FileManagerController {
     @FXML private Button processButton;
     @FXML private Button zoomInButton;
     @FXML private Button zoomOutButton;
-    @FXML private WebView metadataPreviewWebView;
 
     private final SettingsManager settingsManager;
     private final FileManagerService fileManagerService;
@@ -44,6 +39,7 @@ public class FileManagerController {
     private final ImageProcessingService imageProcessingService;
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
+    private PreviewPane previewPane;
 
     public FileManagerController(SettingsManager settingsManager,
                                  FileManagerService fileManagerService,
@@ -62,31 +58,11 @@ public class FileManagerController {
 
     @FXML
     public void initialize() {
+        previewPane = new PreviewPane(filePreviewService);
+        previewContainer.getChildren().add(previewPane);
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
-        setupZoomHandlers();
-    }
-
-    private void setupZoomHandlers() {
-        zoomInButton.setOnAction(e -> zoom(1.1));
-        zoomOutButton.setOnAction(e -> zoom(0.9));
-
-        previewScrollPane.addEventFilter(ScrollEvent.ANY, event -> {
-            if (event.isControlDown()) {
-                event.consume();
-                double delta = event.getDeltaY() > 0 ? 1.1 : 0.9;
-                zoom(delta);
-            }
-        });
-    }
-
-    private void zoom(double factor) {
-        Node content = previewScrollPane.getContent();
-        if (content instanceof ImageView imageView) {
-            imageView.setFitWidth(imageView.getFitWidth() * factor);
-            imageView.setFitHeight(imageView.getFitHeight() * factor);
-        }
     }
 
     private void setupEventHandlers() {
@@ -107,6 +83,9 @@ public class FileManagerController {
                 fileTreeController.setSearchFilter(newValue));
 
         processButton.setOnAction(event -> processSelectedImage());
+
+        zoomInButton.setOnAction(event -> previewPane.zoomIn());
+        zoomOutButton.setOnAction(event -> previewPane.zoomOut());
     }
 
     private void addWatchedDirectory() {
@@ -143,25 +122,16 @@ public class FileManagerController {
     private void updatePreview(TreeItem<String> item) {
         String fullPath = fileTreeController.buildFullPath(item);
         File file = new File(fullPath);
-        if (file.isFile()) {
-            Node previewNode = filePreviewService.getPreview(file);
-            previewPane.getChildren().setAll(previewNode);
-            updateMetadataList(file);
-
-            previewNode.prefWidth(previewPane.getWidth());
-            previewNode.prefHeight(previewPane.getHeight());
-
-            // 移除這些按鈕的事件處理器，因為我們現在直接在圖片上處理縮放
-            zoomInButton.setOnAction(null);
-            zoomOutButton.setOnAction(null);
-        } else {
-            previewPane.getChildren().clear();
-            metadataListView.getItems().clear();
-        }
+        previewPane.updatePreview(file);
+        updateMetadataList(file);
     }
 
     private void updateMetadataList(File file) {
-        metadataListView.getItems().setAll(metadataService.getMetadata(file));
+        if (file != null) {
+            metadataListView.getItems().setAll(metadataService.getMetadata(file));
+        } else {
+            metadataListView.getItems().clear();
+        }
     }
 
     private void processSelectedImage() {

@@ -6,6 +6,7 @@
 <?import javafx.scene.image.ImageView?>
 
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import com.zxzinn.novelai.component.ImageControlBar?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
@@ -112,13 +113,19 @@
                 </VBox>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
-                <ScrollPane fx:id="mainScrollPane" HBox.hgrow="ALWAYS" fitToWidth="true" fitToHeight="true" styleClass="image-scroll-pane">
-                    <AnchorPane>
-                        <ImageView fx:id="mainImageView" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                                   AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" preserveRatio="true"/>
-                    </AnchorPane>
-                </ScrollPane>
-                <VBox spacing="5.0" styleClass="history-panel">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS" prefWidth="850">
+                    <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS">
+                        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" fitToHeight="true" styleClass="image-scroll-pane">
+                            <AnchorPane>
+                                <ImageView fx:id="mainImageView" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                                           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" preserveRatio="true"/>
+                            </AnchorPane>
+                        </ScrollPane>
+                    </StackPane>
+                    <ImageControlBar fx:id="imageControlBar" />
+                </VBox>
+
+                <VBox spacing="5.0" styleClass="history-panel" prefWidth="150" HBox.hgrow="NEVER">
                     <Label text="歷史圖片"/>
                     <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" styleClass="history-scroll-pane">
                         <VBox fx:id="historyImagesContainer" spacing="5.0"/>
