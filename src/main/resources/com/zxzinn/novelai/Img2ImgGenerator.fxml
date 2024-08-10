@@ -58,7 +58,7 @@
                     </GridPane>
                 </TitledPane>
                 <HBox spacing="10.0" alignment="CENTER">
-                    <Button text="生成" fx:id="generateButton" onAction="#handleGenerate" styleClass="generate-button"/>
+                    <Button text="生成" fx:id="generateButton" onAction="#handleGenerateOrStop" styleClass="generate-button"/>
                     <ComboBox fx:id="generateCountComboBox" promptText="生成數量"/>
                 </HBox>
             </VBox>

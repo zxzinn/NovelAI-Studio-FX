@@ -9,6 +9,7 @@ import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
+import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -20,6 +21,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.image.BufferedImage;
@@ -55,13 +57,18 @@ public abstract class AbstractGenerationController {
     @FXML protected ComboBox<String> generateCountComboBox;
     @FXML protected TextField watermarkTextField;
     @FXML protected CheckBox clearLSBCheckBox;
-    @FXML protected Button generateButton;
     @FXML protected ScrollPane mainScrollPane;
     @FXML protected VBox historyImagesContainer;
     @FXML protected ImageView mainImageView;
 
     protected int currentGeneratedCount = 0;
     protected CountDownLatch promptUpdateLatch;
+
+    @FXML protected Button generateButton;
+
+    protected volatile boolean isGenerating = false;
+    protected volatile boolean stopRequested = false;
+    protected volatile boolean isStopping = false;
 
     public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor,
                                         SettingsManager settingsManager,
@@ -120,14 +127,58 @@ public abstract class AbstractGenerationController {
     }
 
     @FXML
-    protected void handleGenerate() {
-        generateButton.setDisable(true);
+    protected void handleGenerateOrStop() {
+        if (!isGenerating && !isStopping) {
+            startGeneration();
+        } else if (isGenerating && !isStopping) {
+            stopGeneration();
+        }
+    }
+
+    protected void startGeneration() {
+        isGenerating = true;
+        stopRequested = false;
+        isStopping = false;
         currentGeneratedCount = 0;
         promptUpdateLatch = new CountDownLatch(1);
+        updateButtonState(true);
         generateImages();
     }
 
+    protected void stopGeneration() {
+        stopRequested = true;
+        isStopping = true;
+        updateButtonState(false);
+    }
+
+    protected void updateButtonState(boolean generating) {
+        Platform.runLater(() -> {
+            if (generating) {
+                generateButton.setText("停止");
+                generateButton.setStyle("-fx-background-color: #e53e3e;"); // 紅色
+            } else {
+                generateButton.setText("生成");
+                generateButton.setStyle("-fx-background-color: #48bb78;"); // 綠色
+                generateButton.setDisable(isStopping);
+            }
+
+            // 添加按鈕動畫
+            ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(100), generateButton);
+            scaleTransition.setToX(1.1);
+            scaleTransition.setToY(1.1);
+            scaleTransition.setCycleCount(2);
+            scaleTransition.setAutoReverse(true);
+            scaleTransition.play();
+        });
+    }
+
     protected abstract void generateImages();
+
+    protected void finishGeneration() {
+        isGenerating = false;
+        isStopping = false;
+        updateButtonState(false);
+    }
 
     protected abstract GenerationPayload createGenerationPayload(String processedPositivePrompt, String processedNegativePrompt);
 
