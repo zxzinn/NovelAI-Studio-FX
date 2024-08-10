@@ -3,6 +3,9 @@ package com.zxzinn.novelai.controller.generation;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.component.ImageControlBar;
+import com.zxzinn.novelai.component.PreviewPane;
+import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.SettingsManager;
@@ -20,10 +23,13 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import org.kordamp.ikonli.javafx.FontIcon;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +44,7 @@ public abstract class AbstractGenerationController {
     protected final SettingsManager settingsManager;
     protected final ImageGenerationService imageGenerationService;
     protected final ImageUtils imageUtils;
+    protected final FilePreviewService filePreviewService;
 
     @FXML protected TextField apiKeyField;
     @FXML protected ComboBox<String> modelComboBox;
@@ -57,14 +64,25 @@ public abstract class AbstractGenerationController {
     @FXML protected ComboBox<String> generateCountComboBox;
     @FXML protected TextField watermarkTextField;
     @FXML protected CheckBox clearLSBCheckBox;
-    @FXML protected ScrollPane mainScrollPane;
     @FXML protected VBox historyImagesContainer;
-    @FXML protected ImageView mainImageView;
+    @FXML protected StackPane previewContainer;
+    @FXML private ImageControlBar imageControlBar;
+
+    protected PreviewPane previewPane;
 
     protected int currentGeneratedCount = 0;
     protected CountDownLatch promptUpdateLatch;
 
     @FXML protected Button generateButton;
+    @FXML protected Button refreshPositivePromptButton;
+    @FXML protected Button refreshNegativePromptButton;
+    @FXML protected Button lockPositivePromptButton;
+    @FXML protected Button lockNegativePromptButton;
+    @FXML protected FontIcon lockPositivePromptIcon;
+    @FXML protected FontIcon lockNegativePromptIcon;
+
+    protected boolean isPositivePromptLocked = false;
+    protected boolean isNegativePromptLocked = false;
 
     protected volatile boolean isGenerating = false;
     protected volatile boolean stopRequested = false;
@@ -73,21 +91,82 @@ public abstract class AbstractGenerationController {
     public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor,
                                         SettingsManager settingsManager,
                                         ImageGenerationService imageGenerationService,
-                                        ImageUtils imageUtils) {
+                                        ImageUtils imageUtils,
+                                        FilePreviewService filePreviewService) {
         this.apiClient = apiClient;
         this.embedProcessor = embedProcessor;
         this.settingsManager = settingsManager;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
+        this.filePreviewService = filePreviewService;
     }
 
     @FXML
     public void initialize() {
+        previewPane = new PreviewPane(filePreviewService);
+        previewContainer.getChildren().add(previewPane);
         initializeFields();
         loadSettings();
         setupListeners();
-        setupZoomHandler();
+        setupRefreshButtons();
+        setupTextAreas();
         updatePromptPreviews();
+        setupLockButtons();
+    }
+
+    private void setupLockButtons() {
+        lockPositivePromptButton.setOnAction(event -> toggleLock(true));
+        lockNegativePromptButton.setOnAction(event -> toggleLock(false));
+    }
+
+    private void toggleLock(boolean isPositive) {
+        if (isPositive) {
+            isPositivePromptLocked = !isPositivePromptLocked;
+            updateLockIcon(lockPositivePromptIcon, isPositivePromptLocked);
+        } else {
+            isNegativePromptLocked = !isNegativePromptLocked;
+            updateLockIcon(lockNegativePromptIcon, isNegativePromptLocked);
+        }
+    }
+
+    private void updateLockIcon(FontIcon icon, boolean isLocked) {
+        icon.setIconLiteral(isLocked ? "fas-lock" : "fas-lock-open");
+    }
+
+    protected void updatePromptPreviewsAsync() {
+        Platform.runLater(() -> {
+            if (!isPositivePromptLocked) {
+                positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
+            }
+            if (!isNegativePromptLocked) {
+                negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
+            }
+            promptUpdateLatch.countDown();
+        });
+    }
+
+    private void setupTextAreas() {
+        setupTextArea(positivePromptArea);
+        setupTextArea(negativePromptArea);
+        setupTextArea(positivePromptPreviewArea);
+        setupTextArea(negativePromptPreviewArea);
+    }
+
+    private void setupTextArea(TextArea textArea) {
+        textArea.setWrapText(true);
+        textArea.setMinHeight(100);
+        textArea.setPrefRowCount(5);
+        textArea.setMaxHeight(Double.MAX_VALUE);
+    }
+
+    private void setupRefreshButtons() {
+        refreshPositivePromptButton.setOnAction(event -> refreshPromptPreview(positivePromptArea, positivePromptPreviewArea));
+        refreshNegativePromptButton.setOnAction(event -> refreshPromptPreview(negativePromptArea, negativePromptPreviewArea));
+    }
+
+    private void refreshPromptPreview(TextArea promptArea, TextArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(promptArea.getText());
+        previewArea.setText(processedPrompt);
     }
 
     protected void initializeFields() {
@@ -108,22 +187,6 @@ public abstract class AbstractGenerationController {
         seedField.setText("0");
         watermarkTextField.setText("");
         clearLSBCheckBox.setSelected(false);
-    }
-
-    protected void setupZoomHandler() {
-        mainScrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
-            if (event.isControlDown()) {
-                double deltaY = event.getDeltaY();
-                double zoomFactor = 1.1;
-                double direction = deltaY > 0 ? 1 : -1;
-                double scale = Math.pow(zoomFactor, direction);
-
-                mainImageView.setScaleX(mainImageView.getScaleX() * scale);
-                mainImageView.setScaleY(mainImageView.getScaleY() * scale);
-
-                event.consume();
-            }
-        });
     }
 
     @FXML
@@ -191,12 +254,7 @@ public abstract class AbstractGenerationController {
             BufferedImage processedImage = processImage(originalImage);
 
             Image fxImage = imageUtils.convertToFxImage(processedImage);
-            mainImageView.setImage(fxImage);
-            mainImageView.setPreserveRatio(true);
-            mainImageView.setSmooth(true);
-            mainImageView.fitWidthProperty().bind(((AnchorPane) mainImageView.getParent()).widthProperty());
-            mainImageView.fitHeightProperty().bind(((AnchorPane) mainImageView.getParent()).heightProperty());
-
+            previewPane.updatePreview(convertBufferedImageToFile(processedImage));
             addImageToHistory(fxImage);
 
             try {
@@ -206,6 +264,36 @@ public abstract class AbstractGenerationController {
                 log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             }
         });
+    }
+
+    private File convertBufferedImageToFile(BufferedImage image) {
+        try {
+            File tempFile = File.createTempFile("temp_image", ".png");
+            ImageIO.write(image, "png", tempFile);
+            tempFile.deleteOnExit();
+            return tempFile;
+        } catch (IOException e) {
+            log.error("無法將 BufferedImage 轉換為 File", e);
+            return null;
+        }
+    }
+
+    protected void addImageToHistory(Image image) {
+        double aspectRatio = image.getWidth() / image.getHeight();
+        ImageView historyImageView = new ImageView(image);
+        historyImageView.setPreserveRatio(true);
+        historyImageView.setSmooth(true);
+        historyImageView.setFitWidth(150);
+        historyImageView.setFitHeight(150 / aspectRatio);
+
+        historyImageView.setOnMouseClicked(event -> {
+            File tempFile = convertBufferedImageToFile(imageUtils.convertToBufferedImage(image));
+            if (tempFile != null) {
+                previewPane.updatePreview(tempFile);
+            }
+        });
+
+        historyImagesContainer.getChildren().addFirst(historyImageView);
     }
 
     protected BufferedImage processImage(BufferedImage image) {
@@ -218,27 +306,6 @@ public abstract class AbstractGenerationController {
         }
 
         return image;
-    }
-
-    protected void updatePromptPreviewsAsync() {
-        Platform.runLater(() -> {
-            positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
-            negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
-            promptUpdateLatch.countDown();
-        });
-    }
-
-    protected void addImageToHistory(Image image) {
-        double aspectRatio = image.getWidth() / image.getHeight();
-        ImageView historyImageView = new ImageView(image);
-        historyImageView.setPreserveRatio(true);
-        historyImageView.setSmooth(true);
-        historyImageView.setFitWidth(150);
-        historyImageView.setFitHeight(150 / aspectRatio);
-
-        historyImageView.setOnMouseClicked(event -> mainImageView.setImage(image));
-
-        historyImagesContainer.getChildren().addFirst(historyImageView);
     }
 
     protected void loadSettings() {
@@ -297,5 +364,10 @@ public abstract class AbstractGenerationController {
     protected void updatePromptPreviews() {
         updatePromptPreview(positivePromptArea.getText(), positivePromptPreviewArea);
         updatePromptPreview(negativePromptArea.getText(), negativePromptPreviewArea);
+    }
+
+    // 在加載或更改圖像時調用此方法
+    private void updateImageResolution(int width, int height) {
+        imageControlBar.setResolution(width, height);
     }
 }

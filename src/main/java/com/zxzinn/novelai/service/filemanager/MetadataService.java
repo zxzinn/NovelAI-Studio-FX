@@ -16,10 +16,22 @@ public class MetadataService {
 
     public List<String> getMetadata(File file) {
         List<String> metadataList = new ArrayList<>();
-        try {
+        if (file == null || !file.exists()) {
+            metadataList.add("文件不存在或無法訪問");
+            return metadataList;
+        }
+
+        if (file.isDirectory()) {
+            metadataList.add("名稱: " + file.getName());
+            metadataList.add("路徑: " + file.getAbsolutePath());
+            metadataList.add("類型: 目錄");
+            metadataList.add("最後修改時間: " + new java.util.Date(file.lastModified()));
+            return metadataList;
+        }
+
+        try (FileInputStream inputstream = new FileInputStream(file)) {
             BodyContentHandler handler = new BodyContentHandler();
             Metadata metadata = new Metadata();
-            FileInputStream inputstream = new FileInputStream(file);
             ParseContext pcontext = new ParseContext();
 
             AutoDetectParser parser = new AutoDetectParser();

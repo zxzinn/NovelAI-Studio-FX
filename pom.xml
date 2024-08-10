@@ -131,9 +131,12 @@
             <artifactId>atlantafx-base</artifactId>
             <version>2.0.1</version>
         </dependency>
-
-
-
+        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>2.0.0</version>
+        </dependency>
 
     </dependencies>
 

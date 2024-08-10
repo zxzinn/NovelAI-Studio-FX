@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.utils.image;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +36,21 @@ public class ImageUtils {
             }
         }
         return wr;
+    }
+
+    public BufferedImage convertToBufferedImage(Image fxImage) {
+        int width = (int) fxImage.getWidth();
+        int height = (int) fxImage.getHeight();
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        PixelReader pixelReader = fxImage.getPixelReader();
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                bufferedImage.setRGB(x, y, pixelReader.getArgb(x, y));
+            }
+        }
+
+        return bufferedImage;
     }
 
     public BufferedImage loadImage(File file) throws IOException {

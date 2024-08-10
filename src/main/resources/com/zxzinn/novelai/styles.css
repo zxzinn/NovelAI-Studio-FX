@@ -138,27 +138,6 @@
     -fx-control-inner-background: #275e77;
 }
 
-.side-panel {
-}
-
-.icon-button {
-}
-
-.file-tree {
-}
-
-.main-content {
-}
-
-.image-scroll-pane {
-}
-
-.action-button {
-}
-
-.metadata-list {
-}
-
 .generate-button {
     -fx-background-color: #3498DB; /* 藍色 */
     -fx-text-fill: white;
@@ -174,18 +153,186 @@
     -fx-opacity: 0.7;
 }
 
-.settings-section {
+.refresh-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
 }
 
-.settings-panel {
+.refresh-button:hover {
+    -fx-background-color: #3a5a7d;
+}
+
+.refresh-button .ikonli-font-icon {
+    -fx-icon-color: #3498DB;
+}
+
+.refresh-button:hover .ikonli-font-icon {
+    -fx-icon-color: #ECF0F1;
+}
+
+.settings-section {
+    -fx-padding: 10px;
+}
+
+.settings-section .check-box {
+    -fx-text-fill: white;
+}
+.prompt-container {
+    -fx-background-color: #34495E;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-border-color: #2C3E50;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+.prompt-label {
+    -fx-text-fill: #ECF0F1;
+    -fx-font-weight: bold;
+}
+
+.prompt-area, .prompt-preview {
+    -fx-text-fill: white;
+    -fx-control-inner-background: #2C3E50;
+    -fx-wrap-text: true;
+    -fx-pref-row-count: 5;
+    -fx-pref-column-count: 40;
+    -fx-border-color: #3498DB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+}
+
+.prompt-area:focused, .prompt-preview:focused {
+    -fx-border-color: #5DADE2;
+    -fx-border-width: 2px;
+}
+
+.prompt-area .scroll-pane, .prompt-preview .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: as-needed;
+}
+.prompt-area, .prompt-preview {
+    -fx-text-fill: white;
+    -fx-control-inner-background: #2C3E50;
+    -fx-wrap-text: true;
+    -fx-pref-row-count: 5;
+    -fx-pref-column-count: 40;
+    -fx-border-color: #3498DB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-font-family: 'Courier New', monospace;
+}
+
+.prompt-content {
+    -fx-padding: 5px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.prompt-area .content, .prompt-preview .content {
+    -fx-padding: 5px;
+    -fx-background-color: transparent;
+}
+
+.refresh-button {
+    -fx-background-color: #3498DB;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
+
+.refresh-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+.refresh-button .ikonli-font-icon {
+    -fx-icon-color: #ECF0F1;
+}
+
+.refresh-button:hover .ikonli-font-icon {
+    -fx-icon-color: #FFFFFF;
+}
+
+.lock-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
+
+.lock-button:hover {
+    -fx-background-color: #3a5a7d;
+}
+
+.lock-button .ikonli-font-icon {
+    -fx-icon-color: #3498DB;
+}
+
+.lock-button:hover .ikonli-font-icon {
+    -fx-icon-color: #ECF0F1;
+}
+
+.image-control-bar {
+    -fx-background-color: #34495E;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+.control-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+    -fx-background-radius: 15px;
+}
+
+.control-button:hover {
+    -fx-background-color: #2980B9;
+}
+
+.control-button .ikonli-font-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 14px;
+}
+
+.resolution-label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-min-width: 100px;  // 確保有足夠的空間顯示解析度
+}
+
+.size-label {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
 }
 
 .history-panel {
+    -fx-background-color: #2C3E50;
+    -fx-padding: 10px;
 }
 
 .history-scroll-pane {
+    -fx-background-color: transparent;
 }
 
-.upload-button {
+.history-scroll-pane .viewport {
+    -fx-background-color: transparent;
 }
-

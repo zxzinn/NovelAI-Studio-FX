@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.controller.ui.MainController;
+import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
@@ -36,6 +37,8 @@ public class Application extends javafx.application.Application {
 
     private SettingsManager settingsManager;
     private Stage primaryStage;
+    FilePreviewService filePreviewService = new FilePreviewService();
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -107,7 +110,9 @@ public class Application extends javafx.application.Application {
                     embedProcessor,
                     imageGenerationService,
                     imageUtils,
-                    windowService);
+                    windowService,
+                    filePreviewService
+            );
 
             Platform.runLater(() -> {
                 try {
