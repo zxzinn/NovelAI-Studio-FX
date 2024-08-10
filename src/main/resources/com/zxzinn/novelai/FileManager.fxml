@@ -44,11 +44,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <ScrollPane fx:id="previewScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
-                <StackPane fx:id="previewContainer">
-                    <ImageView fx:id="previewImageView" preserveRatio="true"/>
-                </StackPane>
-            </ScrollPane>
+            <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="zoomInButton" text="放大" styleClass="action-button">
                     <graphic>

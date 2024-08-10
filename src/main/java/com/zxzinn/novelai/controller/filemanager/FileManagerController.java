@@ -20,7 +20,7 @@ import java.io.IOException;
 @Log4j2
 public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
-    @FXML private StackPane previewContainer;
+    @FXML protected StackPane previewContainer;
     @FXML private ListView<String> metadataListView;
     @FXML private TextField searchField;
     @FXML private Button addButton;
@@ -39,7 +39,7 @@ public class FileManagerController {
     private final ImageProcessingService imageProcessingService;
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
-    private PreviewPane previewPane;
+    protected PreviewPane previewPane;
 
     public FileManagerController(SettingsManager settingsManager,
                                  FileManagerService fileManagerService,
@@ -84,8 +84,6 @@ public class FileManagerController {
 
         processButton.setOnAction(event -> processSelectedImage());
 
-        zoomInButton.setOnAction(event -> previewPane.zoomIn());
-        zoomOutButton.setOnAction(event -> previewPane.zoomOut());
     }
 
     private void addWatchedDirectory() {
