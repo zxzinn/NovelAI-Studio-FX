@@ -69,8 +69,4 @@ public class ImageProcessingService {
     public void shutdown() {
         executorService.shutdown();
     }
-
-    public void shutdown() {
-        executorService.shutdown();
-    }
 }

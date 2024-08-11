@@ -16,6 +16,7 @@ module com.zxzinn.novelai {
     requires atlantafx.base;
     requires jdk.jsobject;
     requires org.controlsfx.controls;
+    requires org.apache.logging.log4j.core;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
