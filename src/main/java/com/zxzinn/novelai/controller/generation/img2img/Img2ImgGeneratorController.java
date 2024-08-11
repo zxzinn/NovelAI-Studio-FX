@@ -2,7 +2,6 @@ package com.zxzinn.novelai.controller.generation.img2img;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;

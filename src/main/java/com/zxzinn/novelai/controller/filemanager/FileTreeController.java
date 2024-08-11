@@ -23,12 +23,12 @@ public class FileTreeController {
     private TreeView<String> fileTreeView;
     private FilteredList<TreeItem<String>> filteredTreeItems;
 
-    public void initialize() {
-        refreshTreeView();
-    }
-
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
+    }
+
+    public void initialize() {
+        refreshTreeView();
     }
 
     public void refreshTreeView() {

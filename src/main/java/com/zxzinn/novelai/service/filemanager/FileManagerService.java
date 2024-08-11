@@ -203,6 +203,7 @@ public class FileManagerService {
         }
     }
 
+
     private FontIcon getFileIcon(File file) {
         if (file.isDirectory()) {
             return new FontIcon(FontAwesomeSolid.FOLDER);
