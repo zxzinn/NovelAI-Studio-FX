@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import lombok.Setter;
@@ -96,5 +97,15 @@ public class FileTreeController {
         }
 
         return Paths.get(watchedDirFullPath, String.join(File.separator, pathParts)).toString();
+    }
+
+    public void selectAllInDirectory(TreeItem<String> directoryItem) {
+        if (directoryItem != null && directoryItem.isExpanded()) {
+            ObservableList<TreeItem<String>> children = directoryItem.getChildren();
+            fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            int startIndex = fileTreeView.getRow(directoryItem) + 1;
+            int endIndex = startIndex + children.size();
+            fileTreeView.getSelectionModel().selectRange(startIndex, endIndex);
+        }
     }
 }

@@ -20,6 +20,7 @@ import java.io.IOException;
 @Log4j2
 public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
+    @FXML private Button selectAllButton;
     @FXML protected StackPane previewContainer;
     @FXML private ListView<String> metadataListView;
     @FXML private TextField searchField;
@@ -40,6 +41,7 @@ public class FileManagerController {
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
     protected PreviewPane previewPane;
+
 
     public FileManagerController(SettingsManager settingsManager,
                                  FileManagerService fileManagerService,
@@ -83,7 +85,15 @@ public class FileManagerController {
                 fileTreeController.setSearchFilter(newValue));
 
         processButton.setOnAction(event -> processSelectedImage());
+        selectAllButton.setOnAction(event -> selectAllInSelectedDirectory());
 
+    }
+
+    private void selectAllInSelectedDirectory() {
+        TreeItem<String> selectedItem = fileTreeView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            fileTreeController.selectAllInDirectory(selectedItem);
+        }
     }
 
     private void addWatchedDirectory() {
