@@ -47,6 +47,7 @@ public class ImageProcessingService {
         }
     }
 
+
     private void clearMetadata(File file) throws IOException {
         BufferedImage image = ImageIO.read(file);
         if (image == null) {
@@ -64,6 +65,8 @@ public class ImageProcessingService {
         File outputFile = new File(cleanedDir, file.getName());
         ImageProcessor.saveImage(image, outputFile);
         log.info("已清除文件的元數據: {}", outputFile.getName());
+
+
     }
 
     public void shutdown() {
