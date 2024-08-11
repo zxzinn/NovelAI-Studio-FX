@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -32,6 +33,7 @@ public class FileManagerService {
     private final ScheduledExecutorService scheduledExecutorService;
     @Setter
     private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
+
 
     public FileManagerService(SettingsManager settingsManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();
@@ -97,6 +99,7 @@ public class FileManagerService {
                 final Path finalFullPath = fullPath;
                 final WatchEvent.Kind<?> finalKind = kind;
                 Platform.runLater(() -> {
+
                     if (fileChangeListener != null) {
                         fileChangeListener.accept(finalFullPath.toString(), finalKind);
                     }
@@ -111,6 +114,11 @@ public class FileManagerService {
                 }
             }
         }
+    }
+
+    private void notifyFileChange(Path path, WatchEvent.Kind<?> kind) {
+        // 這裡可以實現一個觀察者模式，通知 UI 更新
+        // 例如，可以使用 JavaFX 的 Property 或者自定義的事件系統
     }
 
     public void addWatchedDirectory(String path) throws IOException {

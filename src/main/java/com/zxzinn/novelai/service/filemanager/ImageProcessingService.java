@@ -2,6 +2,7 @@ package com.zxzinn.novelai.service.filemanager;
 
 import com.zxzinn.novelai.utils.image.ImageProcessor;
 import javafx.application.Platform;
+
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -13,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
 
 @Log4j2
 public class ImageProcessingService {
@@ -49,6 +51,7 @@ public class ImageProcessingService {
         BufferedImage image = ImageIO.read(file);
         if (image == null) {
             throw new IOException("無法讀取圖像文件: " + file.getName());
+
         }
 
         ImageProcessor.clearMetadata(image);
@@ -61,6 +64,10 @@ public class ImageProcessingService {
         File outputFile = new File(cleanedDir, file.getName());
         ImageProcessor.saveImage(image, outputFile);
         log.info("已清除文件的元數據: {}", outputFile.getName());
+    }
+
+    public void shutdown() {
+        executorService.shutdown();
     }
 
     public void shutdown() {

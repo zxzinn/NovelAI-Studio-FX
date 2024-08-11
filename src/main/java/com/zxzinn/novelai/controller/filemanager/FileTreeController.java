@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -33,6 +34,7 @@ public class FileTreeController {
     private FilteredList<TreeItem<String>> filteredTreeItems;
     private final AtomicBoolean isRefreshing = new AtomicBoolean(false);
     private final Map<String, TreeItem<String>> pathToItemMap = new HashMap<>();
+
 
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
@@ -110,7 +112,7 @@ public class FileTreeController {
         List<String> pathParts = new ArrayList<>();
         TreeItem<String> current = item;
         while (current != null && !current.getValue().equals("監視的目錄")) {
-            pathParts.addFirst(current.getValue());
+            pathParts.add(0, current.getValue());
             current = current.getParent();
         }
 
@@ -128,6 +130,7 @@ public class FileTreeController {
         pathParts.removeFirst();
         return Paths.get(watchedDirFullPath, String.join(File.separator, pathParts)).toString();
     }
+
 
     public void selectAllInDirectory(TreeItem<String> directoryItem) {
         if (directoryItem != null && directoryItem.isExpanded()) {
@@ -251,4 +254,5 @@ public class FileTreeController {
         String name = file.getName().toLowerCase();
         return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
     }
+
 }

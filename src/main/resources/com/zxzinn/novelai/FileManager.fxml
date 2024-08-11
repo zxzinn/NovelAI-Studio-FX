@@ -35,6 +35,11 @@
                     <FontIcon iconLiteral="fas-check-double" iconSize="12"/>
                 </graphic>
             </Button>
+            <Button fx:id="selectAllButton" text="全選" maxWidth="Infinity">
+                <graphic>
+                    <FontIcon iconLiteral="fas-check-double" iconSize="12"/>
+                </graphic>
+            </Button>
             <TreeView fx:id="fileTreeView" VBox.vgrow="ALWAYS" styleClass="file-tree"/>
         </VBox>
     </left>
@@ -45,6 +50,7 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
+
         </VBox>
     </center>
 
@@ -55,6 +61,7 @@
             </padding>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
             <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity"/>
+
         </VBox>
     </right>
     <bottom>

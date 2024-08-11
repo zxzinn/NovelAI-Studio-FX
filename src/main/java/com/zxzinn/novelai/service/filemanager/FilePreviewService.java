@@ -11,6 +11,7 @@ public class FilePreviewService {
 
     public FilePreviewService() {
         this.filePreviewFactory = new FilePreviewFactory();
+
     }
 
     public Node getPreview(File file) {

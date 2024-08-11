@@ -4,6 +4,7 @@ import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.WatchEvent;
 import java.util.List;
+
 
 @Log4j2
 public class FileManagerController {
@@ -99,6 +101,7 @@ public class FileManagerController {
             return;
         }
 
+
         imageProcessingService.clearMetadataForFiles(selectedFiles,
                 this::updateProgress,
                 () -> {
@@ -114,6 +117,7 @@ public class FileManagerController {
         progressBar.setProgress(progress);
         int percentage = (int) (progress * 100);
         progressLabel.setText(String.format("處理中... %d%%", percentage));
+
     }
 
     private List<File> getSelectedImageFiles() {
@@ -169,6 +173,15 @@ public class FileManagerController {
             metadataListView.getItems().clear();
         }
     }
+
+
+
+
+    private void constructDatabase() {
+        // TODO: 實現構建數據庫功能
+        alertService.showAlert("提示", "構建數據庫功能尚未實現");
+    }
+
 
     public void shutdown() {
         fileManagerService.shutdown();
