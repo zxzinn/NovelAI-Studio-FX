@@ -276,10 +276,8 @@ public abstract class AbstractGenerationController {
 
     protected void addImageToHistory(Image image, File imageFile) {
         historyImagesPane.addImage(image, imageFile);
-    }
-  
-    public void clearHistoryImages() {
-        historyImagesPane.clear();
+
+
     }
 
     protected BufferedImage processImage(BufferedImage image) {

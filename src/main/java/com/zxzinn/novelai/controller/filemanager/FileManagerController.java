@@ -6,21 +6,15 @@ import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.web.WebView;
-import javafx.stage.DirectoryChooser;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Log4j2
 public class FileManagerController {
@@ -83,7 +77,6 @@ public class FileManagerController {
     private void setupEventHandlers() {
         addButton.setOnAction(event -> addWatchedDirectory());
         removeButton.setOnAction(event -> removeWatchedDirectory());
-        constructDatabaseButton.setOnAction(event -> constructDatabase());
 
         fileTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -108,71 +101,27 @@ public class FileManagerController {
             return;
         }
 
-        Task<Void> task = imageProcessingService.clearMetadataForFiles(selectedFiles);
-        progressBar.progressProperty().bind(task.progressProperty());
 
-        task.setOnSucceeded(e -> {
-            alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", selectedFiles.size()));
-            updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
-            fileTreeController.refreshTreeView();
-            progressBar.progressProperty().unbind();
-            progressBar.setProgress(0);
-        });
-
-        task.setOnFailed(e -> {
-            alertService.showAlert("錯誤", "處理過程中發生錯誤。");
-            progressBar.progressProperty().unbind();
-            progressBar.setProgress(0);
-        });
-
-        new Thread(task).start();
+        imageProcessingService.clearMetadataForFiles(selectedFiles,
+                this::updateProgress,
+                () -> {
+                    alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", selectedFiles.size()));
+                    updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
+                    fileTreeController.refreshTreeView();
+                },
+                error -> alertService.showAlert("錯誤", "處理過程中發生錯誤: " + error)
+        );
     }
 
-    private void processSelectedImages() {
-        List<File> selectedFiles = getSelectedImageFiles();
-        if (selectedFiles.isEmpty()) {
-            alertService.showAlert("警告", "請選擇要處理的圖像文件。");
-            return;
-        }
+    private void updateProgress(double progress) {
+        progressBar.setProgress(progress);
+        int percentage = (int) (progress * 100);
+        progressLabel.setText(String.format("處理中... %d%%", percentage));
 
-        String watermarkText = watermarkTextField.getText();
-        Task<Void> task = imageProcessingService.processImages(selectedFiles, watermarkText, true);
-        progressBar.progressProperty().bind(task.progressProperty());
-
-        task.setOnSucceeded(e -> {
-            alertService.showAlert("成功", String.format("已處理 %d 個文件。", selectedFiles.size()));
-            fileTreeController.refreshTreeView();
-            progressBar.setProgress(0);
-            progressLabel.setText("處理完成");
-        });
-
-        task.setOnFailed(e -> {
-            alertService.showAlert("錯誤", "處理過程中發生錯誤。");
-            progressBar.setProgress(0);
-            progressLabel.setText("處理失敗");
-        });
-
-        // 在任務執行過程中更新標籤
-        task.progressProperty().addListener((observable, oldValue, newValue) -> {
-            double progress = newValue.doubleValue();
-            int percentage = (int) (progress * 100);
-            progressLabel.setText(String.format("處理中... %d%%", percentage));
-        });
-
-        new Thread(task).start();
     }
 
     private List<File> getSelectedImageFiles() {
-        return fileTreeView.getSelectionModel().getSelectedItems().stream()
-                .map(item -> new File(fileTreeController.buildFullPath(item)))
-                .filter(this::isImageFile)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isImageFile(File file) {
-        if (!file.isFile()) return false;
-        String name = file.getName().toLowerCase();
-        return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
+        return fileTreeController.getSelectedImageFiles();
     }
 
     private void selectAllInSelectedDirectory() {
@@ -183,10 +132,7 @@ public class FileManagerController {
     }
 
     private void addWatchedDirectory() {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("選擇要監視的目錄");
-        File selectedDirectory = directoryChooser.showDialog(fileTreeView.getScene().getWindow());
-
+        File selectedDirectory = fileManagerService.chooseDirectory(fileTreeView.getScene().getWindow());
         if (selectedDirectory != null) {
             try {
                 fileManagerService.addWatchedDirectory(selectedDirectory.getAbsolutePath());
@@ -229,10 +175,13 @@ public class FileManagerController {
     }
 
 
+
+
     private void constructDatabase() {
         // TODO: 實現構建數據庫功能
         alertService.showAlert("提示", "構建數據庫功能尚未實現");
     }
+
 
     public void shutdown() {
         fileManagerService.shutdown();

@@ -2,7 +2,6 @@ package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 
 import javax.imageio.ImageIO;

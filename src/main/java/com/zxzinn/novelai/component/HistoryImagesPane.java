@@ -56,7 +56,4 @@ public class HistoryImagesPane extends VBox {
         historyImagesContainer.getChildren().addFirst(historyImageView);
     }
 
-    public void clear() {
-        historyImagesContainer.getChildren().clear();
-    }
 }

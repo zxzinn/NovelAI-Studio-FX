@@ -3,6 +3,9 @@ package com.zxzinn.novelai.service.filemanager;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
+
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -96,7 +99,7 @@ public class FileManagerService {
                 final Path finalFullPath = fullPath;
                 final WatchEvent.Kind<?> finalKind = kind;
                 Platform.runLater(() -> {
-                    notifyFileChange(finalFullPath, finalKind);
+
                     if (fileChangeListener != null) {
                         fileChangeListener.accept(finalFullPath.toString(), finalKind);
                     }
@@ -248,7 +251,7 @@ public class FileManagerService {
         settingsManager.setBoolean(EXPANDED_PREFIX + path, expanded);
     }
 
-    private boolean isDirectoryExpanded(String path) {
+    public boolean isDirectoryExpanded(String path) {
         return settingsManager.getBoolean(EXPANDED_PREFIX + path, false);
     }
 
@@ -259,6 +262,12 @@ public class FileManagerService {
             }
         }
         return null;
+    }
+
+    public File chooseDirectory(Window ownerWindow) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("選擇要監視的目錄");
+        return directoryChooser.showDialog(ownerWindow);
     }
 
     public void shutdown() {
