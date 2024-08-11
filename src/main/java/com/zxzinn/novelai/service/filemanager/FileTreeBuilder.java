@@ -8,16 +8,13 @@ import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Log4j2
 public class FileTreeBuilder {
@@ -36,29 +33,6 @@ public class FileTreeBuilder {
         this.isExpandedChecker = isExpandedChecker;
         this.fileFilter = fileFilter;
         this.fileComparator = fileComparator;
-    }
-
-    public CompletableFuture<TreeItem<String>> buildDirectoryTree(Set<Path> watchedDirectories) {
-        return CompletableFuture.supplyAsync(() -> {
-            TreeItem<String> root = new TreeItem<>("監視的目錄");
-            root.setExpanded(true);
-
-            List<CompletableFuture<TreeItem<String>>> futures = watchedDirectories.stream()
-                    .map(this::createTreeItemAsync)
-                    .collect(Collectors.toList());
-
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-            for (CompletableFuture<TreeItem<String>> future : futures) {
-                root.getChildren().add(future.join());
-            }
-
-            return root;
-        }, executorService);
-    }
-
-    private CompletableFuture<TreeItem<String>> createTreeItemAsync(Path path) {
-        return CompletableFuture.supplyAsync(() -> createTreeItem(path.toFile()), executorService);
     }
 
     private TreeItem<String> createTreeItem(File file) {
@@ -85,7 +59,7 @@ public class FileTreeBuilder {
             CompletableFuture.runAsync(() -> {
                 List<TreeItem<String>> batch = childList.subList(start, end).stream()
                         .map(this::createTreeItem)
-                        .collect(Collectors.toList());
+                        .toList();
                 Platform.runLater(() -> parentItem.getChildren().addAll(batch));
             }, executorService);
         }

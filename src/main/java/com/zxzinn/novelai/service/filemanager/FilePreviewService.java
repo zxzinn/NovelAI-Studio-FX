@@ -7,10 +7,10 @@ import java.io.File;
 
 @Log4j2
 public class FilePreviewService {
-    private final com.zxzinn.novelai.service.filemanager.FilePreviewFactory filePreviewFactory;
+    private final FilePreviewFactory filePreviewFactory;
 
     public FilePreviewService() {
-        this.filePreviewFactory = new com.zxzinn.novelai.service.filemanager.FilePreviewFactory();
+        this.filePreviewFactory = new FilePreviewFactory();
     }
 
     public Node getPreview(File file) {

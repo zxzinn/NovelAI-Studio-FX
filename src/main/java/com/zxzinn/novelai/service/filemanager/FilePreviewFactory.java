@@ -14,7 +14,7 @@ import java.nio.file.Files;
 @Log4j2
 public class FilePreviewFactory {
     private final Tika tika;
-    private final com.zxzinn.novelai.service.filemanager.ImagePreviewCreator imagePreviewCreator;
+    private final ImagePreviewCreator imagePreviewCreator;
 
     public FilePreviewFactory() {
         this.tika = new Tika();

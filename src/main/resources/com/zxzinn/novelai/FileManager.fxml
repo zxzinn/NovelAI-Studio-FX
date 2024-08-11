@@ -30,11 +30,6 @@
                     </graphic>
                 </Button>
             </HBox>
-            <Button fx:id="constructDatabaseButton" text="構建數據庫" maxWidth="Infinity">
-                <graphic>
-                    <FontIcon iconLiteral="fas-database" iconSize="12"/>
-                </graphic>
-            </Button>
             <Button fx:id="selectAllButton" text="全選" maxWidth="Infinity">
                 <graphic>
                     <FontIcon iconLiteral="fas-check-double" iconSize="12"/>
@@ -50,28 +45,6 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button fx:id="zoomInButton" text="放大" styleClass="action-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-search-plus" iconSize="12"/>
-                    </graphic>
-                </Button>
-                <Button fx:id="zoomOutButton" text="縮小" styleClass="action-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-search-minus" iconSize="12"/>
-                    </graphic>
-                </Button>
-                <Button fx:id="fitButton" text="適應" styleClass="action-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-compress-arrows-alt" iconSize="12"/>
-                    </graphic>
-                </Button>
-                <Button fx:id="originalSizeButton" text="原始大小" styleClass="action-button">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-expand-arrows-alt" iconSize="12"/>
-                    </graphic>
-                </Button>
-            </HBox>
         </VBox>
     </center>
 
@@ -80,14 +53,8 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <TextField fx:id="metadataFilterField" promptText="過濾元數據..."/>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
-            <HBox spacing="5">
-                <Label text="水印文字"/>
-                <TextField fx:id="watermarkTextField" HBox.hgrow="ALWAYS"/>
-            </HBox>
             <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity"/>
-            <Button fx:id="processButton" text="處理圖像" maxWidth="Infinity"/>
         </VBox>
     </right>
     <bottom>

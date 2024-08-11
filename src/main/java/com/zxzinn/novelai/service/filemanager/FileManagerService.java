@@ -3,8 +3,12 @@ package com.zxzinn.novelai.service.filemanager;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,12 +16,13 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 @Log4j2
 public class FileManagerService {
     private static final String WATCHED_DIRECTORIES_KEY = "watchedDirectories";
     private static final String EXPANDED_PREFIX = "expanded_";
+    private static final int BATCH_SIZE = 100;
+    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
     private final Set<Path> watchedDirectories;
     private final Map<WatchKey, Path> watchKeyToPath;
@@ -28,24 +33,17 @@ public class FileManagerService {
     @Setter
     private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
 
-    private final DirectoryWatcher directoryWatcher;
-    private final FileTreeBuilder fileTreeBuilder;
-
-    private Predicate<File> fileFilter = file -> true;
-    private Comparator<File> fileComparator = Comparator
-            .comparing(File::isDirectory).reversed()
-            .thenComparing(File::getName);
-
     public FileManagerService(SettingsManager settingsManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();
         this.watchKeyToPath = new ConcurrentHashMap<>();
         this.watchService = FileSystems.getDefault().newWatchService();
         this.settingsManager = settingsManager;
-        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.executorService = new ThreadPoolExecutor(
+                THREAD_POOL_SIZE, THREAD_POOL_SIZE,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-
-        this.directoryWatcher = new DirectoryWatcher(watchService, watchKeyToPath, this::notifyFileChange);
-        this.fileTreeBuilder = new FileTreeBuilder(executorService, this::isDirectoryExpanded, fileFilter, fileComparator);
 
         loadWatchedDirectories();
         startWatchService();
@@ -63,7 +61,56 @@ public class FileManagerService {
     }
 
     private void startWatchService() {
-        scheduledExecutorService.scheduleWithFixedDelay(directoryWatcher::processEvents, 0, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(this::processWatchEvents, 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void processWatchEvents() {
+        WatchKey key;
+        while ((key = watchService.poll()) != null) {
+            Path dir = watchKeyToPath.get(key);
+            if (dir == null) {
+                continue;
+            }
+
+            for (WatchEvent<?> event : key.pollEvents()) {
+                WatchEvent.Kind<?> kind = event.kind();
+                if (kind == StandardWatchEventKinds.OVERFLOW) {
+                    continue;
+                }
+
+                @SuppressWarnings("unchecked")
+                WatchEvent<Path> ev = (WatchEvent<Path>) event;
+                Path fileName = ev.context();
+                Path fullPath = dir.resolve(fileName);
+
+                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                    if (Files.isDirectory(fullPath)) {
+                        try {
+                            addWatchedDirectory(fullPath.toString());
+                        } catch (IOException e) {
+                            log.error("無法添加新創建的目錄到監視列表: {}", fullPath, e);
+                        }
+                    }
+                }
+
+                // 通知 UI 更新
+                final Path finalFullPath = fullPath;
+                final WatchEvent.Kind<?> finalKind = kind;
+                Platform.runLater(() -> {
+                    if (fileChangeListener != null) {
+                        fileChangeListener.accept(finalFullPath.toString(), finalKind);
+                    }
+                });
+            }
+
+            boolean valid = key.reset();
+            if (!valid) {
+                watchKeyToPath.remove(key);
+                if (watchKeyToPath.isEmpty()) {
+                    break;
+                }
+            }
+        }
     }
 
     public void addWatchedDirectory(String path) throws IOException {
@@ -120,14 +167,83 @@ public class FileManagerService {
     }
 
     public CompletableFuture<TreeItem<String>> getDirectoryTree() {
-        return fileTreeBuilder.buildDirectoryTree(watchedDirectories);
+        return CompletableFuture.supplyAsync(() -> {
+            TreeItem<String> root = new TreeItem<>("監視的目錄");
+            root.setExpanded(true);
+
+            List<CompletableFuture<TreeItem<String>>> futures = watchedDirectories.stream()
+                    .map(this::createTreeItemAsync)
+                    .toList();
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            for (CompletableFuture<TreeItem<String>> future : futures) {
+                root.getChildren().add(future.join());
+            }
+
+            return root;
+        }, executorService);
+    }
+
+    private CompletableFuture<TreeItem<String>> createTreeItemAsync(Path path) {
+        return CompletableFuture.supplyAsync(() -> createTreeItem(path.toFile()), executorService);
+    }
+
+    private TreeItem<String> createTreeItem(File file) {
+        TreeItem<String> item = new TreeItem<>(file.getName(), getFileIcon(file));
+        if (file.isDirectory()) {
+            item.setExpanded(isDirectoryExpanded(file.getAbsolutePath()));
+            CompletableFuture.runAsync(() -> loadChildrenInBatches(item, file), executorService);
+        }
+        return item;
+    }
+
+    private void loadChildrenInBatches(TreeItem<String> parentItem, File parentFile) {
+        File[] children = parentFile.listFiles();
+        if (children == null) {
+            return;
+        }
+
+        List<File> childList = Arrays.asList(children);
+        for (int i = 0; i < childList.size(); i += BATCH_SIZE) {
+            final int start = i;
+            final int end = Math.min(start + BATCH_SIZE, childList.size());
+            CompletableFuture.runAsync(() -> {
+                List<TreeItem<String>> batch = childList.subList(start, end).stream()
+                        .map(this::createTreeItem)
+                        .toList();
+                Platform.runLater(() -> parentItem.getChildren().addAll(batch));
+            }, executorService);
+        }
+    }
+
+    private FontIcon getFileIcon(File file) {
+        if (file.isDirectory()) {
+            return new FontIcon(FontAwesomeSolid.FOLDER);
+        } else {
+            String extension = getFileExtension(file);
+            return switch (extension.toLowerCase()) {
+                case "png", "jpg", "jpeg", "gif" -> new FontIcon(FontAwesomeSolid.IMAGE);
+                case "txt" -> new FontIcon(FontAwesomeSolid.FILE_ALT);
+                default -> new FontIcon(FontAwesomeSolid.FILE);
+            };
+        }
+    }
+
+    private String getFileExtension(File file) {
+        String name = file.getName();
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return "";
+        }
+        return name.substring(lastIndexOf + 1);
     }
 
     public void setDirectoryExpanded(String path, boolean expanded) {
         settingsManager.setBoolean(EXPANDED_PREFIX + path, expanded);
     }
 
-    private boolean isDirectoryExpanded(String path) {
+    public boolean isDirectoryExpanded(String path) {
         return settingsManager.getBoolean(EXPANDED_PREFIX + path, false);
     }
 
@@ -140,42 +256,10 @@ public class FileManagerService {
         return null;
     }
 
-    private void notifyFileChange(Path path, WatchEvent.Kind<?> kind) {
-        if (fileChangeListener != null) {
-            Platform.runLater(() -> fileChangeListener.accept(path.toString(), kind));
-        }
-    }
-    public void setFileFilter(Predicate<File> filter) {
-        this.fileFilter = filter;
-        fileTreeBuilder.setFileFilter(filter);
-    }
-
-    public void setFileComparator(Comparator<File> comparator) {
-        this.fileComparator = comparator;
-        fileTreeBuilder.setFileComparator(comparator);
-    }
-
-    public CompletableFuture<List<File>> searchFiles(String keyword) {
-        return CompletableFuture.supplyAsync(() -> {
-            List<File> results = new ArrayList<>();
-            for (Path watchedDir : watchedDirectories) {
-                searchFilesRecursively(watchedDir.toFile(), keyword, results);
-            }
-            return results;
-        }, executorService);
-    }
-
-    private void searchFilesRecursively(File directory, String keyword, List<File> results) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    searchFilesRecursively(file, keyword, results);
-                } else if (file.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                    results.add(file);
-                }
-            }
-        }
+    public File chooseDirectory(Window ownerWindow) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("選擇要監視的目錄");
+        return directoryChooser.showDialog(ownerWindow);
     }
 
     public void shutdown() {
