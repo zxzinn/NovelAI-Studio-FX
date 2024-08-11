@@ -87,9 +87,15 @@ public class FileManagerService {
                     if (Files.isDirectory(fullPath)) {
                         try {
                             addWatchedDirectory(fullPath.toString());
+                            refreshDirectory(dir); // 刷新父目錄
                         } catch (IOException e) {
                             log.error("無法添加新創建的目錄到監視列表: {}", fullPath, e);
                         }
+                    }
+                } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                    if (watchedDirectories.remove(fullPath)) {
+                        removeWatchKey(fullPath);
+                        refreshDirectory(dir); // 刷新父目錄
                     }
                 }
 
@@ -123,6 +129,11 @@ public class FileManagerService {
             log.info("已添加監視目錄: {}", directory);
 
             settingsManager.addToStringList(WATCHED_DIRECTORIES_KEY, path);
+
+            // 通知檔案樹控制器更新
+            if (fileChangeListener != null) {
+                fileChangeListener.accept(path, StandardWatchEventKinds.ENTRY_CREATE);
+            }
         }
     }
 
@@ -260,6 +271,28 @@ public class FileManagerService {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("選擇要監視的目錄");
         return directoryChooser.showDialog(ownerWindow);
+    }
+
+    public void refreshDirectory(Path directory) {
+        WatchKey key = null;
+        for (Map.Entry<WatchKey, Path> entry : watchKeyToPath.entrySet()) {
+            if (entry.getValue().equals(directory)) {
+                key = entry.getKey();
+                break;
+            }
+        }
+        if (key != null) {
+            key.pollEvents(); // 清除所有待處理的事件
+            Path dir = watchKeyToPath.get(key);
+            if (dir != null) {
+                final Path finalDir = dir;
+                Platform.runLater(() -> {
+                    if (fileChangeListener != null) {
+                        fileChangeListener.accept(finalDir.toString(), StandardWatchEventKinds.ENTRY_MODIFY);
+                    }
+                });
+            }
+        }
     }
 
     public void shutdown() {

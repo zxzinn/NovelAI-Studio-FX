@@ -18,10 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -147,12 +144,21 @@ public class FileTreeController {
                 } else if (eventKind == StandardWatchEventKinds.ENTRY_CREATE) {
                     addNewItem(path);
                 } else if (eventKind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                    updateModifiedItem(path);
+                    refreshTreeItem(path);
                 }
             } catch (Exception e) {
                 log.error("更新樹項目時發生錯誤", e);
             }
         });
+    }
+
+    private void refreshTreeItem(String path) {
+        TreeItem<String> item = pathToItemMap.get(path);
+        if (item != null) {
+            File file = new File(path);
+            item.getChildren().clear();
+            loadChildrenInBatches(item, file);
+        }
     }
 
     private void removeDeletedItem(String path) {
@@ -176,6 +182,7 @@ public class FileTreeController {
             parentItem.getChildren().add(newItem);
             pathToItemMap.put(path, newItem);
             if (file.isDirectory()) {
+                newItem.setExpanded(true);  // 確保新建的資料夾會展開
                 loadChildrenInBatches(newItem, file);
             }
         } else {
@@ -208,11 +215,17 @@ public class FileTreeController {
     private void loadChildrenInBatches(TreeItem<String> parentItem, File parentFile) {
         File[] children = parentFile.listFiles();
         if (children != null) {
-            for (File child : children) {
+            List<File> childList = Arrays.asList(children);
+            Collections.sort(childList);  // 對檔案列表進行排序
+            for (File child : childList) {
                 TreeItem<String> childItem = createTreeItem(child);
                 parentItem.getChildren().add(childItem);
                 String childPath = child.getAbsolutePath();
                 pathToItemMap.put(childPath, childItem);
+                if (child.isDirectory()) {
+                    // 遞迴載入子目錄
+                    loadChildrenInBatches(childItem, child);
+                }
             }
         }
     }

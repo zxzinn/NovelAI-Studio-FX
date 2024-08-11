@@ -11,6 +11,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.List;
 
@@ -104,6 +106,18 @@ public class FileManagerController {
                 () -> {
                     alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", selectedFiles.size()));
                     updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
+                    // 刷新處理後的目錄
+                    for (File file : selectedFiles) {
+                        Path parentDir = file.getParentFile().toPath();
+                        Path cleanedDir = parentDir.resolve("cleaned");
+                        if (Files.exists(cleanedDir)) {
+                            try {
+                                fileManagerService.addWatchedDirectory(cleanedDir.toString());
+                            } catch (IOException e) {
+                                log.error("無法添加 cleaned 目錄到監視列表", e);
+                            }
+                        }
+                    }
                     fileTreeController.refreshTreeView();
                 },
                 error -> alertService.showAlert("錯誤", "處理過程中發生錯誤: " + error)
