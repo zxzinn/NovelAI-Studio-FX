@@ -2,7 +2,7 @@ package com.zxzinn.novelai.controller.generation;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.api.ImageGenerationPayload;
+
 import com.zxzinn.novelai.component.HistoryImagesPane;
 import com.zxzinn.novelai.component.ImageControlBar;
 import com.zxzinn.novelai.component.PreviewPane;
@@ -19,18 +19,12 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -107,6 +101,7 @@ public abstract class AbstractGenerationController {
     public void initialize() {
         previewPane = new PreviewPane(filePreviewService);
         previewContainer.getChildren().add(previewPane);
+        historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         initializeFields();
         loadSettings();
         setupListeners();
@@ -129,6 +124,10 @@ public abstract class AbstractGenerationController {
             isNegativePromptLocked = !isNegativePromptLocked;
             updateLockIcon(lockNegativePromptIcon, isNegativePromptLocked);
         }
+    }
+
+    protected void handleHistoryImageClick(File imageFile) {
+        previewPane.updatePreview(imageFile);
     }
 
     private void updateLockIcon(FontIcon icon, boolean isLocked) {
@@ -256,35 +255,29 @@ public abstract class AbstractGenerationController {
             BufferedImage processedImage = processImage(originalImage);
 
             Image fxImage = imageUtils.convertToFxImage(processedImage);
-            previewPane.updatePreview(convertBufferedImageToFile(processedImage));
-            addImageToHistory(fxImage);
-
-            try {
-                String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-                ImageProcessor.saveImage(processedImage, new File("output", fileName));
-            } catch (IOException e) {
-                log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
-            }
+            File imageFile = saveImageToFile(processedImage, timeStamp);
+            previewPane.updatePreview(imageFile);
+            addImageToHistory(fxImage, imageFile);
         });
     }
 
-    private File convertBufferedImageToFile(BufferedImage image) {
+    private File saveImageToFile(BufferedImage image, String timeStamp) {
         try {
-            File tempFile = File.createTempFile("temp_image", ".png");
-            ImageIO.write(image, "png", tempFile);
-            tempFile.deleteOnExit();
-            return tempFile;
+            String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
+            File outputFile = new File("output", fileName);
+            ImageProcessor.saveImage(image, outputFile);
+            return outputFile;
         } catch (IOException e) {
-            log.error("無法將 BufferedImage 轉換為 File", e);
+            log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
             return null;
         }
     }
 
-    protected void addImageToHistory(Image image) {
-        historyImagesPane.addImage(image);
-    }
 
-    // 如果需要清除歷史圖片，可以添加這個方法
+    protected void addImageToHistory(Image image, File imageFile) {
+        historyImagesPane.addImage(image, imageFile);
+    }
+  
     public void clearHistoryImages() {
         historyImagesPane.clear();
     }
@@ -357,10 +350,5 @@ public abstract class AbstractGenerationController {
     protected void updatePromptPreviews() {
         updatePromptPreview(positivePromptArea.getText(), positivePromptPreviewArea);
         updatePromptPreview(negativePromptArea.getText(), negativePromptPreviewArea);
-    }
-
-    // 在加載或更改圖像時調用此方法
-    private void updateImageResolution(int width, int height) {
-        imageControlBar.setResolution(width, height);
     }
 }

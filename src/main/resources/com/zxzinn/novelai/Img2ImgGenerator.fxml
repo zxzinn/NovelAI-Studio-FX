@@ -115,14 +115,7 @@
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS" prefWidth="850">
-                    <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS">
-                        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" fitToHeight="true" styleClass="image-scroll-pane">
-                            <AnchorPane>
-                                <ImageView fx:id="mainImageView" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                                           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" preserveRatio="true"/>
-                            </AnchorPane>
-                        </ScrollPane>
-                    </StackPane>
+                    <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
                     <ImageControlBar fx:id="imageControlBar" />
                 </VBox>
 

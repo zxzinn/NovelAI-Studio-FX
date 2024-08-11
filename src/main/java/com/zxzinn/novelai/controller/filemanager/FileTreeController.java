@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.EventType;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import lombok.Setter;
@@ -12,6 +14,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -23,12 +27,12 @@ public class FileTreeController {
     private TreeView<String> fileTreeView;
     private FilteredList<TreeItem<String>> filteredTreeItems;
 
-    public void initialize() {
-        refreshTreeView();
-    }
-
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
+    }
+
+    public void initialize() {
+        refreshTreeView();
     }
 
     public void refreshTreeView() {
@@ -78,23 +82,88 @@ public class FileTreeController {
         List<String> pathParts = new ArrayList<>();
         TreeItem<String> current = item;
         while (current != null && !current.getValue().equals("監視的目錄")) {
-            pathParts.addFirst(current.getValue());
+            pathParts.add(0, current.getValue());
             current = current.getParent();
         }
 
-        if (current == null || current.getParent() != null) {
-            log.error("無法找到根目錄，路徑可能不完整: {}", String.join(File.separator, pathParts));
-            return String.join(File.separator, pathParts);
+        if (pathParts.isEmpty()) {
+            log.warn("無法構建完整路徑：路徑為空");
+            return "";
         }
 
-        String watchedDir = pathParts.removeFirst();
+        String watchedDir = pathParts.get(0);
         String watchedDirFullPath = fileManagerService.getWatchedDirectoryFullPath(watchedDir);
 
         if (watchedDirFullPath == null) {
-            log.error("無法找到監視目錄的完整路徑: {}", watchedDir);
+            log.warn("無法找到監視目錄的完整路徑: {}", watchedDir);
             return String.join(File.separator, pathParts);
         }
 
+        pathParts.remove(0);
         return Paths.get(watchedDirFullPath, String.join(File.separator, pathParts)).toString();
+    }
+
+
+    public void selectAllInDirectory(TreeItem<String> directoryItem) {
+        if (directoryItem != null && directoryItem.isExpanded()) {
+            ObservableList<TreeItem<String>> children = directoryItem.getChildren();
+            fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            int startIndex = fileTreeView.getRow(directoryItem) + 1;
+            int endIndex = startIndex + children.size();
+            fileTreeView.getSelectionModel().selectRange(startIndex, endIndex);
+        }
+    }
+
+    public void updateTreeItem(String path, WatchEvent.Kind<?> eventKind) {
+        Platform.runLater(() -> {
+            TreeItem<String> root = fileTreeView.getRoot();
+            if (root != null) {
+                updateTreeItemRecursive(root, path, eventKind);
+            } else {
+                log.warn("文件樹根節點為空");
+            }
+        });
+    }
+
+    private void updateTreeItemRecursive(TreeItem<String> item, String path, WatchEvent.Kind<?> eventKind) {
+        String itemPath = buildFullPath(item);
+        if (itemPath.isEmpty()) {
+            return;
+        }
+
+        if (path.startsWith(itemPath)) {
+            if (path.equals(itemPath)) {
+                // 找到了匹配的項目
+                TreeItem<String> parent = item.getParent();
+                if (parent != null) {
+                    if (eventKind == StandardWatchEventKinds.ENTRY_CREATE || eventKind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        // 處理子項修改事件
+                        refreshChildren(item);
+                    } else if (eventKind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        // 處理值變更事件
+                        item.setValue(new File(path).getName());
+                    }
+                }
+            } else {
+                // 繼續在子項中搜索
+                for (TreeItem<String> child : item.getChildren()) {
+                    updateTreeItemRecursive(child, path, eventKind);
+                }
+            }
+        }
+    }
+
+
+    private void refreshChildren(TreeItem<String> item) {
+        File file = new File(buildFullPath(item));
+        if (file.isDirectory()) {
+            item.getChildren().clear();
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    item.getChildren().add(new TreeItem<>(child.getName()));
+                }
+            }
+        }
     }
 }

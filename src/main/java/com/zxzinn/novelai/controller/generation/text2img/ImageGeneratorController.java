@@ -9,7 +9,6 @@ import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import javafx.application.Platform;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.image.BufferedImage;

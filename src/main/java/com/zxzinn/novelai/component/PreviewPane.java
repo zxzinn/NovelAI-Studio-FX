@@ -28,49 +28,20 @@ public class PreviewPane extends StackPane {
         imageView.fitHeightProperty().bind(heightProperty());
 
         getChildren().add(scrollPane);
-
-        setupZoomHandler();
     }
 
     public void updatePreview(File file) {
-        if (file != null && file.isFile()) {
+        if(file != null && file.isFile()) {
             Node previewNode = filePreviewService.getPreview(file);
             scrollPane.setContent(previewNode);
 
-            if (previewNode instanceof ImageView) {
-                ImageView iv = (ImageView) previewNode;
-                iv.setPreserveRatio(true);
-                iv.fitWidthProperty().bind(widthProperty());
-                iv.fitHeightProperty().bind(heightProperty());
+            if(previewNode instanceof ImageView imageview) {
+                imageview.setPreserveRatio(true);
+                imageview.fitWidthProperty().bind(widthProperty());
+                imageview.fitHeightProperty().bind(heightProperty());
             }
         } else {
             scrollPane.setContent(null);
         }
-    }
-
-    private void setupZoomHandler() {
-        scrollPane.addEventFilter(javafx.scene.input.ScrollEvent.ANY, event -> {
-            if (event.isControlDown()) {
-                event.consume();
-                double delta = event.getDeltaY() > 0 ? 1.1 : 0.9;
-                zoom(delta);
-            }
-        });
-    }
-
-    private void zoom(double factor) {
-        Node content = scrollPane.getContent();
-        if (content instanceof ImageView imageView) {
-            imageView.setFitWidth(imageView.getFitWidth() * factor);
-            imageView.setFitHeight(imageView.getFitHeight() * factor);
-        }
-    }
-
-    public void zoomIn() {
-        zoom(1.1);
-    }
-
-    public void zoomOut() {
-        zoom(0.9);
     }
 }

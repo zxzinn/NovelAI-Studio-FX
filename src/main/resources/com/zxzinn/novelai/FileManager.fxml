@@ -35,6 +35,11 @@
                     <FontIcon iconLiteral="fas-database" iconSize="12"/>
                 </graphic>
             </Button>
+            <Button fx:id="selectAllButton" text="全選" maxWidth="Infinity">
+                <graphic>
+                    <FontIcon iconLiteral="fas-check-double" iconSize="12"/>
+                </graphic>
+            </Button>
             <TreeView fx:id="fileTreeView" VBox.vgrow="ALWAYS" styleClass="file-tree"/>
         </VBox>
     </left>
@@ -44,11 +49,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <ScrollPane fx:id="previewScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
-                <StackPane fx:id="previewContainer">
-                    <ImageView fx:id="previewImageView" preserveRatio="true"/>
-                </StackPane>
-            </ScrollPane>
+            <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="zoomInButton" text="放大" styleClass="action-button">
                     <graphic>
@@ -85,8 +86,17 @@
                 <Label text="水印文字"/>
                 <TextField fx:id="watermarkTextField" HBox.hgrow="ALWAYS"/>
             </HBox>
-            <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata"/>
+            <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity"/>
             <Button fx:id="processButton" text="處理圖像" maxWidth="Infinity"/>
         </VBox>
     </right>
+    <bottom>
+        <VBox spacing="5" alignment="CENTER">
+            <padding>
+                <Insets top="10" right="0" bottom="0" left="0"/>
+            </padding>
+            <ProgressBar fx:id="progressBar" progress="0.0" maxWidth="Infinity"/>
+            <Label fx:id="progressLabel" text="準備就緒" alignment="CENTER"/>
+        </VBox>
+    </bottom>
 </BorderPane>

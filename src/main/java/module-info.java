@@ -36,4 +36,6 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.controller.ui;
     exports com.zxzinn.novelai.utils.common;
     exports com.zxzinn.novelai.component;
+    exports com.zxzinn.novelai.service.filemanager;
+    opens com.zxzinn.novelai.service.filemanager to javafx.fxml;
 }
