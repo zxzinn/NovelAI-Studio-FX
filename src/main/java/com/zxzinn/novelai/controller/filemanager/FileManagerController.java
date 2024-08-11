@@ -17,6 +17,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +69,15 @@ public class FileManagerController {
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
+
+        // 設置檔案系統變化的監聽器
+        fileManagerService.setFileChangeListener(this::handleFileChange);
+    }
+
+    private void handleFileChange(String path, WatchEvent.Kind<?> kind) {
+        fileTreeController.updateTreeItem(path, kind);
+        // 更新預覽或元數據
+        updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
     }
 
     private void setupEventHandlers() {

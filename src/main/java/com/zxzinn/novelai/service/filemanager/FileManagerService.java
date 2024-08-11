@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.filemanager;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.function.BiConsumer;
 
 @Log4j2
 public class FileManagerService {
@@ -27,6 +28,9 @@ public class FileManagerService {
     private final SettingsManager settingsManager;
     private final ExecutorService executorService;
     private final ScheduledExecutorService scheduledExecutorService;
+    @Setter
+    private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
+
 
     public FileManagerService(SettingsManager settingsManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();
@@ -87,6 +91,16 @@ public class FileManagerService {
                         }
                     }
                 }
+
+                // 通知 UI 更新
+                final Path finalFullPath = fullPath;
+                final WatchEvent.Kind<?> finalKind = kind;
+                Platform.runLater(() -> {
+                    notifyFileChange(finalFullPath, finalKind);
+                    if (fileChangeListener != null) {
+                        fileChangeListener.accept(finalFullPath.toString(), finalKind);
+                    }
+                });
             }
 
             boolean valid = key.reset();
@@ -97,6 +111,11 @@ public class FileManagerService {
                 }
             }
         }
+    }
+
+    private void notifyFileChange(Path path, WatchEvent.Kind<?> kind) {
+        // 這裡可以實現一個觀察者模式，通知 UI 更新
+        // 例如，可以使用 JavaFX 的 Property 或者自定義的事件系統
     }
 
     public void addWatchedDirectory(String path) throws IOException {
@@ -202,7 +221,6 @@ public class FileManagerService {
             }, executorService);
         }
     }
-
 
     private FontIcon getFileIcon(File file) {
         if (file.isDirectory()) {
