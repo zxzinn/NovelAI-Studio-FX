@@ -2,6 +2,7 @@ package com.zxzinn.novelai.controller.generation;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
+
 import com.zxzinn.novelai.component.HistoryImagesPane;
 import com.zxzinn.novelai.component.ImageControlBar;
 import com.zxzinn.novelai.component.PreviewPane;
@@ -272,10 +273,11 @@ public abstract class AbstractGenerationController {
         }
     }
 
+
     protected void addImageToHistory(Image image, File imageFile) {
         historyImagesPane.addImage(image, imageFile);
     }
-
+  
     public void clearHistoryImages() {
         historyImagesPane.clear();
     }
