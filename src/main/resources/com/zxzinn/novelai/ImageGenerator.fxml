@@ -2,8 +2,6 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.image.ImageView?>
 
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.zxzinn.novelai.component.ImageControlBar?>
@@ -46,13 +44,6 @@
                         <TextField fx:id="stepsField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
                         <Label text="種子" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
                         <TextField fx:id="seedField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                    </GridPane>
-                </TitledPane>
-                <TitledPane text="Advanced Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <CheckBox fx:id="clearLSBCheckBox" text="清除 Metadata" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
-                        <Label text="水印文字" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="watermarkTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                     </GridPane>
                 </TitledPane>
                 <HBox spacing="10.0" alignment="CENTER">

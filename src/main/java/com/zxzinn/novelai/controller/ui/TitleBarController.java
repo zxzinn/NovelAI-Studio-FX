@@ -32,7 +32,7 @@ public class TitleBarController extends HBox {
     @FXML private Button maximizeButton;
     @FXML private Button closeButton;
 
-    private StringProperty title = new SimpleStringProperty();
+    private final StringProperty title = new SimpleStringProperty();
 
     @FXML
     private void initialize() {

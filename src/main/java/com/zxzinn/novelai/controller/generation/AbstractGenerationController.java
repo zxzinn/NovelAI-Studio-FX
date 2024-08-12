@@ -57,8 +57,6 @@ public abstract class AbstractGenerationController {
     @FXML protected TextArea positivePromptPreviewArea;
     @FXML protected TextArea negativePromptPreviewArea;
     @FXML protected ComboBox<String> generateCountComboBox;
-    @FXML protected TextField watermarkTextField;
-    @FXML protected CheckBox clearLSBCheckBox;
     @FXML protected VBox historyImagesContainer;
     @FXML protected StackPane previewContainer;
     @FXML private ImageControlBar imageControlBar;
@@ -186,8 +184,6 @@ public abstract class AbstractGenerationController {
         countField.setText("1");
         stepsField.setText("28");
         seedField.setText("0");
-        watermarkTextField.setText("");
-        clearLSBCheckBox.setSelected(false);
     }
 
     @FXML
@@ -252,10 +248,9 @@ public abstract class AbstractGenerationController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            BufferedImage processedImage = processImage(originalImage);
 
-            Image fxImage = imageUtils.convertToFxImage(processedImage);
-            File imageFile = saveImageToFile(processedImage, timeStamp);
+            Image fxImage = imageUtils.convertToFxImage(originalImage);
+            File imageFile = saveImageToFile(originalImage, timeStamp);
             previewPane.updatePreview(imageFile);
             addImageToHistory(fxImage, imageFile);
         });
@@ -276,18 +271,6 @@ public abstract class AbstractGenerationController {
 
     protected void addImageToHistory(Image image, File imageFile) {
         historyImagesPane.addImage(image, imageFile);
-    }
-
-    protected BufferedImage processImage(BufferedImage image) {
-        if (!watermarkTextField.getText().isEmpty()) {
-            ImageProcessor.addWatermark(image, watermarkTextField.getText());
-        }
-
-        if (clearLSBCheckBox.isSelected()) {
-            ImageProcessor.clearMetadata(image);
-        }
-
-        return image;
     }
 
     protected void loadSettings() {

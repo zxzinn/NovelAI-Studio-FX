@@ -4,17 +4,24 @@ import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.image.ImageProcessor;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import lombok.extern.log4j.Log4j2;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 public class FileManagerController {
@@ -25,10 +32,7 @@ public class FileManagerController {
     @FXML private TextField searchField;
     @FXML private Button addButton;
     @FXML private Button removeButton;
-    @FXML private Button constructDatabaseButton;
-    @FXML private TextField watermarkTextField;
     @FXML private Button clearMetadataButton;
-    @FXML private Button processButton;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
 
@@ -36,24 +40,23 @@ public class FileManagerController {
     private final FileManagerService fileManagerService;
     private final FilePreviewService filePreviewService;
     private final MetadataService metadataService;
-    private final ImageProcessingService imageProcessingService;
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
     protected PreviewPane previewPane;
+    private final ExecutorService executorService;
 
     public FileManagerController(SettingsManager settingsManager,
                                  FileManagerService fileManagerService,
                                  FilePreviewService filePreviewService,
                                  MetadataService metadataService,
-                                 ImageProcessingService imageProcessingService,
                                  AlertService alertService) {
         this.settingsManager = settingsManager;
         this.fileManagerService = fileManagerService;
         this.filePreviewService = filePreviewService;
         this.metadataService = metadataService;
-        this.imageProcessingService = imageProcessingService;
         this.alertService = alertService;
         this.fileTreeController = new FileTreeController(fileManagerService);
+        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     @FXML
@@ -101,33 +104,73 @@ public class FileManagerController {
             return;
         }
 
-        imageProcessingService.clearMetadataForFiles(selectedFiles,
-                this::updateProgress,
-                () -> {
-                    alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", selectedFiles.size()));
-                    updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
-                    // 刷新處理後的目錄
-                    for (File file : selectedFiles) {
-                        Path parentDir = file.getParentFile().toPath();
-                        Path cleanedDir = parentDir.resolve("cleaned");
-                        if (Files.exists(cleanedDir)) {
-                            try {
-                                fileManagerService.addWatchedDirectory(cleanedDir.toString());
-                            } catch (IOException e) {
-                                log.error("無法添加 cleaned 目錄到監視列表", e);
-                            }
-                        }
+        AtomicInteger processedCount = new AtomicInteger(0);
+        int totalFiles = selectedFiles.size();
+
+        for (File file : selectedFiles) {
+            executorService.submit(() -> {
+                try {
+                    processFile(file);
+                    int completed = processedCount.incrementAndGet();
+                    updateProgressOnUI(completed, totalFiles);
+                    if (completed == totalFiles) {
+                        onProcessingComplete(selectedFiles);
                     }
-                    fileTreeController.refreshTreeView();
-                },
-                error -> alertService.showAlert("錯誤", "處理過程中發生錯誤: " + error)
-        );
+                } catch (Exception e) {
+                    log.error("處理文件時發生錯誤: {}", file.getName(), e);
+                    Platform.runLater(() -> alertService.showAlert("錯誤", "處理文件時發生錯誤: " + e.getMessage()));
+                }
+            });
+        }
     }
 
-    private void updateProgress(double progress) {
-        progressBar.setProgress(progress);
-        int percentage = (int) (progress * 100);
-        progressLabel.setText(String.format("處理中... %d%%", percentage));
+    private void processFile(File file) throws IOException {
+        BufferedImage image = ImageIO.read(file);
+        if (image == null) {
+            throw new IOException("無法讀取圖像文件: " + file.getName());
+        }
+
+        ImageProcessor.clearMetadata(image);
+
+        File cleanedDir = new File(file.getParentFile(), "cleaned");
+        if (!cleanedDir.exists() && !cleanedDir.mkdir()) {
+            throw new IOException("無法創建 cleaned 目錄");
+        }
+
+        File outputFile = new File(cleanedDir, file.getName());
+        ImageProcessor.saveImage(image, outputFile);
+    }
+
+    private void updateProgressOnUI(int completed, int total) {
+        Platform.runLater(() -> {
+            double progress = (double) completed / total;
+            progressBar.setProgress(progress);
+            int percentage = (int) (progress * 100);
+            progressLabel.setText(String.format("處理中... %d%%", percentage));
+        });
+    }
+
+    private void onProcessingComplete(List<File> processedFiles) {
+        Platform.runLater(() -> {
+            alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", processedFiles.size()));
+            updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
+            refreshProcessedDirectories(processedFiles);
+            fileTreeController.refreshTreeView();
+        });
+    }
+
+    private void refreshProcessedDirectories(List<File> processedFiles) {
+        for (File file : processedFiles) {
+            Path parentDir = file.getParentFile().toPath();
+            Path cleanedDir = parentDir.resolve("cleaned");
+            if (Files.exists(cleanedDir)) {
+                try {
+                    fileManagerService.addWatchedDirectory(cleanedDir.toString());
+                } catch (IOException e) {
+                    log.error("無法添加 cleaned 目錄到監視列表", e);
+                }
+            }
+        }
     }
 
     private List<File> getSelectedImageFiles() {

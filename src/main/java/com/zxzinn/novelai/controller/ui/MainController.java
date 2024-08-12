@@ -6,7 +6,6 @@ import com.zxzinn.novelai.controller.generation.img2img.Img2ImgGeneratorControll
 import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
-import com.zxzinn.novelai.service.filemanager.ImageProcessingService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
@@ -106,7 +105,6 @@ public class MainController {
 
         FileManagerService fileManagerService = new FileManagerService(settingsManager);
         MetadataService metadataService = new MetadataService();
-        ImageProcessingService imageProcessingService = new ImageProcessingService();
         AlertService alertService = new AlertService();
 
         FileManagerController controller = new FileManagerController(
@@ -114,7 +112,6 @@ public class MainController {
                 fileManagerService,
                 filePreviewService,
                 metadataService,
-                imageProcessingService,
                 alertService
         );
 

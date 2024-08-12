@@ -17,20 +17,6 @@ import java.io.IOException;
 @Log4j2
 public class ImageProcessor {
 
-    public static void addWatermark(BufferedImage image, String watermarkText) {
-        Graphics2D g2d = image.createGraphics();
-        AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f);
-        g2d.setComposite(alphaChannel);
-        g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("Arial", Font.BOLD, 64));
-        FontMetrics fontMetrics = g2d.getFontMetrics();
-        Rectangle2D rect = fontMetrics.getStringBounds(watermarkText, g2d);
-        int centerX = (image.getWidth() - (int) rect.getWidth()) / 2;
-        int centerY = (image.getHeight() - (int) rect.getHeight()) / 2;
-        g2d.drawString(watermarkText, centerX, centerY);
-        g2d.dispose();
-    }
-
     public static void clearMetadata(BufferedImage image) {
         WritableRaster raster = image.getRaster();
         int[] pixels = new int[raster.getNumBands()];

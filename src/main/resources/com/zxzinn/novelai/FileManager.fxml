@@ -5,7 +5,6 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<?import javafx.scene.image.ImageView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             stylesheets="@styles.css">
@@ -60,7 +59,7 @@
     <bottom>
         <VBox spacing="5" alignment="CENTER">
             <padding>
-                <Insets top="10" right="0" bottom="0" left="0"/>
+                <Insets top="10"/>
             </padding>
             <ProgressBar fx:id="progressBar" progress="0.0" maxWidth="Infinity"/>
             <Label fx:id="progressLabel" text="準備就緒" alignment="CENTER"/>

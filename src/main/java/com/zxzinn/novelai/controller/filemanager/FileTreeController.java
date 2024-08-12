@@ -14,7 +14,6 @@ import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
@@ -187,20 +186,6 @@ public class FileTreeController {
             }
         } else {
             log.warn("無法找到父項目來添加新項目: {}", path);
-        }
-    }
-
-    private void updateModifiedItem(String path) {
-        TreeItem<String> item = pathToItemMap.get(path);
-        if (item != null) {
-            File file = new File(path);
-            item.setGraphic(getFileIcon(file));
-            if (file.isDirectory()) {
-                item.getChildren().clear();
-                loadChildrenInBatches(item, file);
-            }
-        } else {
-            log.warn("無法找到要更新的項目: {}", path);
         }
     }
 

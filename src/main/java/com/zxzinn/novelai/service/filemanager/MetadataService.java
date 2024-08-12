@@ -32,10 +32,10 @@ public class MetadataService {
         try (FileInputStream inputstream = new FileInputStream(file)) {
             BodyContentHandler handler = new BodyContentHandler();
             Metadata metadata = new Metadata();
-            ParseContext pcontext = new ParseContext();
+            ParseContext context = new ParseContext();
 
             AutoDetectParser parser = new AutoDetectParser();
-            parser.parse(inputstream, handler, metadata, pcontext);
+            parser.parse(inputstream, handler, metadata, context);
 
             for (String name : metadata.names()) {
                 metadataList.add(name + ": " + metadata.get(name));

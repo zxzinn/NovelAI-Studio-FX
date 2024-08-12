@@ -12,13 +12,12 @@ import java.io.File;
 @Log4j2
 public class PreviewPane extends StackPane {
     private final ScrollPane scrollPane;
-    private final ImageView imageView;
     private final FilePreviewService filePreviewService;
 
     public PreviewPane(FilePreviewService filePreviewService) {
         this.filePreviewService = filePreviewService;
         this.scrollPane = new ScrollPane();
-        this.imageView = new ImageView();
+        ImageView imageView = new ImageView();
 
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
