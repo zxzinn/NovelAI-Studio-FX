@@ -5,6 +5,9 @@ import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
 
 @Log4j2
 public class NovelAIAPIClient implements APIClient {
@@ -14,9 +17,36 @@ public class NovelAIAPIClient implements APIClient {
     private final OkHttpClient httpClient;
     private final Gson gson;
 
-    public NovelAIAPIClient(OkHttpClient httpClient, Gson gson) {
-        this.httpClient = httpClient;
+    public NovelAIAPIClient(Gson gson) {
         this.gson = gson;
+        this.httpClient = createHttpClient();
+    }
+
+    private OkHttpClient createHttpClient() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS);
+
+        // 檢查是否可以連接到 Clash 代理
+        if (isClashProxyAvailable()) {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 7890));
+            builder.proxy(proxy);
+            log.info("使用 Clash 代理: 127.0.0.1:7890");
+        } else {
+            log.info("未使用代理");
+        }
+
+        return builder.build();
+    }
+
+    private boolean isClashProxyAvailable() {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress("127.0.0.1", 7890), 1000);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override

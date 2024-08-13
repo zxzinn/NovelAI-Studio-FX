@@ -96,7 +96,7 @@ public class Application extends javafx.application.Application {
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .build();
             Gson gson = new Gson();
-            APIClient apiClient = new NovelAIAPIClient(httpClient, gson);
+            APIClient apiClient = new NovelAIAPIClient(gson);
             EmbedProcessor embedProcessor = new EmbedProcessor();
             ImageUtils imageUtils = new ImageUtils();
             ImageGenerationService imageGenerationService = new ImageGenerationService(
