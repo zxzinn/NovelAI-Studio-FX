@@ -28,6 +28,9 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CountDownLatch;
@@ -41,39 +44,68 @@ public abstract class AbstractGenerationController {
     protected final ImageUtils imageUtils;
     protected final FilePreviewService filePreviewService;
 
-    @FXML protected TextField apiKeyField;
-    @FXML protected ComboBox<String> modelComboBox;
-    @FXML protected TextField widthField;
-    @FXML protected TextField heightField;
-    @FXML protected TextField ratioField;
-    @FXML protected TextField countField;
-    @FXML protected ComboBox<String> samplerComboBox;
-    @FXML protected CheckBox smeaCheckBox;
-    @FXML protected CheckBox smeaDynCheckBox;
-    @FXML protected TextField stepsField;
-    @FXML protected TextField seedField;
-    @FXML protected TextArea positivePromptArea;
-    @FXML protected TextArea negativePromptArea;
-    @FXML protected TextArea positivePromptPreviewArea;
-    @FXML protected TextArea negativePromptPreviewArea;
-    @FXML protected ComboBox<String> generateCountComboBox;
-    @FXML protected VBox historyImagesContainer;
-    @FXML protected StackPane previewContainer;
-    @FXML private ImageControlBar imageControlBar;
-    @FXML private HistoryImagesPane historyImagesPane;
+    @FXML
+    protected TextField apiKeyField;
+    @FXML
+    protected ComboBox<String> modelComboBox;
+    @FXML
+    protected TextField widthField;
+    @FXML
+    protected TextField heightField;
+    @FXML
+    protected TextField ratioField;
+    @FXML
+    protected TextField countField;
+    @FXML
+    protected ComboBox<String> samplerComboBox;
+    @FXML
+    protected CheckBox smeaCheckBox;
+    @FXML
+    protected CheckBox smeaDynCheckBox;
+    @FXML
+    protected TextField stepsField;
+    @FXML
+    protected TextField seedField;
+    @FXML
+    protected TextArea positivePromptArea;
+    @FXML
+    protected TextArea negativePromptArea;
+    @FXML
+    protected TextArea positivePromptPreviewArea;
+    @FXML
+    protected TextArea negativePromptPreviewArea;
+    @FXML
+    protected ComboBox<String> generateCountComboBox;
+    @FXML
+    protected VBox historyImagesContainer;
+    @FXML
+    protected StackPane previewContainer;
+    @FXML
+    private ImageControlBar imageControlBar;
+    @FXML
+    private HistoryImagesPane historyImagesPane;
+    @FXML
+    protected TextField outputDirectoryField;
 
     protected PreviewPane previewPane;
 
     protected int currentGeneratedCount = 0;
     protected CountDownLatch promptUpdateLatch;
 
-    @FXML protected Button generateButton;
-    @FXML protected Button refreshPositivePromptButton;
-    @FXML protected Button refreshNegativePromptButton;
-    @FXML protected Button lockPositivePromptButton;
-    @FXML protected Button lockNegativePromptButton;
-    @FXML protected FontIcon lockPositivePromptIcon;
-    @FXML protected FontIcon lockNegativePromptIcon;
+    @FXML
+    protected Button generateButton;
+    @FXML
+    protected Button refreshPositivePromptButton;
+    @FXML
+    protected Button refreshNegativePromptButton;
+    @FXML
+    protected Button lockPositivePromptButton;
+    @FXML
+    protected Button lockNegativePromptButton;
+    @FXML
+    protected FontIcon lockPositivePromptIcon;
+    @FXML
+    protected FontIcon lockNegativePromptIcon;
 
     protected boolean isPositivePromptLocked = false;
     protected boolean isNegativePromptLocked = false;
@@ -184,6 +216,7 @@ public abstract class AbstractGenerationController {
         countField.setText("1");
         stepsField.setText("28");
         seedField.setText("0");
+        outputDirectoryField.setText("output");
     }
 
     @FXML
@@ -248,18 +281,25 @@ public abstract class AbstractGenerationController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-
             Image fxImage = imageUtils.convertToFxImage(originalImage);
             File imageFile = saveImageToFile(originalImage, timeStamp);
-            previewPane.updatePreview(imageFile);
-            addImageToHistory(fxImage, imageFile);
+            if (imageFile != null) {
+                previewPane.updatePreview(imageFile);
+                addImageToHistory(fxImage, imageFile);
+            }
         });
     }
 
     private File saveImageToFile(BufferedImage image, String timeStamp) {
         try {
+            String outputDir = outputDirectoryField.getText();
+            Path outputPath = Paths.get(outputDir);
+            if (!Files.exists(outputPath)) {
+                Files.createDirectories(outputPath);
+            }
+
             String fileName = "generated_image_" + timeStamp.replace(":", "-") + "_" + (currentGeneratedCount) + ".png";
-            File outputFile = new File("output", fileName);
+            File outputFile = outputPath.resolve(fileName).toFile();
             ImageProcessor.saveImage(image, outputFile);
             return outputFile;
         } catch (IOException e) {
@@ -267,7 +307,6 @@ public abstract class AbstractGenerationController {
             return null;
         }
     }
-
 
     protected void addImageToHistory(Image image, File imageFile) {
         historyImagesPane.addImage(image, imageFile);
@@ -286,6 +325,7 @@ public abstract class AbstractGenerationController {
         generateCountComboBox.setValue(settingsManager.getString("generateCount", "1"));
         positivePromptArea.setText(settingsManager.getString("positivePrompt", ""));
         negativePromptArea.setText(settingsManager.getString("negativePrompt", ""));
+        outputDirectoryField.setText(settingsManager.getString("outputDirectory", "output"));
     }
 
     protected void setupListeners() {
@@ -313,6 +353,8 @@ public abstract class AbstractGenerationController {
                 settingsManager.setString("positivePrompt", newVal));
         negativePromptArea.textProperty().addListener((obs, oldVal, newVal) ->
                 settingsManager.setString("negativePrompt", newVal));
+        outputDirectoryField.textProperty().addListener((obs, oldVal, newVal) ->
+                settingsManager.setString("outputDirectory", newVal));
 
         positivePromptArea.textProperty().addListener((observable, oldValue, newValue) ->
                 updatePromptPreview(newValue, positivePromptPreviewArea));

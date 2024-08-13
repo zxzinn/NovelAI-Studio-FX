@@ -32,6 +32,8 @@
                         <TextField fx:id="ratioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
                         <Label text="每次生成圖像數" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
                         <TextField fx:id="countField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <Label text="輸出目錄" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <TextField fx:id="outputDirectoryField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
                     </GridPane>
                 </TitledPane>
                 <TitledPane text="Sampling Settings" styleClass="settings-section">
