@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI with Maven and Release
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "dev-master" ]
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -91,3 +91,26 @@ jobs:
         with:
           name: maven-logs-${{ matrix.os }}-${{ matrix.java }}-${{ env.PROJECT_VERSION }}
           path: ~/.m2/repository/.m2.log
+
+      - name: Create Release
+        if: success() && matrix.os == 'ubuntu-latest'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.PROJECT_VERSION }}
+          release_name: Release ${{ env.PROJECT_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        if: success() && matrix.os == 'ubuntu-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar
+          asset_name: NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar
+          asset_content_type: application/java-archive

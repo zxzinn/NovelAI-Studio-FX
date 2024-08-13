@@ -10,6 +10,7 @@ import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
+import javafx.application.Platform;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 
@@ -21,6 +22,10 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ImageGeneratorController extends AbstractGenerationController {
+
+    private static final long REQUEST_COOLDOWN = 1000; // 1 second cooldown
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY = 5000; // 5 seconds
 
     public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
@@ -43,19 +48,41 @@ public class ImageGeneratorController extends AbstractGenerationController {
                             positivePromptPreviewArea.getText(),
                             negativePromptPreviewArea.getText()
                     );
-                    BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
+
+                    BufferedImage image = null;
+                    for (int retry = 0; retry < MAX_RETRIES; retry++) {
+                        try {
+                            image = imageGenerationService.generateImage(payload, apiKeyField.getText());
+                            break;
+                        } catch (IOException e) {
+                            if (retry == MAX_RETRIES - 1) {
+                                throw e;
+                            }
+                            log.warn("生成圖像失敗,將在{}毫秒後重試. 錯誤: {}", RETRY_DELAY, e.getMessage());
+                            Thread.sleep(RETRY_DELAY);
+                        }
+                    }
 
                     if (image != null) {
                         handleGeneratedImage(image);
+                        currentGeneratedCount++;
+                        Platform.runLater(() -> NotificationService.showNotification("圖像生成成功！", Duration.seconds(3)));
+                    } else {
+                        Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)));
                     }
 
-                    currentGeneratedCount++;
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
-                    NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
+
+                    // Add cooldown between requests
+                    Thread.sleep(REQUEST_COOLDOWN);
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
+                Platform.runLater(() -> NotificationService.showNotification("圖像生成過程中發生錯誤", Duration.seconds(5)));
+            } catch (InterruptedException e) {
+                log.warn("圖像生成過程被中斷");
+                Thread.currentThread().interrupt();
             } finally {
                 finishGeneration();
             }
