@@ -4,9 +4,11 @@ import atlantafx.base.theme.PrimerDark;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.NovelAIAPIClient;
+import com.zxzinn.novelai.component.NotificationPane;
 import com.zxzinn.novelai.controller.ui.MainController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
@@ -39,7 +41,6 @@ public class Application extends javafx.application.Application {
     private Stage primaryStage;
     FilePreviewService filePreviewService = new FilePreviewService();
 
-
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -71,7 +72,6 @@ public class Application extends javafx.application.Application {
 
         Scene scene = new Scene(root, 300, 200);
 
-        // 修改這裡以處理可能的空值情況
         String cssPath = "/com/zxzinn/novelai/loading-styles.css";
         URL resource = getClass().getResource(cssPath);
         if (resource != null) {
@@ -121,6 +121,17 @@ public class Application extends javafx.application.Application {
                     loader.setController(mainController);
                     Parent root = loader.load();
 
+                    // 創建一個頂層StackPane
+                    StackPane rootPane = new StackPane();
+                    rootPane.getChildren().add(root);
+
+                    // 創建並添加NotificationPane
+                    NotificationPane notificationPane = new NotificationPane();
+                    rootPane.getChildren().add(notificationPane);
+
+                    // 初始化NotificationService
+                    NotificationService.initialize(notificationPane);
+
                     // 設置初始視窗大小和位置
                     Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
                     double width = screenBounds.getWidth() * 0.8;
@@ -128,7 +139,7 @@ public class Application extends javafx.application.Application {
                     double x = (screenBounds.getWidth() - width) / 2;
                     double y = (screenBounds.getHeight() - height) / 2;
 
-                    Scene scene = new Scene(root, width, height);
+                    Scene scene = new Scene(rootPane, width, height);
                     scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
                     scene.getStylesheets().add(Objects
                             .requireNonNull(getClass()

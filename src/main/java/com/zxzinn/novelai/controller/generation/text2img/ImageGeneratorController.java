@@ -6,9 +6,11 @@ import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
+import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.image.BufferedImage;
@@ -50,6 +52,7 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     currentGeneratedCount++;
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
+                    NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
                 }
             } catch (IOException | InterruptedException e) {
                 log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
