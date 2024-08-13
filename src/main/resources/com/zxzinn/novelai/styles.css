@@ -329,10 +329,20 @@
     -fx-padding: 10px;
 }
 
-.history-scroll-pane {
+.history-list-view {
     -fx-background-color: transparent;
+    -fx-padding: 0;
 }
 
-.history-scroll-pane .viewport {
+.history-list-view .list-cell {
     -fx-background-color: transparent;
+    -fx-padding: 5px 0;
+}
+
+.history-list-view .list-cell:filled:hover {
+    -fx-background-color: #34495E;
+}
+
+.history-list-view .scroll-bar:horizontal {
+    -fx-scale-x: 0;
 }

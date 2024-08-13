@@ -6,7 +6,5 @@
 <fx:root type="javafx.scene.layout.VBox" spacing="5.0" styleClass="history-panel"
          xmlns:fx="http://javafx.com/fxml">
     <Label text="歷史圖片"/>
-    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" styleClass="history-scroll-pane">
-        <VBox fx:id="historyImagesContainer" spacing="5.0"/>
-    </ScrollPane>
+    <ListView fx:id="historyListView" VBox.vgrow="ALWAYS" styleClass="history-list-view"/>
 </fx:root>

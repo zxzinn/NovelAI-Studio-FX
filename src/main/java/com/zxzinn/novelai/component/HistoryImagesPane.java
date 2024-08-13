@@ -1,27 +1,33 @@
 package com.zxzinn.novelai.component;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
-
 import lombok.Setter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Consumer;
-
 
 public class HistoryImagesPane extends VBox {
 
-    @FXML
-    private VBox historyImagesContainer;
+    private static final int MAX_HISTORY_SIZE = 100; // 最大历史图片数量
+    private static final double THUMBNAIL_WIDTH = 150; // 缩略图宽度
 
+    @FXML
+    private ListView<HistoryImage> historyListView;
+
+    private final Deque<HistoryImage> historyImages = new ArrayDeque<>();
 
     @Setter
     private Consumer<File> onImageClickHandler;
-
 
     public HistoryImagesPane() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/HistoryImagesPane.fxml"));
@@ -33,27 +39,62 @@ public class HistoryImagesPane extends VBox {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+
+        setupListView();
     }
 
+    private void setupListView() {
+        historyListView.setCellFactory(param -> new ListCell<>() {
+            private final ImageView imageView = new ImageView();
 
-    public void addImage(Image image, File imageFile) {
-
-        double aspectRatio = image.getWidth() / image.getHeight();
-        ImageView historyImageView = new ImageView(image);
-        historyImageView.setPreserveRatio(true);
-        historyImageView.setSmooth(true);
-        historyImageView.setFitWidth(150);
-        historyImageView.setFitHeight(150 / aspectRatio);
-
-
-        historyImageView.setOnMouseClicked(event -> {
-            if (onImageClickHandler != null) {
-                onImageClickHandler.accept(imageFile);
+            @Override
+            protected void updateItem(HistoryImage item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    imageView.setImage(item.image);
+                    imageView.setFitWidth(THUMBNAIL_WIDTH);
+                    imageView.setFitHeight(THUMBNAIL_WIDTH / item.image.getWidth() * item.image.getHeight());
+                    imageView.setPreserveRatio(true);
+                    imageView.setSmooth(true);
+                    setGraphic(imageView);
+                }
             }
         });
 
+        historyListView.setOnMouseClicked(event -> {
+            HistoryImage selectedItem = historyListView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && onImageClickHandler != null) {
+                onImageClickHandler.accept(selectedItem.file);
+            }
+        });
 
-        historyImagesContainer.getChildren().addFirst(historyImageView);
+        // 设置ListView的固定宽度，禁用水平滚动条
+        historyListView.setPrefWidth(THUMBNAIL_WIDTH + 20); // 添加一些额外的宽度用于padding
+        historyListView.setMaxWidth(THUMBNAIL_WIDTH + 20);
+        historyListView.setMinWidth(THUMBNAIL_WIDTH + 20);
     }
 
+    public void addImage(Image image, File imageFile) {
+        Platform.runLater(() -> {
+            HistoryImage historyImage = new HistoryImage(image, imageFile);
+            historyImages.addFirst(historyImage);
+            if (historyImages.size() > MAX_HISTORY_SIZE) {
+                historyImages.removeLast();
+            }
+            historyListView.getItems().setAll(historyImages);
+            historyListView.scrollTo(0);
+        });
+    }
+
+    private static class HistoryImage {
+        final Image image;
+        final File file;
+
+        HistoryImage(Image image, File file) {
+            this.image = image;
+            this.file = file;
+        }
+    }
 }
