@@ -66,14 +66,11 @@ public class FileManagerController {
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
-
-        // 設置檔案系統變化的監聽器
         fileManagerService.setFileChangeListener(this::handleFileChange);
     }
 
     private void handleFileChange(String path, WatchEvent.Kind<?> kind) {
         fileTreeController.updateTreeItem(path, kind);
-        // 更新預覽或元數據
         updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
     }
 

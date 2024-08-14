@@ -37,28 +37,28 @@ public class EmbedProcessor {
         for (int i = embeds.size() - 1; i >= 0; i--) {
             EmbedDetector.EmbedTag embed = embeds.get(i);
             try {
-                Map<String, Object> yamlData = yamlLoader.loadYamlFile(embed.name);
+                Map<String, Object> yamlData = yamlLoader.loadYamlFile(embed.name());
                 Map<String, Object> tagset = (Map<String, Object>) yamlData.get("tagset");
                 ConditionProcessor conditionProcessor = new ConditionProcessor(tagset);
                 List<String> generatedTags = conditionProcessor.processConditions((String) yamlData.get("condition"));
 
                 if (!generatedTags.isEmpty()) {
                     String replacement = String.join(",", generatedTags);
-                    result.replace(embed.start, embed.end, replacement);
-                    log.debug("Generated tags for {}: {}", embed.name, generatedTags);
+                    result.replace(embed.start(), embed.end(), replacement);
+                    log.debug("Generated tags for {}: {}", embed.name(), generatedTags);
                 } else {
-                    result.delete(embed.start, embed.end);
-                    log.debug("No tags generated for: {}", embed.name);
+                    result.delete(embed.start(), embed.end());
+                    log.debug("No tags generated for: {}", embed.name());
                 }
             } catch (FileNotFoundException e) {
-                log.warn("YAML file not found for tag: {}", embed.name);
-                result.delete(embed.start, embed.end);
+                log.warn("YAML file not found for tag: {}", embed.name());
+                result.delete(embed.start(), embed.end());
             } catch (YAMLException e) {
-                log.warn("Invalid YAML file for tag: {}. Error: {}", embed.name, e.getMessage());
-                result.delete(embed.start, embed.end);
+                log.warn("Invalid YAML file for tag: {}. Error: {}", embed.name(), e.getMessage());
+                result.delete(embed.start(), embed.end());
             } catch (Exception e) {
-                log.error("Error processing YAML file for tag: {}. Error: {}", embed.name, e.getMessage());
-                result.delete(embed.start, embed.end);
+                log.error("Error processing YAML file for tag: {}. Error: {}", embed.name(), e.getMessage());
+                result.delete(embed.start(), embed.end());
             }
         }
 
@@ -69,14 +69,14 @@ public class EmbedProcessor {
         Pattern bracketPattern = Pattern.compile("\\{(\\w+)(?:=null)?}");
         Matcher bracketMatcher = bracketPattern.matcher(input);
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         while (bracketMatcher.find()) {
             String replacement = "{" + bracketMatcher.group(1) + "}";
-            bracketMatcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+            bracketMatcher.appendReplacement(stringBuilder, Matcher.quoteReplacement(replacement));
         }
-        bracketMatcher.appendTail(sb);
+        bracketMatcher.appendTail(stringBuilder);
 
-        String result = sb.toString();
+        String result = stringBuilder.toString();
         result = result.replaceAll(",,+", ",").replaceAll("^,|,$", "");
 
         return result;

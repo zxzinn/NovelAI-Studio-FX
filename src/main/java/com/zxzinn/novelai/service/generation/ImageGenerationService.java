@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.service.generation;
 
-import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
+import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -22,7 +22,7 @@ public class ImageGenerationService {
 
     public BufferedImage generateImage(GenerationPayload payload, String apiKey) throws IOException {
         int maxRetries = 3;
-        int retryDelay = 5000; // 5 seconds
+        int retryDelay = 5000;
 
         for (int i = 0; i < maxRetries; i++) {
             try {
@@ -30,7 +30,7 @@ public class ImageGenerationService {
                 return processResponseData(responseData);
             } catch (IOException e) {
                 if (i == maxRetries - 1) {
-                    throw e; // 如果是最後一次重試,則拋出異常
+                    throw e;
                 }
                 log.warn("生成圖像失敗,將在{}毫秒後重試. 錯誤: {}", retryDelay, e.getMessage());
                 try {

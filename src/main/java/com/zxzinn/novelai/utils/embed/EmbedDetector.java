@@ -28,15 +28,6 @@ public class EmbedDetector {
         return embeds;
     }
 
-    public static class EmbedTag {
-        public final String name;
-        public final int start;
-        public final int end;
-
-        public EmbedTag(String name, int start, int end) {
-            this.name = name;
-            this.start = start;
-            this.end = end;
-        }
+    public record EmbedTag(String name, int start, int end) {
     }
 }

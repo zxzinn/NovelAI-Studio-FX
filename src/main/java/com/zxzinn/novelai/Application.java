@@ -3,7 +3,6 @@ package com.zxzinn.novelai;
 import atlantafx.base.theme.PrimerDark;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.api.NovelAIAPIClient;
 import com.zxzinn.novelai.component.NotificationPane;
 import com.zxzinn.novelai.controller.ui.MainController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
@@ -90,13 +89,8 @@ public class Application extends javafx.application.Application {
     private void initializeComponents() {
         closeLoadingScreen();
         CompletableFuture.runAsync(() -> {
-            OkHttpClient httpClient = new OkHttpClient.Builder()
-                    .readTimeout(60, TimeUnit.SECONDS)
-                    .writeTimeout(60, TimeUnit.SECONDS)
-                    .connectTimeout(60, TimeUnit.SECONDS)
-                    .build();
             Gson gson = new Gson();
-            APIClient apiClient = new NovelAIAPIClient(gson);
+            APIClient apiClient = new APIClient(gson);
             EmbedProcessor embedProcessor = new EmbedProcessor();
             ImageUtils imageUtils = new ImageUtils();
             ImageGenerationService imageGenerationService = new ImageGenerationService(
@@ -121,18 +115,14 @@ public class Application extends javafx.application.Application {
                     loader.setController(mainController);
                     Parent root = loader.load();
 
-                    // 創建一個頂層StackPane
                     StackPane rootPane = new StackPane();
                     rootPane.getChildren().add(root);
 
-                    // 創建並添加NotificationPane
                     NotificationPane notificationPane = new NotificationPane();
                     rootPane.getChildren().add(notificationPane);
 
-                    // 初始化NotificationService
                     NotificationService.initialize(notificationPane);
 
-                    // 設置初始視窗大小和位置
                     Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
                     double width = screenBounds.getWidth() * 0.8;
                     double height = screenBounds.getHeight() * 0.8;

@@ -8,6 +8,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import lombok.Data;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -24,8 +25,7 @@ import java.util.function.Predicate;
 @Log4j2
 public class FileTreeController {
     private final FileManagerService fileManagerService;
-    @Setter
-    private TreeView<String> fileTreeView;
+    @Setter private TreeView<String> fileTreeView;
     private FilteredList<TreeItem<String>> filteredTreeItems;
     private final AtomicBoolean isRefreshing = new AtomicBoolean(false);
     private final Map<String, TreeItem<String>> pathToItemMap = new HashMap<>();
@@ -201,14 +201,13 @@ public class FileTreeController {
         File[] children = parentFile.listFiles();
         if (children != null) {
             List<File> childList = Arrays.asList(children);
-            Collections.sort(childList);  // 對檔案列表進行排序
+            Collections.sort(childList);
             for (File child : childList) {
                 TreeItem<String> childItem = createTreeItem(child);
                 parentItem.getChildren().add(childItem);
                 String childPath = child.getAbsolutePath();
                 pathToItemMap.put(childPath, childItem);
                 if (child.isDirectory()) {
-                    // 遞迴載入子目錄
                     loadChildrenInBatches(childItem, child);
                 }
             }

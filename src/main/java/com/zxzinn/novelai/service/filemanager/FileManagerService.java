@@ -99,7 +99,6 @@ public class FileManagerService {
                     }
                 }
 
-                // 通知 UI 更新
                 final Path finalFullPath = fullPath;
                 final WatchEvent.Kind<?> finalKind = kind;
                 Platform.runLater(() -> {
@@ -130,7 +129,6 @@ public class FileManagerService {
 
             settingsManager.addToStringList(WATCHED_DIRECTORIES_KEY, path);
 
-            // 通知檔案樹控制器更新
             if (fileChangeListener != null) {
                 fileChangeListener.accept(path, StandardWatchEventKinds.ENTRY_CREATE);
             }
@@ -282,7 +280,7 @@ public class FileManagerService {
             }
         }
         if (key != null) {
-            key.pollEvents(); // 清除所有待處理的事件
+            key.pollEvents();
             Path dir = watchKeyToPath.get(key);
             if (dir != null) {
                 final Path finalDir = dir;

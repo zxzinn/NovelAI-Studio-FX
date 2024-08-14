@@ -22,10 +22,9 @@ public class TitleBarController extends HBox {
     private static final Logger logger = LogManager.getLogger(TitleBarController.class);
     private double xOffset = 0;
     private double yOffset = 0;
-    @Setter
-    private Stage stage;
+    @Setter private Stage stage;
     private Rectangle2D previousBounds;
-    private static final long ANIMATION_DURATION = 20_000_000L; // 150ms in nanoseconds
+    private static final long ANIMATION_DURATION = 20_000_000L;
 
     @FXML private Label titleLabel;
     @FXML private Button minimizeButton;

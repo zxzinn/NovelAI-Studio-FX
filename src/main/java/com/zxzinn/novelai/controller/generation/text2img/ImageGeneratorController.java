@@ -1,8 +1,8 @@
 package com.zxzinn.novelai.controller.generation.text2img;
 
-import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
@@ -22,10 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ImageGeneratorController extends AbstractGenerationController {
-
-    private static final long REQUEST_COOLDOWN = 1000; // 1 second cooldown
-    private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY = 5000; // 5 seconds
 
     public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
@@ -49,8 +45,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
                             negativePromptPreviewArea.getText()
                     );
 
-                    BufferedImage image = null;
-                    for (int retry = 0; retry < MAX_RETRIES; retry++) {
+                    BufferedImage image;
+                    for (int retry = 0; true; retry++) {
                         try {
                             image = imageGenerationService.generateImage(payload, apiKeyField.getText());
                             break;
@@ -74,8 +70,6 @@ public class ImageGeneratorController extends AbstractGenerationController {
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
 
-                    // Add cooldown between requests
-                    Thread.sleep(REQUEST_COOLDOWN);
                 }
             } catch (IOException e) {
                 log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);

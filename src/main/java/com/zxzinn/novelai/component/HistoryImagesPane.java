@@ -18,16 +18,14 @@ import java.util.function.Consumer;
 
 public class HistoryImagesPane extends VBox {
 
-    private static final int MAX_HISTORY_SIZE = 100; // 最大历史图片数量
-    private static final double THUMBNAIL_WIDTH = 150; // 缩略图宽度
+    private static final int MAX_HISTORY_SIZE = 100;
+    private static final double THUMBNAIL_WIDTH = 150;
 
-    @FXML
-    private ListView<HistoryImage> historyListView;
+    @FXML private ListView<HistoryImage> historyListView;
 
     private final Deque<HistoryImage> historyImages = new ArrayDeque<>();
 
-    @Setter
-    private Consumer<File> onImageClickHandler;
+    @Setter private Consumer<File> onImageClickHandler;
 
     public HistoryImagesPane() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/HistoryImagesPane.fxml"));
@@ -70,8 +68,7 @@ public class HistoryImagesPane extends VBox {
             }
         });
 
-        // 设置ListView的固定宽度，禁用水平滚动条
-        historyListView.setPrefWidth(THUMBNAIL_WIDTH + 20); // 添加一些额外的宽度用于padding
+        historyListView.setPrefWidth(THUMBNAIL_WIDTH + 20);
         historyListView.setMaxWidth(THUMBNAIL_WIDTH + 20);
         historyListView.setMinWidth(THUMBNAIL_WIDTH + 20);
     }
@@ -88,13 +85,5 @@ public class HistoryImagesPane extends VBox {
         });
     }
 
-    private static class HistoryImage {
-        final Image image;
-        final File file;
-
-        HistoryImage(Image image, File file) {
-            this.image = image;
-            this.file = file;
-        }
-    }
+    private record HistoryImage(Image image, File file) {}
 }

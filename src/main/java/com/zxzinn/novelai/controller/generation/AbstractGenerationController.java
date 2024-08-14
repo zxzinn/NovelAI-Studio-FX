@@ -44,68 +44,39 @@ public abstract class AbstractGenerationController {
     protected final ImageUtils imageUtils;
     protected final FilePreviewService filePreviewService;
 
-    @FXML
-    protected TextField apiKeyField;
-    @FXML
-    protected ComboBox<String> modelComboBox;
-    @FXML
-    protected TextField widthField;
-    @FXML
-    protected TextField heightField;
-    @FXML
-    protected TextField ratioField;
-    @FXML
-    protected TextField countField;
-    @FXML
-    protected ComboBox<String> samplerComboBox;
-    @FXML
-    protected CheckBox smeaCheckBox;
-    @FXML
-    protected CheckBox smeaDynCheckBox;
-    @FXML
-    protected TextField stepsField;
-    @FXML
-    protected TextField seedField;
-    @FXML
-    protected TextArea positivePromptArea;
-    @FXML
-    protected TextArea negativePromptArea;
-    @FXML
-    protected TextArea positivePromptPreviewArea;
-    @FXML
-    protected TextArea negativePromptPreviewArea;
-    @FXML
-    protected ComboBox<String> generateCountComboBox;
-    @FXML
-    protected VBox historyImagesContainer;
-    @FXML
-    protected StackPane previewContainer;
-    @FXML
-    private ImageControlBar imageControlBar;
-    @FXML
-    private HistoryImagesPane historyImagesPane;
-    @FXML
-    protected TextField outputDirectoryField;
-
-    protected PreviewPane previewPane;
+    @FXML protected TextField apiKeyField;
+    @FXML protected ComboBox<String> modelComboBox;
+    @FXML protected TextField widthField;
+    @FXML protected TextField heightField;
+    @FXML protected TextField ratioField;
+    @FXML protected TextField countField;
+    @FXML protected ComboBox<String> samplerComboBox;
+    @FXML protected CheckBox smeaCheckBox;
+    @FXML protected CheckBox smeaDynCheckBox;
+    @FXML protected TextField stepsField;
+    @FXML protected TextField seedField;
+    @FXML protected TextArea positivePromptArea;
+    @FXML protected TextArea negativePromptArea;
+    @FXML protected TextArea positivePromptPreviewArea;
+    @FXML protected TextArea negativePromptPreviewArea;
+    @FXML protected ComboBox<String> generateCountComboBox;
+    @FXML protected VBox historyImagesContainer;
+    @FXML protected StackPane previewContainer;
+    @FXML private ImageControlBar imageControlBar;
+    @FXML private HistoryImagesPane historyImagesPane;
+    @FXML protected TextField outputDirectoryField;
+    @FXML protected PreviewPane previewPane;
 
     protected int currentGeneratedCount = 0;
     protected CountDownLatch promptUpdateLatch;
 
-    @FXML
-    protected Button generateButton;
-    @FXML
-    protected Button refreshPositivePromptButton;
-    @FXML
-    protected Button refreshNegativePromptButton;
-    @FXML
-    protected Button lockPositivePromptButton;
-    @FXML
-    protected Button lockNegativePromptButton;
-    @FXML
-    protected FontIcon lockPositivePromptIcon;
-    @FXML
-    protected FontIcon lockNegativePromptIcon;
+    @FXML protected Button generateButton;
+    @FXML protected Button refreshPositivePromptButton;
+    @FXML protected Button refreshNegativePromptButton;
+    @FXML protected Button lockPositivePromptButton;
+    @FXML protected Button lockNegativePromptButton;
+    @FXML protected FontIcon lockPositivePromptIcon;
+    @FXML protected FontIcon lockNegativePromptIcon;
 
     protected boolean isPositivePromptLocked = false;
     protected boolean isNegativePromptLocked = false;
@@ -113,6 +84,9 @@ public abstract class AbstractGenerationController {
     protected volatile boolean isGenerating = false;
     protected volatile boolean stopRequested = false;
     protected volatile boolean isStopping = false;
+
+    protected static final int MAX_RETRIES = 3;
+    protected static final long RETRY_DELAY = 5000; // 5 seconds
 
     public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor,
                                         SettingsManager settingsManager,
