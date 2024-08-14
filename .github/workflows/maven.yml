@@ -40,7 +40,7 @@ jobs:
           VERSION=$(git describe --tags --always --dirty | sed 's/^v//; s/-/./')
           CLEAN_VERSION=$(echo $VERSION | sed 's/[^0-9.]//g')
           if [[ ! $CLEAN_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            CLEAN_VERSION="0.1.0-SNAPSHOT"
+            CLEAN_VERSION="0.1.1-SNAPSHOT"
           fi
           echo "PROJECT_VERSION=$CLEAN_VERSION" >> $GITHUB_ENV
           echo "Set version to $CLEAN_VERSION"
@@ -54,7 +54,7 @@ jobs:
           $VERSION = (git describe --tags --always --dirty) -replace '^v','' -replace '-','.'
           $CLEAN_VERSION = $VERSION -replace '[^0-9.]',''
           if ($CLEAN_VERSION -notmatch '^\d+\.\d+\.\d+$') {
-            $CLEAN_VERSION = "0.1.0-SNAPSHOT"
+            $CLEAN_VERSION = "0.1.1-SNAPSHOT"
           }
           echo "PROJECT_VERSION=$CLEAN_VERSION" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           echo "Set version to $CLEAN_VERSION"
