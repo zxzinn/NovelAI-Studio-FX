@@ -85,8 +85,8 @@ public abstract class AbstractGenerationController {
     protected volatile boolean stopRequested = false;
     protected volatile boolean isStopping = false;
 
-    protected static final int MAX_RETRIES = 3;
-    protected static final long RETRY_DELAY = 5000; // 5 seconds
+    protected static final int MAX_RETRIES = 5;
+    protected static final long RETRY_DELAY = 20000;
 
     public AbstractGenerationController(APIClient apiClient, EmbedProcessor embedProcessor,
                                         SettingsManager settingsManager,
