@@ -54,7 +54,7 @@
             </padding>
             <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
             <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity"/>
-            <Button fx:id="mergeYamlButton" text="合併YAML文件" maxWidth="Infinity"/>
+            <Button fx:id="mergeTxtButton" text="合併Txt文件" maxWidth="Infinity"/>
         </VBox>
     </right>
     <bottom>

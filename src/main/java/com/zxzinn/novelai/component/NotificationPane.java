@@ -47,6 +47,9 @@ public class NotificationPane extends StackPane {
         setOpacity(0);
         setTranslateY(-50);
 
+        // 設置 NotificationPane 不接受鼠標事件
+        setMouseTransparent(true);
+
         showAnimation = new Timeline(
                 new KeyFrame(Duration.ZERO,
                         new KeyValue(opacityProperty(), 0),

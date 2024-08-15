@@ -4,8 +4,8 @@ import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.common.TxtProcessor;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
-import com.zxzinn.novelai.utils.yaml.YamlProcessor;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -38,7 +38,7 @@ public class FileManagerController {
     @FXML private Button addButton;
     @FXML private Button removeButton;
     @FXML private Button clearMetadataButton;
-    @FXML private Button mergeYamlButton;
+    @FXML private Button mergeTxtButton;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
 
@@ -73,7 +73,6 @@ public class FileManagerController {
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
 
-        // 設置檔案系統變化的監聽器
         fileManagerService.setFileChangeListener(this::handleFileChange);
 
         fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -87,7 +86,6 @@ public class FileManagerController {
 
     private void handleFileChange(String path, WatchEvent.Kind<?> kind) {
         fileTreeController.updateTreeItem(path, kind);
-        // 更新預覽或元數據
         updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
     }
 
@@ -109,43 +107,42 @@ public class FileManagerController {
 
         selectAllButton.setOnAction(event -> selectAllInSelectedDirectory());
         clearMetadataButton.setOnAction(event -> clearMetadataForSelectedFiles());
-        mergeYamlButton.setOnAction(event -> mergeSelectedYamlFiles());
+        mergeTxtButton.setOnAction(event -> mergeSelectedTxtFiles());
     }
 
-    private void mergeSelectedYamlFiles() {
-        List<File> selectedFiles = getSelectedYamlFiles();
+    private void mergeSelectedTxtFiles() {
+        List<File> selectedFiles = getSelectedTxtFiles();
         if (selectedFiles.isEmpty()) {
-            alertService.showAlert("警告", "請選擇要合併的YAML文件。");
+            alertService.showAlert("警告", "請選擇要合併的txt文件。");
             return;
         }
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("選擇輸出文件");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("YAML Files", "*.yml"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("TXT Files", "*.txt"));
         File outputFile = fileChooser.showSaveDialog(fileTreeView.getScene().getWindow());
 
         if (outputFile != null) {
             try {
-                YamlProcessor.mergeAndProcessYamlFiles(selectedFiles, outputFile);
-                alertService.showAlert("成功", "YAML文件已成功合併和處理。");
+                TxtProcessor.mergeAndProcessTxtFiles(selectedFiles, outputFile);
+                alertService.showAlert("成功", "txt文件已成功合併和處理。");
             } catch (IOException e) {
-                log.error("合併YAML文件時發生錯誤", e);
-                alertService.showAlert("錯誤", "合併YAML文件時發生錯誤: " + e.getMessage());
+                log.error("合併txt文件時發生錯誤", e);
+                alertService.showAlert("錯誤", "合併txt文件時發生錯誤: " + e.getMessage());
             }
         }
     }
 
-    private List<File> getSelectedYamlFiles() {
+    private List<File> getSelectedTxtFiles() {
         return fileTreeView.getSelectionModel().getSelectedItems().stream()
                 .map(item -> new File(fileTreeController.buildFullPath(item)))
-                .filter(this::isYamlFile)
+                .filter(this::isTxtFile)
                 .collect(Collectors.toList());
     }
 
-    private boolean isYamlFile(File file) {
+    private boolean isTxtFile(File file) {
         if (!file.isFile()) return false;
-        String name = file.getName().toLowerCase();
-        return name.endsWith(".yml") || name.endsWith(".yaml");
+        return file.getName().toLowerCase().endsWith(".txt");
     }
 
     private void clearMetadataForSelectedFiles() {

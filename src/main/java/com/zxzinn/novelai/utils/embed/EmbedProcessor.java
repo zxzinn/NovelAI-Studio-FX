@@ -1,22 +1,20 @@
 package com.zxzinn.novelai.utils.embed;
 
 import lombok.extern.log4j.Log4j2;
-import org.yaml.snakeyaml.error.YAMLException;
 
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class EmbedProcessor {
+    private static final String EMBEDS_DIRECTORY = "embeds";
     private final EmbedDetector embedDetector;
-    private final YamlLoader yamlLoader;
 
     public EmbedProcessor() {
         this.embedDetector = new EmbedDetector();
-        this.yamlLoader = new YamlLoader();
     }
 
     public String processPrompt(String input) {
@@ -29,7 +27,6 @@ public class EmbedProcessor {
         return finalResult;
     }
 
-    @SuppressWarnings("unchecked")
     private String processEmbeds(String input) {
         List<EmbedDetector.EmbedTag> embeds = embedDetector.detectEmbeds(input);
         StringBuilder result = new StringBuilder(input);
@@ -37,10 +34,7 @@ public class EmbedProcessor {
         for (int i = embeds.size() - 1; i >= 0; i--) {
             EmbedDetector.EmbedTag embed = embeds.get(i);
             try {
-                Map<String, Object> yamlData = yamlLoader.loadYamlFile(embed.name());
-                Map<String, Object> tagset = (Map<String, Object>) yamlData.get("tagset");
-                ConditionProcessor conditionProcessor = new ConditionProcessor(tagset);
-                List<String> generatedTags = conditionProcessor.processConditions((String) yamlData.get("condition"));
+                List<String> generatedTags = processEmbedFile(embed.name(), embed.sampling());
 
                 if (!generatedTags.isEmpty()) {
                     String replacement = String.join(",", generatedTags);
@@ -50,19 +44,72 @@ public class EmbedProcessor {
                     result.delete(embed.start(), embed.end());
                     log.debug("No tags generated for: {}", embed.name());
                 }
-            } catch (FileNotFoundException e) {
-                log.warn("YAML file not found for tag: {}", embed.name());
-                result.delete(embed.start(), embed.end());
-            } catch (YAMLException e) {
-                log.warn("Invalid YAML file for tag: {}. Error: {}", embed.name(), e.getMessage());
-                result.delete(embed.start(), embed.end());
-            } catch (Exception e) {
-                log.error("Error processing YAML file for tag: {}. Error: {}", embed.name(), e.getMessage());
+            } catch (IOException e) {
+                log.error("Error processing file for tag: {}. Error: {}", embed.name(), e.getMessage());
                 result.delete(embed.start(), embed.end());
             }
         }
 
         return result.toString();
+    }
+
+    private List<String> processEmbedFile(String tagName, String sampling) throws IOException {
+        String filePath = EMBEDS_DIRECTORY + File.separator + tagName.replace("/", File.separator) + ".txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("Text file not found: " + filePath);
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            List<String> allTags = reader.lines()
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .collect(Collectors.toList());
+
+            if (sampling == null || sampling.isEmpty() || !isValidSampling(sampling)) {
+                return allTags.stream().map(this::processTag).collect(Collectors.toList());
+            } else {
+                int sampleSize = getSampleSize(sampling, allTags.size());
+                return selectRandomTags(allTags, sampleSize);
+            }
+        }
+    }
+
+    private boolean isValidSampling(String sampling) {
+        return sampling.matches("\\d+") || sampling.matches("\\d+~\\d+");
+    }
+
+    private int getSampleSize(String sampling, int totalTags) {
+        try {
+            if (sampling.contains("~")) {
+                String[] range = sampling.split("~");
+                if (range.length != 2) {
+                    log.warn("Invalid sampling range: {}", sampling);
+                    return totalTags;
+                }
+                int min = Integer.parseInt(range[0]);
+                int max = Integer.parseInt(range[1]);
+                return new Random().nextInt(max - min + 1) + min;
+            } else {
+                return Math.min(Integer.parseInt(sampling), totalTags);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Invalid sampling format: {}", sampling);
+            return totalTags;
+        }
+    }
+
+    private List<String> selectRandomTags(List<String> tags, int count) {
+        List<String> shuffled = new ArrayList<>(tags);
+        Collections.shuffle(shuffled);
+        return shuffled.subList(0, Math.min(count, shuffled.size())).stream()
+                .map(this::processTag)
+                .collect(Collectors.toList());
+    }
+
+    private String processTag(String tag) {
+        return tag; // 保持原樣，因為文件中已經包含了 {} 和 [] 的標記
     }
 
     private String processStringPatterns(String input) {

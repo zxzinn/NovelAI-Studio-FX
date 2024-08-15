@@ -44,21 +44,6 @@
 
     <center>
         <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS">
-            <Tab fx:id="generatorTab" closable="false" text="Generator">
-                <graphic>
-                    <FontIcon iconLiteral="fas-image" iconSize="16" />
-                </graphic>
-            </Tab>
-            <Tab fx:id="img2ImgTab" closable="false" text="Img2Img">
-                <graphic>
-                    <FontIcon iconLiteral="fas-exchange-alt" iconSize="16" />
-                </graphic>
-            </Tab>
-            <Tab fx:id="fileManagerTab" closable="false" text="File Manager">
-                <graphic>
-                    <FontIcon iconLiteral="fas-folder-open" iconSize="16" />
-                </graphic>
-            </Tab>
         </TabPane>
     </center>
 </BorderPane>

@@ -8,7 +8,6 @@ import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import lombok.Data;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -21,7 +20,6 @@ import java.nio.file.WatchEvent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Log4j2
 public class FileTreeController {
@@ -37,7 +35,6 @@ public class FileTreeController {
 
     public void initialize() {
         refreshTreeView();
-
     }
 
     public void refreshTreeView() {
@@ -237,25 +234,5 @@ public class FileTreeController {
             return "";
         }
         return name.substring(lastIndexOf + 1);
-    }
-
-    public List<File> getSelectedFiles() {
-        return fileTreeView.getSelectionModel().getSelectedItems().stream()
-                .map(item -> new File(buildFullPath(item)))
-                .filter(File::isFile)
-                .collect(Collectors.toList());
-    }
-
-    public List<File> getSelectedImageFiles() {
-        return fileTreeView.getSelectionModel().getSelectedItems().stream()
-                .map(item -> new File(buildFullPath(item)))
-                .filter(this::isImageFile)
-                .toList();
-    }
-
-    private boolean isImageFile(File file) {
-        if (!file.isFile()) return false;
-        String name = file.getName().toLowerCase();
-        return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
     }
 }
