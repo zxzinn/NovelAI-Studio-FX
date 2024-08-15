@@ -5,10 +5,14 @@ import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
+import com.zxzinn.novelai.utils.yaml.YamlProcessor;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class FileManagerController {
@@ -33,6 +38,7 @@ public class FileManagerController {
     @FXML private Button addButton;
     @FXML private Button removeButton;
     @FXML private Button clearMetadataButton;
+    @FXML private Button mergeYamlButton;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
 
@@ -66,11 +72,22 @@ public class FileManagerController {
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
+
+        // 設置檔案系統變化的監聽器
         fileManagerService.setFileChangeListener(this::handleFileChange);
+
+        fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        fileTreeView.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.CONTROL) {
+                fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            }
+        });
     }
 
     private void handleFileChange(String path, WatchEvent.Kind<?> kind) {
         fileTreeController.updateTreeItem(path, kind);
+        // 更新預覽或元數據
         updatePreview(fileTreeView.getSelectionModel().getSelectedItem());
     }
 
@@ -92,6 +109,43 @@ public class FileManagerController {
 
         selectAllButton.setOnAction(event -> selectAllInSelectedDirectory());
         clearMetadataButton.setOnAction(event -> clearMetadataForSelectedFiles());
+        mergeYamlButton.setOnAction(event -> mergeSelectedYamlFiles());
+    }
+
+    private void mergeSelectedYamlFiles() {
+        List<File> selectedFiles = getSelectedYamlFiles();
+        if (selectedFiles.isEmpty()) {
+            alertService.showAlert("警告", "請選擇要合併的YAML文件。");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("選擇輸出文件");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("YAML Files", "*.yml"));
+        File outputFile = fileChooser.showSaveDialog(fileTreeView.getScene().getWindow());
+
+        if (outputFile != null) {
+            try {
+                YamlProcessor.mergeAndProcessYamlFiles(selectedFiles, outputFile);
+                alertService.showAlert("成功", "YAML文件已成功合併和處理。");
+            } catch (IOException e) {
+                log.error("合併YAML文件時發生錯誤", e);
+                alertService.showAlert("錯誤", "合併YAML文件時發生錯誤: " + e.getMessage());
+            }
+        }
+    }
+
+    private List<File> getSelectedYamlFiles() {
+        return fileTreeView.getSelectionModel().getSelectedItems().stream()
+                .map(item -> new File(fileTreeController.buildFullPath(item)))
+                .filter(this::isYamlFile)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isYamlFile(File file) {
+        if (!file.isFile()) return false;
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".yml") || name.endsWith(".yaml");
     }
 
     private void clearMetadataForSelectedFiles() {
@@ -171,7 +225,10 @@ public class FileManagerController {
     }
 
     private List<File> getSelectedImageFiles() {
-        return fileTreeController.getSelectedImageFiles();
+        return fileTreeView.getSelectionModel().getSelectedItems().stream()
+                .map(item -> new File(fileTreeController.buildFullPath(item)))
+                .filter(this::isImageFile)
+                .collect(Collectors.toList());
     }
 
     private void selectAllInSelectedDirectory() {
@@ -179,6 +236,12 @@ public class FileManagerController {
         if (selectedItem != null) {
             fileTreeController.selectAllInDirectory(selectedItem);
         }
+    }
+
+    private boolean isImageFile(File file) {
+        if (!file.isFile()) return false;
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");
     }
 
     private void addWatchedDirectory() {
@@ -226,5 +289,6 @@ public class FileManagerController {
 
     public void shutdown() {
         fileManagerService.shutdown();
+        executorService.shutdown();
     }
 }

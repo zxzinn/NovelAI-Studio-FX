@@ -21,6 +21,7 @@ import java.nio.file.WatchEvent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class FileTreeController {
@@ -36,6 +37,7 @@ public class FileTreeController {
 
     public void initialize() {
         refreshTreeView();
+
     }
 
     public void refreshTreeView() {
@@ -52,6 +54,7 @@ public class FileTreeController {
                     filteredRoot.setExpanded(true);
                     filteredRoot.getChildren().addAll(filteredTreeItems);
                     fileTreeView.setRoot(filteredRoot);
+                    fileTreeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                     updatePathToItemMap(filteredRoot);
                     log.info("已刷新檔案樹視圖");
                 } catch (Exception e) {
@@ -234,6 +237,13 @@ public class FileTreeController {
             return "";
         }
         return name.substring(lastIndexOf + 1);
+    }
+
+    public List<File> getSelectedFiles() {
+        return fileTreeView.getSelectionModel().getSelectedItems().stream()
+                .map(item -> new File(buildFullPath(item)))
+                .filter(File::isFile)
+                .collect(Collectors.toList());
     }
 
     public List<File> getSelectedImageFiles() {
