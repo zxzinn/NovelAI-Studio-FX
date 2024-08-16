@@ -6,22 +6,17 @@ import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.generation.AbstractGenerationController;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
-import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import javafx.application.Platform;
-import javafx.util.Duration;
+import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import lombok.extern.log4j.Log4j2;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ImageGeneratorController extends AbstractGenerationController {
+    @FXML private CheckBox smeaCheckBox;
+    @FXML private CheckBox smeaDynCheckBox;
 
     public ImageGeneratorController(APIClient apiClient, EmbedProcessor embedProcessor,
                                     SettingsManager settingsManager,
@@ -31,61 +26,19 @@ public class ImageGeneratorController extends AbstractGenerationController {
         super(apiClient, embedProcessor, settingsManager, imageGenerationService, imageUtils, filePreviewService);
     }
 
+    @FXML
     @Override
-    protected void generateImages() {
-        CompletableFuture.runAsync(() -> {
-            try {
-                while (isGenerating && !stopRequested && currentGeneratedCount < getMaxCount()) {
-                    if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
-                        log.warn("等待提示詞更新超時");
-                    }
+    public void initialize() {
+        super.initialize();
+        // 添加 SMEA 相關的初始化
+        smeaCheckBox.setSelected(settingsManager.getBoolean("smea", true));
+        smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
 
-                    GenerationPayload payload = createGenerationPayload(
-                            positivePromptPreviewArea.getText(),
-                            negativePromptPreviewArea.getText()
-                    );
-
-                    BufferedImage image;
-                    for (int retry = 0; true; retry++) {
-                        try {
-                            image = imageGenerationService.generateImage(payload, apiKeyField.getText());
-                            break;
-                        } catch (IOException e) {
-                            if (retry == MAX_RETRIES - 1) {
-                                throw e;
-                            }
-                            log.warn("生成圖像失敗,將在{}毫秒後重試. 錯誤: {}", RETRY_DELAY, e.getMessage());
-                            Thread.sleep(RETRY_DELAY);
-                        }
-                    }
-
-                    if (image != null) {
-                        handleGeneratedImage(image);
-                        currentGeneratedCount++;
-                        Platform.runLater(() -> NotificationService.showNotification("圖像生成成功！", Duration.seconds(3)));
-                    } else {
-                        Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)));
-                    }
-
-                    promptUpdateLatch = new CountDownLatch(1);
-                    updatePromptPreviewsAsync();
-
-                }
-            } catch (IOException e) {
-                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
-                Platform.runLater(() -> NotificationService.showNotification("圖像生成過程中發生錯誤", Duration.seconds(5)));
-            } catch (InterruptedException e) {
-                log.warn("圖像生成過程被中斷");
-                Thread.currentThread().interrupt();
-            } finally {
-                finishGeneration();
-            }
-        });
-    }
-
-    private int getMaxCount() {
-        String selectedCount = generateCountComboBox.getValue();
-        return "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
+        // 添加 SMEA 相關的監聽器
+        smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
+                settingsManager.setBoolean("smea", newVal));
+        smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
+                settingsManager.setBoolean("smeaDyn", newVal));
     }
 
     @Override

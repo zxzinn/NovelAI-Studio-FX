@@ -8,6 +8,7 @@ import com.zxzinn.novelai.component.ImageControlBar;
 import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
@@ -33,7 +34,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public abstract class AbstractGenerationController {
@@ -51,8 +54,6 @@ public abstract class AbstractGenerationController {
     @FXML protected TextField ratioField;
     @FXML protected TextField countField;
     @FXML protected ComboBox<String> samplerComboBox;
-    @FXML protected CheckBox smeaCheckBox;
-    @FXML protected CheckBox smeaDynCheckBox;
     @FXML protected TextField stepsField;
     @FXML protected TextField seedField;
     @FXML protected TextArea positivePromptArea;
@@ -239,8 +240,69 @@ public abstract class AbstractGenerationController {
         });
     }
 
-    protected abstract void generateImages();
+    protected void generateImages() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                while (isGenerating && !stopRequested && currentGeneratedCount < getMaxCount()) {
+                    if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
+                        log.warn("等待提示詞更新超時");
+                    }
 
+                    GenerationPayload payload = createGenerationPayload(
+                            positivePromptPreviewArea.getText(),
+                            negativePromptPreviewArea.getText()
+                    );
+
+                    BufferedImage image = null;
+                    boolean generationSuccessful = false;
+
+                    for (int retry = 0; retry < MAX_RETRIES; retry++) {
+                        try {
+                            image = imageGenerationService.generateImage(payload, apiKeyField.getText());
+                            generationSuccessful = true;
+                            break;
+                        } catch (IOException e) {
+                            if (retry == MAX_RETRIES - 1) {
+                                log.error("生成圖像失敗，已達到最大重試次數", e);
+                                throw e;
+                            }
+                            log.warn("生成圖像失敗,將在{}毫秒後重試. 錯誤: {}", RETRY_DELAY, e.getMessage());
+                            try {
+                                Thread.sleep(RETRY_DELAY);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                throw new IOException("生成圖像過程被中斷", ie);
+                            }
+                        }
+                    }
+
+                    if (generationSuccessful && image != null) {
+                        handleGeneratedImage(image);
+                        currentGeneratedCount++;
+                        Platform.runLater(() -> NotificationService.showNotification("圖像生成成功！", Duration.seconds(3)));
+                    } else {
+                        Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)));
+                    }
+
+                    promptUpdateLatch = new CountDownLatch(1);
+                    updatePromptPreviewsAsync();
+                }
+            } catch (IOException e) {
+                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
+                Platform.runLater(() -> NotificationService.showNotification("圖像生成過程中發生錯誤", Duration.seconds(5)));
+            } catch (InterruptedException e) {
+                log.warn("圖像生成過程被中斷");
+                Thread.currentThread().interrupt();
+            } finally {
+                finishGeneration();
+            }
+        });
+    }
+
+    protected int getMaxCount() {
+        String selectedCount = generateCountComboBox.getValue();
+        return "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
+    }
     protected void finishGeneration() {
         isGenerating = false;
         isStopping = false;
@@ -292,8 +354,6 @@ public abstract class AbstractGenerationController {
         widthField.setText(String.valueOf(settingsManager.getInt("width", 832)));
         heightField.setText(String.valueOf(settingsManager.getInt("height", 1216)));
         samplerComboBox.setValue(settingsManager.getString("sampler", "k_euler"));
-        smeaCheckBox.setSelected(settingsManager.getBoolean("smea", true));
-        smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
         stepsField.setText(String.valueOf(settingsManager.getInt("steps", 28)));
         seedField.setText(String.valueOf(settingsManager.getInt("seed", 0)));
         generateCountComboBox.setValue(settingsManager.getString("generateCount", "1"));
@@ -313,10 +373,6 @@ public abstract class AbstractGenerationController {
                 settingsManager.setInt("height", Integer.parseInt(newVal)));
         samplerComboBox.valueProperty().addListener((obs, oldVal, newVal) ->
                 settingsManager.setString("sampler", newVal));
-        smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
-                settingsManager.setBoolean("smea", newVal));
-        smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
-                settingsManager.setBoolean("smeaDyn", newVal));
         stepsField.textProperty().addListener((obs, oldVal, newVal) ->
                 settingsManager.setInt("steps", Integer.parseInt(newVal)));
         seedField.textProperty().addListener((obs, oldVal, newVal) ->

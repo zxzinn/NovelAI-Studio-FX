@@ -9,9 +9,10 @@ import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
@@ -19,13 +20,14 @@ import lombok.extern.log4j.Log4j2;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 public class Img2ImgGeneratorController extends AbstractGenerationController {
 
     @FXML private Button uploadImageButton;
     @FXML private TextField extraNoiseSeedField;
+    @FXML private Slider strengthSlider;
+    @FXML private Label strengthLabel;
 
     private String base64Image;
 
@@ -43,6 +45,11 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
         super.initialize();
         uploadImageButton.setOnAction(event -> handleUploadImage());
         extraNoiseSeedField.setText("0");
+        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
+            strengthSlider.setValue(roundedValue);
+            strengthLabel.setText(String.format("%.1f", roundedValue));
+        });
     }
 
     @FXML
@@ -65,46 +72,6 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
     }
 
     @Override
-    protected void generateImages() {
-        CompletableFuture.runAsync(() -> {
-            try {
-                if (base64Image == null) {
-                    log.error("請先上傳一張圖片");
-                    Platform.runLater(() -> {
-                        updateButtonState(false);
-                        isStopping = false;
-                    });
-                    return;
-                }
-
-                while (isGenerating && !stopRequested && currentGeneratedCount < getMaxCount()) {
-                    GenerationPayload payload = createGenerationPayload(
-                            positivePromptPreviewArea.getText(),
-                            negativePromptPreviewArea.getText()
-                    );
-                    BufferedImage image = imageGenerationService.generateImage(payload, apiKeyField.getText());
-
-                    if (image != null) {
-                        handleGeneratedImage(image);
-                    }
-
-                    currentGeneratedCount++;
-                    updatePromptPreviewsAsync();
-                }
-            } catch (IOException e) {
-                log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
-            } finally {
-                finishGeneration();
-            }
-        });
-    }
-
-    private int getMaxCount() {
-        String selectedCount = generateCountComboBox.getValue();
-        return "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
-    }
-
-    @Override
     protected GenerationPayload createGenerationPayload(String processedPositivePrompt, String processedNegativePrompt) {
         Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
         payload.setInput(processedPositivePrompt);
@@ -120,14 +87,32 @@ public class Img2ImgGeneratorController extends AbstractGenerationController {
         parameters.setN_samples(Integer.parseInt(countField.getText()));
         parameters.setUcPreset(false);
         parameters.setQualityToggle(false);
-        parameters.setSm(smeaCheckBox.isSelected());
-        parameters.setSm_dyn(smeaDynCheckBox.isSelected());
         parameters.setSeed(Long.parseLong(seedField.getText()));
         parameters.setNegative_prompt(processedNegativePrompt);
         parameters.setImage(base64Image);
         parameters.setExtra_noise_seed(Long.parseLong(extraNoiseSeedField.getText()));
 
+        // 新增的參數
+        parameters.setStrength(strengthSlider.getValue());
+        parameters.setNoise(0);
+        parameters.setDynamic_thresholding(false);
+        parameters.setControlnet_strength(1.0);
+        parameters.setLegacy(false);
+        parameters.setAdd_original_image(true);
+        parameters.setCfg_rescale(0);
+        parameters.setNoise_schedule("native");
+        parameters.setLegacy_v3_extend(false);
+
         payload.setParameters(parameters);
         return payload;
+    }
+
+    @Override
+    protected void generateImages() {
+        if (base64Image == null) {
+            log.error("請先上傳一張圖片");
+            return;
+        }
+        super.generateImages();
     }
 }

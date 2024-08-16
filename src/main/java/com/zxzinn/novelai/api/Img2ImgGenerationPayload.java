@@ -9,16 +9,16 @@ public class Img2ImgGenerationPayload extends GenerationPayload {
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class Img2ImgGenerationParameters extends GenerationParameters {
-        public double strength;
-        public int noise;
-        public boolean dynamic_thresholding;
-        public double controlnet_strength;
-        public boolean legacy;
-        public boolean add_original_image;
-        public int cfg_rescale;
-        public String noise_schedule;
-        public boolean legacy_v3_extend;
-        public String image;
-        public long extra_noise_seed;
+        private double strength = 0.5;
+        private int noise = 0;
+        private boolean dynamic_thresholding = false;
+        private double controlnet_strength = 1.0;
+        private boolean legacy = false;
+        private boolean add_original_image = true;
+        private int cfg_rescale = 0;
+        private String noise_schedule = "native";
+        private boolean legacy_v3_extend = false;
+        private String image;
+        private long extra_noise_seed;
     }
 }
