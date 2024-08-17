@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<fx:root type="javafx.scene.layout.VBox" xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="5.0">
+    <Button fx:id="refreshButton" styleClass="refresh-button">
+        <graphic>
+            <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
+        </graphic>
+    </Button>
+    <Button fx:id="lockButton" styleClass="lock-button">
+        <graphic>
+            <FontIcon fx:id="lockIcon" iconLiteral="fas-lock-open" iconSize="16"/>
+        </graphic>
+    </Button>
+</fx:root>

@@ -2,9 +2,7 @@ package com.zxzinn.novelai.controller.generation;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.component.HistoryImagesPane;
-import com.zxzinn.novelai.component.ImageControlBar;
-import com.zxzinn.novelai.component.PreviewPane;
+import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.NotificationService;
@@ -25,7 +23,6 @@ import javafx.util.Duration;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -70,10 +67,12 @@ public abstract class AbstractGenerationController {
     @FXML protected ComboBox<String> samplerComboBox;
     @FXML protected TextField stepsField;
     @FXML protected TextField seedField;
-    @FXML protected TextArea positivePromptArea;
-    @FXML protected TextArea negativePromptArea;
-    @FXML protected TextArea positivePromptPreviewArea;
-    @FXML protected TextArea negativePromptPreviewArea;
+    @FXML protected PromptArea positivePromptArea;
+    @FXML protected PromptArea negativePromptArea;
+    @FXML protected PromptPreviewArea positivePromptPreviewArea;
+    @FXML protected PromptPreviewArea negativePromptPreviewArea;
+    @FXML protected PromptControls positivePromptControls;
+    @FXML protected PromptControls negativePromptControls;
     @FXML protected ComboBox<String> generateCountComboBox;
     @FXML protected VBox historyImagesContainer;
     @FXML protected StackPane previewContainer;
@@ -82,12 +81,6 @@ public abstract class AbstractGenerationController {
     @FXML protected TextField outputDirectoryField;
     @FXML protected PreviewPane previewPane;
     @FXML protected Button generateButton;
-    @FXML protected Button refreshPositivePromptButton;
-    @FXML protected Button refreshNegativePromptButton;
-    @FXML protected Button lockPositivePromptButton;
-    @FXML protected Button lockNegativePromptButton;
-    @FXML protected FontIcon lockPositivePromptIcon;
-    @FXML protected FontIcon lockNegativePromptIcon;
 
     @Getter protected int currentGeneratedCount = 0;
     protected CountDownLatch promptUpdateLatch;
@@ -105,24 +98,24 @@ public abstract class AbstractGenerationController {
         initializeFields();
         loadSettings();
         setupListeners();
-        setupRefreshButtons();
-        setupTextAreas();
+        setupPromptControls();
         updatePromptPreviews();
-        setupLockButtons();
     }
 
-    private void setupLockButtons() {
-        lockPositivePromptButton.setOnAction(event -> toggleLock(true));
-        lockNegativePromptButton.setOnAction(event -> toggleLock(false));
+    private void setupPromptControls() {
+        positivePromptControls.setOnRefreshAction(() -> refreshPromptPreview(positivePromptArea, positivePromptPreviewArea));
+        negativePromptControls.setOnRefreshAction(() -> refreshPromptPreview(negativePromptArea, negativePromptPreviewArea));
+        positivePromptControls.setOnLockAction(() -> toggleLock(true));
+        negativePromptControls.setOnLockAction(() -> toggleLock(false));
     }
 
     private void toggleLock(boolean isPositive) {
         if (isPositive) {
             isPositivePromptLocked = !isPositivePromptLocked;
-            updateLockIcon(lockPositivePromptIcon, isPositivePromptLocked);
+            positivePromptControls.setLockIcon(isPositivePromptLocked);
         } else {
             isNegativePromptLocked = !isNegativePromptLocked;
-            updateLockIcon(lockNegativePromptIcon, isNegativePromptLocked);
+            negativePromptControls.setLockIcon(isNegativePromptLocked);
         }
     }
 
@@ -130,44 +123,21 @@ public abstract class AbstractGenerationController {
         previewPane.updatePreview(imageFile);
     }
 
-    private void updateLockIcon(FontIcon icon, boolean isLocked) {
-        icon.setIconLiteral(isLocked ? "fas-lock" : "fas-lock-open");
-    }
-
     protected void updatePromptPreviewsAsync() {
         Platform.runLater(() -> {
             if (!isPositivePromptLocked) {
-                positivePromptPreviewArea.setText(embedProcessor.processPrompt(positivePromptArea.getText()));
+                positivePromptPreviewArea.setPreviewText(embedProcessor.processPrompt(positivePromptArea.getPromptText()));
             }
             if (!isNegativePromptLocked) {
-                negativePromptPreviewArea.setText(embedProcessor.processPrompt(negativePromptArea.getText()));
+                negativePromptPreviewArea.setPreviewText(embedProcessor.processPrompt(negativePromptArea.getPromptText()));
             }
             promptUpdateLatch.countDown();
         });
     }
 
-    private void setupTextAreas() {
-        setupTextArea(positivePromptArea);
-        setupTextArea(negativePromptArea);
-        setupTextArea(positivePromptPreviewArea);
-        setupTextArea(negativePromptPreviewArea);
-    }
-
-    private void setupTextArea(TextArea textArea) {
-        textArea.setWrapText(true);
-        textArea.setMinHeight(100);
-        textArea.setPrefRowCount(5);
-        textArea.setMaxHeight(Double.MAX_VALUE);
-    }
-
-    private void setupRefreshButtons() {
-        refreshPositivePromptButton.setOnAction(event -> refreshPromptPreview(positivePromptArea, positivePromptPreviewArea));
-        refreshNegativePromptButton.setOnAction(event -> refreshPromptPreview(negativePromptArea, negativePromptPreviewArea));
-    }
-
-    private void refreshPromptPreview(TextArea promptArea, TextArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(promptArea.getText());
-        previewArea.setText(processedPrompt);
+    private void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
+        previewArea.setPreviewText(processedPrompt);
     }
 
     protected void initializeFields() {
@@ -187,6 +157,11 @@ public abstract class AbstractGenerationController {
         stepsField.setText(DEFAULT_STEPS);
         seedField.setText(DEFAULT_SEED);
         outputDirectoryField.setText(DEFAULT_OUTPUT_DIRECTORY);
+
+        positivePromptArea.setPromptLabel("正面提示詞:");
+        negativePromptArea.setPromptLabel("負面提示詞:");
+        positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
+        negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
     }
 
     @FXML
@@ -232,8 +207,8 @@ public abstract class AbstractGenerationController {
                     }
 
                     GenerationPayload payload = createGenerationPayload(
-                            positivePromptPreviewArea.getText(),
-                            negativePromptPreviewArea.getText()
+                            positivePromptPreviewArea.getPreviewText(),
+                            negativePromptPreviewArea.getPreviewText()
                     );
 
                     Optional<BufferedImage> generatedImage = generateImageWithRetry(payload);
@@ -339,8 +314,8 @@ public abstract class AbstractGenerationController {
         stepsField.setText(String.valueOf(settingsManager.getInt("steps", Integer.parseInt(DEFAULT_STEPS))));
         seedField.setText(String.valueOf(settingsManager.getInt("seed", Integer.parseInt(DEFAULT_SEED))));
         generateCountComboBox.setValue(settingsManager.getString("generateCount", "1"));
-        positivePromptArea.setText(settingsManager.getString("positivePrompt", ""));
-        negativePromptArea.setText(settingsManager.getString("negativePrompt", ""));
+        positivePromptArea.setPromptText(settingsManager.getString("positivePrompt", ""));
+        negativePromptArea.setPromptText(settingsManager.getString("negativePrompt", ""));
         outputDirectoryField.setText(settingsManager.getString("outputDirectory", DEFAULT_OUTPUT_DIRECTORY));
     }
 
@@ -353,13 +328,13 @@ public abstract class AbstractGenerationController {
         setupTextFieldListener(stepsField, "steps", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
         setupTextFieldListener(seedField, "seed", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
         setupComboBoxListener(generateCountComboBox, "generateCount", settingsManager::setString);
-        setupTextAreaListener(positivePromptArea, "positivePrompt", settingsManager::setString);
-        setupTextAreaListener(negativePromptArea, "negativePrompt", settingsManager::setString);
+        setupPromptAreaListener(positivePromptArea, "positivePrompt", settingsManager::setString);
+        setupPromptAreaListener(negativePromptArea, "negativePrompt", settingsManager::setString);
         setupTextFieldListener(outputDirectoryField, "outputDirectory", settingsManager::setString);
 
-        positivePromptArea.textProperty().addListener((observable, oldValue, newValue) ->
+        positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
                 updatePromptPreview(newValue, positivePromptPreviewArea));
-        negativePromptArea.textProperty().addListener((observable, oldValue, newValue) ->
+        negativePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
                 updatePromptPreview(newValue, negativePromptPreviewArea));
     }
 
@@ -371,17 +346,17 @@ public abstract class AbstractGenerationController {
         comboBox.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupTextAreaListener(TextArea textArea, String key, BiConsumer<String, String> setter) {
-        textArea.textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
+    private void setupPromptAreaListener(PromptArea promptArea, String key, BiConsumer<String, String> setter) {
+        promptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    protected void updatePromptPreview(String newValue, TextArea previewArea) {
+    protected void updatePromptPreview(String newValue, PromptPreviewArea previewArea) {
         String processedPrompt = embedProcessor.processPrompt(newValue);
-        previewArea.setText(processedPrompt);
+        previewArea.setPreviewText(processedPrompt);
     }
 
     protected void updatePromptPreviews() {
-        updatePromptPreview(positivePromptArea.getText(), positivePromptPreviewArea);
-        updatePromptPreview(negativePromptArea.getText(), negativePromptPreviewArea);
+        updatePromptPreview(positivePromptArea.getPromptText(), positivePromptPreviewArea);
+        updatePromptPreview(negativePromptArea.getPromptText(), negativePromptPreviewArea);
     }
 }

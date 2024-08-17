@@ -6,6 +6,9 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.zxzinn.novelai.component.ImageControlBar?>
 <?import com.zxzinn.novelai.component.HistoryImagesPane?>
+<?import com.zxzinn.novelai.component.PromptPreviewArea?>
+<?import com.zxzinn.novelai.component.PromptControls?>
+<?import com.zxzinn.novelai.component.PromptArea?>
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
@@ -66,55 +69,20 @@
     <center>
         <VBox spacing="10.0" styleClass="main-content">
             <HBox spacing="10.0" VBox.vgrow="NEVER">
-                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                    <Label text="正面提示詞:"/>
-                    <TextArea fx:id="positivePromptArea" styleClass="prompt-area" VBox.vgrow="ALWAYS"/>
-                </VBox>
-                <VBox alignment="CENTER" spacing="5.0">
-                    <Button fx:id="refreshPositivePromptButton" styleClass="refresh-button">
-                        <graphic>
-                            <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
-                        </graphic>
-                    </Button>
-                    <Button fx:id="lockPositivePromptButton" styleClass="lock-button">
-                        <graphic>
-                            <FontIcon fx:id="lockPositivePromptIcon" iconLiteral="fas-lock-open" iconSize="16"/>
-                        </graphic>
-                    </Button>
-                </VBox>
-                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                    <Label text="正面提示詞預覽"/>
-                    <TextArea fx:id="positivePromptPreviewArea" styleClass="prompt-preview" VBox.vgrow="ALWAYS"/>
-                </VBox>
+                <PromptArea fx:id="positivePromptArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
+                <PromptControls fx:id="positivePromptControls"/>
+                <PromptPreviewArea fx:id="positivePromptPreviewArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="NEVER">
-                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                    <Label text="負面提示詞:"/>
-                    <TextArea fx:id="negativePromptArea" styleClass="prompt-area" VBox.vgrow="ALWAYS"/>
-                </VBox>
-                <VBox alignment="CENTER" spacing="5.0">
-                    <Button fx:id="refreshNegativePromptButton" styleClass="refresh-button">
-                        <graphic>
-                            <FontIcon iconLiteral="fas-sync-alt" iconSize="16"/>
-                        </graphic>
-                    </Button>
-                    <Button fx:id="lockNegativePromptButton" styleClass="lock-button">
-                        <graphic>
-                            <FontIcon fx:id="lockNegativePromptIcon" iconLiteral="fas-lock-open" iconSize="16"/>
-                        </graphic>
-                    </Button>
-                </VBox>
-                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                    <Label text="負面提示詞預覽"/>
-                    <TextArea fx:id="negativePromptPreviewArea" styleClass="prompt-preview" VBox.vgrow="ALWAYS"/>
-                </VBox>
+                <PromptArea fx:id="negativePromptArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
+                <PromptControls fx:id="negativePromptControls"/>
+                <PromptPreviewArea fx:id="negativePromptPreviewArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
             </HBox>
             <HBox spacing="10.0" VBox.vgrow="ALWAYS">
                 <VBox spacing="5.0" HBox.hgrow="ALWAYS" prefWidth="850">
                     <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
                     <ImageControlBar fx:id="imageControlBar" />
                 </VBox>
-
                 <HistoryImagesPane fx:id="historyImagesPane" prefWidth="150" HBox.hgrow="NEVER"/>
             </HBox>
         </VBox>
