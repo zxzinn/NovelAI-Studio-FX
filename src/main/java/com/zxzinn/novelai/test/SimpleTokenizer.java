@@ -7,6 +7,8 @@ import java.util.regex.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
+import static java.lang.StringTemplate.STR;
+
 public class SimpleTokenizer {
     private final Map<Integer, String> byteEncoder;
     private final Map<String, Integer> encoder;
