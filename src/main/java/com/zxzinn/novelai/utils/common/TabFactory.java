@@ -2,9 +2,7 @@ package com.zxzinn.novelai.utils.common;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
-import com.zxzinn.novelai.controller.generation.UnifiedGeneratorController;
-import com.zxzinn.novelai.controller.generation.img2img.Img2ImgGeneratorController;
-import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
+import com.zxzinn.novelai.controller.generation.GenerationController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
@@ -59,36 +57,10 @@ public class TabFactory {
         return instance;
     }
 
-    public Tab createGeneratorTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
-        loader.setControllerFactory(param -> new ImageGeneratorController(apiClient, embedProcessor, settingsManager,
-                imageGenerationService, imageUtils, filePreviewService));
-        BorderPane content = loader.load();
-        return new TabBuilder()
-                .setContent(content)
-                .setText("Generator")
-                .setClosable(false)
-                .setGraphic(new FontIcon("fas-image"))
-                .build();
-    }
-
-    public Tab createImg2ImgTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/Img2ImgGenerator.fxml"));
-        loader.setControllerFactory(param -> new Img2ImgGeneratorController(apiClient, embedProcessor, settingsManager,
-                imageGenerationService, imageUtils, filePreviewService));
-        BorderPane content = loader.load();
-        return new TabBuilder()
-                .setContent(content)
-                .setText("Img2Img")
-                .setClosable(false)
-                .setGraphic(new FontIcon("fas-exchange-alt"))
-                .build();
-    }
-
     public Tab createUnifiedGeneratorTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/UnifiedGenerator.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
         GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(settingsManager);
-        loader.setControllerFactory(param -> new UnifiedGeneratorController(apiClient, embedProcessor, settingsManager,
+        loader.setControllerFactory(param -> new GenerationController(apiClient, embedProcessor, settingsManager,
                 imageGenerationService, imageUtils, filePreviewService, generationSettingsManager));
         BorderPane content = loader.load();
         return new TabBuilder()

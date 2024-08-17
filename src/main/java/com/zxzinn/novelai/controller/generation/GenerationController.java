@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @RequiredArgsConstructor
-public class UnifiedGeneratorController {
+public class GenerationController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
 

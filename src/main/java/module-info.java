@@ -22,8 +22,6 @@ module com.zxzinn.novelai {
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
     opens com.zxzinn.novelai.controller.generation to javafx.fxml;
-    opens com.zxzinn.novelai.controller.generation.img2img to javafx.fxml;
-    opens com.zxzinn.novelai.controller.generation.text2img to javafx.fxml;
     opens com.zxzinn.novelai.controller.filemanager to javafx.fxml;
     opens com.zxzinn.novelai.controller.ui to javafx.fxml;
     opens com.zxzinn.novelai.utils.common to javafx.fxml;
@@ -32,8 +30,6 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai;
     exports com.zxzinn.novelai.api to com.google.gson;
     exports com.zxzinn.novelai.controller.generation;
-    exports com.zxzinn.novelai.controller.generation.img2img;
-    exports com.zxzinn.novelai.controller.generation.text2img;
     exports com.zxzinn.novelai.controller.filemanager;
     exports com.zxzinn.novelai.controller.ui;
     exports com.zxzinn.novelai.utils.common;

@@ -12,7 +12,7 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             xmlns:ikonli="http://ikonli.org/javafx"
-            fx:controller="com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController"
+            fx:controller="com.zxzinn.novelai.controller.generation.GenerationController"
             stylesheets="@styles.css">
     <left>
         <ScrollPane fitToWidth="true" styleClass="side-panel">
@@ -23,6 +23,8 @@
                         <TextField fx:id="apiKeyField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                         <Label text="模型" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                         <ComboBox fx:id="modelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="生成模式" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="generationModeComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
                     </GridPane>
                 </TitledPane>
                 <TitledPane text="Output Settings" styleClass="settings-section">
@@ -43,12 +45,30 @@
                     <GridPane hgap="10.0" vgap="10.0">
                         <Label text="採樣器" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                         <ComboBox fx:id="samplerComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <CheckBox fx:id="smeaCheckBox" text="SMEA" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="步驟" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <TextField fx:id="stepsField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                        <Label text="種子" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <TextField fx:id="seedField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <Label text="步驟" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="stepsField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="種子" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="seedField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
+                <TitledPane fx:id="txt2imgSettingsPane" text="Text2Image Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <CheckBox fx:id="smeaCheckBox" text="SMEA" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </TitledPane>
+                <TitledPane fx:id="img2imgSettingsPane" text="Image2Image Settings" styleClass="settings-section">
+                    <GridPane hgap="10.0" vgap="10.0">
+                        <Label text="Strength" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <HBox spacing="10.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Slider fx:id="strengthSlider" min="0" max="1" value="0.5" blockIncrement="0.1" />
+                            <Label fx:id="strengthLabel" text="0.5"/>
+                        </HBox>
+                        <Label text="Extra Noise Seed" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="extraNoiseSeedField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Label text="Upload Image" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Button fx:id="uploadImageButton" text="選擇圖片" onAction="#handleUploadImage"
+                                GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="upload-button"/>
                     </GridPane>
                 </TitledPane>
                 <HBox spacing="10.0" alignment="CENTER">
