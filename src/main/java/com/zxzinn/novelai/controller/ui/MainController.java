@@ -62,8 +62,7 @@ public class MainController {
     private void loadTabContent() {
         try {
             mainTabPane.getTabs().addAll(
-                    tabFactory.createGeneratorTab(),
-                    tabFactory.createImg2ImgTab(),
+                    tabFactory.createUnifiedGeneratorTab(),
                     tabFactory.createFileManagerTab()
             );
         } catch (IOException e) {

@@ -131,6 +131,14 @@ public class SettingsManager {
         return Boolean.parseBoolean(getString(key, String.valueOf(defaultValue)));
     }
 
+    public void setLong(String key, long value) {
+        setString(key, String.valueOf(value));
+    }
+
+    public long getLong(String key, long defaultValue) {
+        return Long.parseLong(getString(key, String.valueOf(defaultValue)));
+    }
+
     public void setStringList(String key, List<String> values) {
         setString(key, String.join(",", values));
     }

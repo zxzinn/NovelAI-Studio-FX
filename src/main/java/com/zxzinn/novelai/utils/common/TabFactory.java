@@ -2,6 +2,7 @@ package com.zxzinn.novelai.utils.common;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
+import com.zxzinn.novelai.controller.generation.UnifiedGeneratorController;
 import com.zxzinn.novelai.controller.generation.img2img.Img2ImgGeneratorController;
 import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
@@ -80,6 +81,19 @@ public class TabFactory {
                 .setText("Img2Img")
                 .setClosable(false)
                 .setGraphic(new FontIcon("fas-exchange-alt"))
+                .build();
+    }
+
+    public Tab createUnifiedGeneratorTab() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/UnifiedGenerator.fxml"));
+        loader.setControllerFactory(param -> new UnifiedGeneratorController(apiClient, embedProcessor, settingsManager,
+                imageGenerationService, imageUtils, filePreviewService));
+        BorderPane content = loader.load();
+        return new TabBuilder()
+                .setContent(content)
+                .setText("圖像生成")
+                .setClosable(false)
+                .setGraphic(new FontIcon("fas-image"))
                 .build();
     }
 
