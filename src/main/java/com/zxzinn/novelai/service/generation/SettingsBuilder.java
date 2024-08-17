@@ -22,13 +22,15 @@ public class SettingsBuilder {
     private CheckBox smeaDynCheckBox;
     private Slider strengthSlider;
     private TextField extraNoiseSeedField;
+    private TextField ratioField;
+    private TextField countField;
 
     public void loadSettings(GenerationSettingsManager settingsManager) {
         settingsManager.loadSettings(
                 apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
                 stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
                 outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox,
-                strengthSlider, extraNoiseSeedField
+                strengthSlider, extraNoiseSeedField, ratioField, countField
         );
     }
 }

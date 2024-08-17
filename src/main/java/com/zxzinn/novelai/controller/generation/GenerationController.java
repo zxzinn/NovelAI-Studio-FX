@@ -138,6 +138,8 @@ public class GenerationController {
                 .smeaDynCheckBox(smeaDynCheckBox)
                 .strengthSlider(strengthSlider)
                 .extraNoiseSeedField(extraNoiseSeedField)
+                .ratioField(ratioField)
+                .countField(countField)
                 .build()
                 .loadSettings(generationSettingsManager);
     }
@@ -221,8 +223,11 @@ public class GenerationController {
                 .smeaDynCheckBox(smeaDynCheckBox)
                 .strengthSlider(strengthSlider)
                 .extraNoiseSeedField(extraNoiseSeedField)
+                .ratioField(ratioField)
+                .countField(countField)
                 .build()
                 .setupListeners(generationSettingsManager);
+
 
         positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
                 updatePromptPreview(newValue, positivePromptPreviewArea));

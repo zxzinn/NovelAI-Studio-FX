@@ -14,7 +14,7 @@ public class GenerationSettingsManager {
                              TextField seedField, ComboBox<String> generateCountComboBox, PromptArea positivePromptArea,
                              PromptArea negativePromptArea, TextField outputDirectoryField,
                              ComboBox<String> generationModeComboBox, CheckBox smeaCheckBox, CheckBox smeaDynCheckBox,
-                             Slider strengthSlider, TextField extraNoiseSeedField) {
+                             Slider strengthSlider, TextField extraNoiseSeedField, TextField ratioField, TextField countField) {
         apiKeyField.setText(settingsManager.getString("apiKey", ""));
         modelComboBox.setValue(settingsManager.getString("model", "nai-diffusion-3"));
         widthField.setText(String.valueOf(settingsManager.getInt("width", 832)));
@@ -31,6 +31,8 @@ public class GenerationSettingsManager {
         smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
         strengthSlider.setValue(settingsManager.getDouble("strength", 0.5));
         extraNoiseSeedField.setText(String.valueOf(settingsManager.getLong("extraNoiseSeed", 0)));
+        ratioField.setText(String.valueOf(settingsManager.getInt("ratio", 7))); // 新增
+        countField.setText(String.valueOf(settingsManager.getInt("count", 1))); // 新增
     }
 
     public void setupListeners(TextField apiKeyField, ComboBox<String> modelComboBox, TextField widthField,
@@ -38,7 +40,7 @@ public class GenerationSettingsManager {
                                TextField seedField, ComboBox<String> generateCountComboBox, PromptArea positivePromptArea,
                                PromptArea negativePromptArea, TextField outputDirectoryField,
                                ComboBox<String> generationModeComboBox, CheckBox smeaCheckBox, CheckBox smeaDynCheckBox,
-                               Slider strengthSlider, TextField extraNoiseSeedField) {
+                               Slider strengthSlider, TextField extraNoiseSeedField, TextField ratioField, TextField countField) {
         setupTextFieldListener(apiKeyField, "apiKey", settingsManager::setString);
         setupComboBoxListener(modelComboBox, "model", settingsManager::setString);
         setupTextFieldListener(widthField, "width", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
@@ -55,6 +57,8 @@ public class GenerationSettingsManager {
         setupCheckBoxListener(smeaDynCheckBox, "smeaDyn", settingsManager::setBoolean);
         setupSliderListener(strengthSlider, "strength", settingsManager::setDouble);
         setupTextFieldListener(extraNoiseSeedField, "extraNoiseSeed", (key, value) -> settingsManager.setLong(key, Long.parseLong(value)));
+        setupTextFieldListener(ratioField, "ratio", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
+        setupTextFieldListener(countField, "count", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
     }
 
     private void setupTextFieldListener(TextField textField, String key, java.util.function.BiConsumer<String, String> setter) {

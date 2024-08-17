@@ -22,13 +22,15 @@ public class ListenersBuilder {
     private CheckBox smeaDynCheckBox;
     private Slider strengthSlider;
     private TextField extraNoiseSeedField;
+    private TextField ratioField;
+    private TextField countField;
 
     public void setupListeners(GenerationSettingsManager settingsManager) {
         settingsManager.setupListeners(
                 apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
                 stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
                 outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox,
-                strengthSlider, extraNoiseSeedField
+                strengthSlider, extraNoiseSeedField, ratioField, countField
         );
     }
 }
