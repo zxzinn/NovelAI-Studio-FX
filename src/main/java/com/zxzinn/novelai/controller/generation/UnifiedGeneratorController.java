@@ -4,9 +4,7 @@ import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
-import com.zxzinn.novelai.service.generation.GenerationPayloadFactory;
-import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
-import com.zxzinn.novelai.service.generation.ImageGenerationService;
+import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.SettingsManager;
@@ -101,9 +99,7 @@ public class UnifiedGeneratorController {
         previewContainer.getChildren().add(previewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         initializeFields();
-        generationSettingsManager.loadSettings(apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
-                stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
-                outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox, strengthSlider, extraNoiseSeedField);
+        loadSettings();
         setupListeners();
         setupPromptControls();
         updatePromptPreviews();
@@ -122,6 +118,28 @@ public class UnifiedGeneratorController {
         positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
         negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
         setupStrengthSlider();
+    }
+
+    private void loadSettings() {
+        SettingsBuilder.builder()
+                .apiKeyField(apiKeyField)
+                .modelComboBox(modelComboBox)
+                .widthField(widthField)
+                .heightField(heightField)
+                .samplerComboBox(samplerComboBox)
+                .stepsField(stepsField)
+                .seedField(seedField)
+                .generateCountComboBox(generateCountComboBox)
+                .positivePromptArea(positivePromptArea)
+                .negativePromptArea(negativePromptArea)
+                .outputDirectoryField(outputDirectoryField)
+                .generationModeComboBox(generationModeComboBox)
+                .smeaCheckBox(smeaCheckBox)
+                .smeaDynCheckBox(smeaDynCheckBox)
+                .strengthSlider(strengthSlider)
+                .extraNoiseSeedField(extraNoiseSeedField)
+                .build()
+                .loadSettings(generationSettingsManager);
     }
 
     private void setupStrengthSlider() {
@@ -186,9 +204,25 @@ public class UnifiedGeneratorController {
     }
 
     private void setupListeners() {
-        generationSettingsManager.setupListeners(apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
-                stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
-                outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox, strengthSlider, extraNoiseSeedField);
+        ListenersBuilder.builder()
+                .apiKeyField(apiKeyField)
+                .modelComboBox(modelComboBox)
+                .widthField(widthField)
+                .heightField(heightField)
+                .samplerComboBox(samplerComboBox)
+                .stepsField(stepsField)
+                .seedField(seedField)
+                .generateCountComboBox(generateCountComboBox)
+                .positivePromptArea(positivePromptArea)
+                .negativePromptArea(negativePromptArea)
+                .outputDirectoryField(outputDirectoryField)
+                .generationModeComboBox(generationModeComboBox)
+                .smeaCheckBox(smeaCheckBox)
+                .smeaDynCheckBox(smeaDynCheckBox)
+                .strengthSlider(strengthSlider)
+                .extraNoiseSeedField(extraNoiseSeedField)
+                .build()
+                .setupListeners(generationSettingsManager);
 
         positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
                 updatePromptPreview(newValue, positivePromptPreviewArea));
@@ -306,24 +340,25 @@ public class UnifiedGeneratorController {
     }
 
     private GenerationPayload createGenerationPayload() {
-        return GenerationPayloadFactory.createPayload(
-                generationModeComboBox.getValue(),
-                positivePromptPreviewArea.getPreviewText(),
-                negativePromptPreviewArea.getPreviewText(),
-                modelComboBox.getValue(),
-                Integer.parseInt(widthField.getText()),
-                Integer.parseInt(heightField.getText()),
-                Integer.parseInt(ratioField.getText()),
-                samplerComboBox.getValue(),
-                Integer.parseInt(stepsField.getText()),
-                Integer.parseInt(countField.getText()),
-                Long.parseLong(seedField.getText()),
-                smeaCheckBox.isSelected(),
-                smeaDynCheckBox.isSelected(),
-                base64Image,
-                strengthSlider.getValue(),
-                Long.parseLong(extraNoiseSeedField.getText())
-        );
+        return PayloadBuilder.builder()
+                .generationMode(generationModeComboBox.getValue())
+                .processedPositivePrompt(positivePromptPreviewArea.getPreviewText())
+                .processedNegativePrompt(negativePromptPreviewArea.getPreviewText())
+                .model(modelComboBox.getValue())
+                .width(Integer.parseInt(widthField.getText()))
+                .height(Integer.parseInt(heightField.getText()))
+                .scale(Integer.parseInt(ratioField.getText()))
+                .sampler(samplerComboBox.getValue())
+                .steps(Integer.parseInt(stepsField.getText()))
+                .nSamples(Integer.parseInt(countField.getText()))
+                .seed(Long.parseLong(seedField.getText()))
+                .smea(smeaCheckBox.isSelected())
+                .smeaDyn(smeaDynCheckBox.isSelected())
+                .base64Image(base64Image)
+                .strength(strengthSlider.getValue())
+                .extraNoiseSeed(Long.parseLong(extraNoiseSeedField.getText()))
+                .build()
+                .createPayload();
     }
 
     private void handleGeneratedImage(BufferedImage originalImage) {
