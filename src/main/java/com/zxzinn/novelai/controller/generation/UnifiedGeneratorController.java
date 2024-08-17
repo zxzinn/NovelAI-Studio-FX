@@ -2,10 +2,10 @@ package com.zxzinn.novelai.controller.generation;
 
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.api.ImageGenerationPayload;
-import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
+import com.zxzinn.novelai.service.generation.GenerationPayloadFactory;
+import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
@@ -18,11 +18,11 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -38,20 +38,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 
 @Log4j2
 @RequiredArgsConstructor
 public class UnifiedGeneratorController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
-    private static final String DEFAULT_WIDTH = "832";
-    private static final String DEFAULT_HEIGHT = "1216";
-    private static final String DEFAULT_RATIO = "7";
-    private static final String DEFAULT_COUNT = "1";
-    private static final String DEFAULT_STEPS = "28";
-    private static final String DEFAULT_SEED = "0";
-    private static final String DEFAULT_OUTPUT_DIRECTORY = "output";
 
     private final APIClient apiClient;
     private final EmbedProcessor embedProcessor;
@@ -59,6 +51,7 @@ public class UnifiedGeneratorController {
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
+    private final GenerationSettingsManager generationSettingsManager;
 
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
@@ -93,7 +86,7 @@ public class UnifiedGeneratorController {
     @FXML private TextField extraNoiseSeedField;
     @FXML private Button uploadImageButton;
 
-    @Getter private int currentGeneratedCount = 0;
+    private int currentGeneratedCount = 0;
     private CountDownLatch promptUpdateLatch;
     private volatile boolean isGenerating = false;
     private volatile boolean stopRequested = false;
@@ -108,11 +101,35 @@ public class UnifiedGeneratorController {
         previewContainer.getChildren().add(previewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         initializeFields();
-        loadSettings();
+        generationSettingsManager.loadSettings(apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
+                stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
+                outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox, strengthSlider, extraNoiseSeedField);
         setupListeners();
         setupPromptControls();
         updatePromptPreviews();
         setupGenerationModeComboBox();
+    }
+
+    private void initializeFields() {
+        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
+        modelComboBox.setValue(NAIConstants.MODELS[0]);
+        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
+        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
+        generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
+        generateCountComboBox.setValue("1");
+        positivePromptArea.setPromptLabel("正面提示詞:");
+        negativePromptArea.setPromptLabel("負面提示詞:");
+        positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
+        negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
+        setupStrengthSlider();
+    }
+
+    private void setupStrengthSlider() {
+        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
+            strengthSlider.setValue(roundedValue);
+            strengthLabel.setText(String.format("%.1f", roundedValue));
+        });
     }
 
     private void setupGenerationModeComboBox() {
@@ -168,35 +185,25 @@ public class UnifiedGeneratorController {
         previewArea.setPreviewText(processedPrompt);
     }
 
-    private void initializeFields() {
-        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
-        modelComboBox.setValue(NAIConstants.MODELS[0]);
+    private void setupListeners() {
+        generationSettingsManager.setupListeners(apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
+                stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,
+                outputDirectoryField, generationModeComboBox, smeaCheckBox, smeaDynCheckBox, strengthSlider, extraNoiseSeedField);
 
-        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
-        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
+        positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
+                updatePromptPreview(newValue, positivePromptPreviewArea));
+        negativePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
+                updatePromptPreview(newValue, negativePromptPreviewArea));
+    }
 
-        generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
-        generateCountComboBox.setValue("1");
+    private void updatePromptPreview(String newValue, PromptPreviewArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(newValue);
+        previewArea.setPreviewText(processedPrompt);
+    }
 
-        widthField.setText(DEFAULT_WIDTH);
-        heightField.setText(DEFAULT_HEIGHT);
-        ratioField.setText(DEFAULT_RATIO);
-        countField.setText(DEFAULT_COUNT);
-        stepsField.setText(DEFAULT_STEPS);
-        seedField.setText(DEFAULT_SEED);
-        outputDirectoryField.setText(DEFAULT_OUTPUT_DIRECTORY);
-
-        positivePromptArea.setPromptLabel("正面提示詞:");
-        negativePromptArea.setPromptLabel("負面提示詞:");
-        positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
-        negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
-
-        extraNoiseSeedField.setText("0");
-        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
-            strengthSlider.setValue(roundedValue);
-            strengthLabel.setText(String.format("%.1f", roundedValue));
-        });
+    private void updatePromptPreviews() {
+        updatePromptPreview(positivePromptArea.getPromptText(), positivePromptPreviewArea);
+        updatePromptPreview(negativePromptArea.getPromptText(), negativePromptPreviewArea);
     }
 
     @FXML
@@ -246,22 +253,13 @@ public class UnifiedGeneratorController {
                         log.warn("等待提示詞更新超時");
                     }
 
-                    GenerationPayload payload = createGenerationPayload(
-                            positivePromptPreviewArea.getPreviewText(),
-                            negativePromptPreviewArea.getPreviewText()
-                    );
-
+                    GenerationPayload payload = createGenerationPayload();
                     Optional<BufferedImage> generatedImage = generateImageWithRetry(payload);
 
-                    generatedImage.ifPresent(image -> {
-                        handleGeneratedImage(image);
-                        currentGeneratedCount++;
-                        Platform.runLater(() -> NotificationService.showNotification("圖像生成成功！", Duration.seconds(3)));
-                    });
-
-                    if (generatedImage.isEmpty()) {
-                        Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)));
-                    }
+                    generatedImage.ifPresentOrElse(
+                            this::handleGeneratedImage,
+                            () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)))
+                    );
 
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
@@ -307,70 +305,25 @@ public class UnifiedGeneratorController {
         updateButtonState(false);
     }
 
-    private GenerationPayload createGenerationPayload(String processedPositivePrompt, String processedNegativePrompt) {
-        if ("Text2Image".equals(generationModeComboBox.getValue())) {
-            return createText2ImagePayload(processedPositivePrompt, processedNegativePrompt);
-        } else {
-            return createImage2ImagePayload(processedPositivePrompt, processedNegativePrompt);
-        }
-    }
-
-    private ImageGenerationPayload createText2ImagePayload(String processedPositivePrompt, String processedNegativePrompt) {
-        ImageGenerationPayload payload = new ImageGenerationPayload();
-        payload.setInput(processedPositivePrompt);
-        payload.setModel(modelComboBox.getValue());
-        payload.setAction("generate");
-
-        GenerationPayload.GenerationParameters parameters = new GenerationPayload.GenerationParameters();
-        parameters.setWidth(Integer.parseInt(widthField.getText()));
-        parameters.setHeight(Integer.parseInt(heightField.getText()));
-        parameters.setScale(Integer.parseInt(ratioField.getText()));
-        parameters.setSampler(samplerComboBox.getValue());
-        parameters.setSteps(Integer.parseInt(stepsField.getText()));
-        parameters.setN_samples(Integer.parseInt(countField.getText()));
-        parameters.setUcPreset(false);
-        parameters.setQualityToggle(false);
-        parameters.setSm(smeaCheckBox.isSelected());
-        parameters.setSm_dyn(smeaDynCheckBox.isSelected());
-        parameters.setSeed(Long.parseLong(seedField.getText()));
-        parameters.setNegative_prompt(processedNegativePrompt);
-
-        payload.setParameters(parameters);
-        return payload;
-    }
-
-    private Img2ImgGenerationPayload createImage2ImagePayload(String processedPositivePrompt, String processedNegativePrompt) {
-        Img2ImgGenerationPayload payload = new Img2ImgGenerationPayload();
-        payload.setInput(processedPositivePrompt);
-        payload.setModel(modelComboBox.getValue());
-        payload.setAction("img2img");
-
-        Img2ImgGenerationPayload.Img2ImgGenerationParameters parameters = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
-        parameters.setWidth(Integer.parseInt(widthField.getText()));
-        parameters.setHeight(Integer.parseInt(heightField.getText()));
-        parameters.setScale(Integer.parseInt(ratioField.getText()));
-        parameters.setSampler(samplerComboBox.getValue());
-        parameters.setSteps(Integer.parseInt(stepsField.getText()));
-        parameters.setN_samples(Integer.parseInt(countField.getText()));
-        parameters.setUcPreset(false);
-        parameters.setQualityToggle(false);
-        parameters.setSeed(Long.parseLong(seedField.getText()));
-        parameters.setNegative_prompt(processedNegativePrompt);
-        parameters.setImage(base64Image);
-        parameters.setExtra_noise_seed(Long.parseLong(extraNoiseSeedField.getText()));
-
-        parameters.setStrength(strengthSlider.getValue());
-        parameters.setNoise(0);
-        parameters.setDynamic_thresholding(false);
-        parameters.setControlnet_strength(1.0);
-        parameters.setLegacy(false);
-        parameters.setAdd_original_image(true);
-        parameters.setCfg_rescale(0);
-        parameters.setNoise_schedule("native");
-        parameters.setLegacy_v3_extend(false);
-
-        payload.setParameters(parameters);
-        return payload;
+    private GenerationPayload createGenerationPayload() {
+        return GenerationPayloadFactory.createPayload(
+                generationModeComboBox.getValue(),
+                positivePromptPreviewArea.getPreviewText(),
+                negativePromptPreviewArea.getPreviewText(),
+                modelComboBox.getValue(),
+                Integer.parseInt(widthField.getText()),
+                Integer.parseInt(heightField.getText()),
+                Integer.parseInt(ratioField.getText()),
+                samplerComboBox.getValue(),
+                Integer.parseInt(stepsField.getText()),
+                Integer.parseInt(countField.getText()),
+                Long.parseLong(seedField.getText()),
+                smeaCheckBox.isSelected(),
+                smeaDynCheckBox.isSelected(),
+                base64Image,
+                strengthSlider.getValue(),
+                Long.parseLong(extraNoiseSeedField.getText())
+        );
     }
 
     private void handleGeneratedImage(BufferedImage originalImage) {
@@ -384,6 +337,8 @@ public class UnifiedGeneratorController {
                 previewPane.updatePreview(imageFile);
                 addImageToHistory(fxImage, imageFile);
             });
+            currentGeneratedCount++;
+            NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
         });
     }
 
@@ -405,81 +360,8 @@ public class UnifiedGeneratorController {
         }
     }
 
-    private void addImageToHistory(javafx.scene.image.Image image, File imageFile) {
+    private void addImageToHistory(Image image, File imageFile) {
         historyImagesPane.addImage(image, imageFile);
-    }
-
-    private void loadSettings() {
-        apiKeyField.setText(settingsManager.getString("apiKey", ""));
-        modelComboBox.setValue(settingsManager.getString("model", "nai-diffusion-3"));
-        widthField.setText(String.valueOf(settingsManager.getInt("width", Integer.parseInt(DEFAULT_WIDTH))));
-        heightField.setText(String.valueOf(settingsManager.getInt("height", Integer.parseInt(DEFAULT_HEIGHT))));
-        samplerComboBox.setValue(settingsManager.getString("sampler", "k_euler"));
-        stepsField.setText(String.valueOf(settingsManager.getInt("steps", Integer.parseInt(DEFAULT_STEPS))));
-        seedField.setText(String.valueOf(settingsManager.getInt("seed", Integer.parseInt(DEFAULT_SEED))));
-        generateCountComboBox.setValue(settingsManager.getString("generateCount", "1"));
-        positivePromptArea.setPromptText(settingsManager.getString("positivePrompt", ""));
-        negativePromptArea.setPromptText(settingsManager.getString("negativePrompt", ""));
-        outputDirectoryField.setText(settingsManager.getString("outputDirectory", DEFAULT_OUTPUT_DIRECTORY));
-        generationModeComboBox.setValue(settingsManager.getString("generationMode", "Text2Image"));
-        smeaCheckBox.setSelected(settingsManager.getBoolean("smea", true));
-        smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
-        strengthSlider.setValue(settingsManager.getDouble("strength", 0.5));
-        extraNoiseSeedField.setText(String.valueOf(settingsManager.getLong("extraNoiseSeed", 0)));
-    }
-
-    private void setupListeners() {
-        setupTextFieldListener(apiKeyField, "apiKey", settingsManager::setString);
-        setupComboBoxListener(modelComboBox, "model", settingsManager::setString);
-        setupTextFieldListener(widthField, "width", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupTextFieldListener(heightField, "height", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupComboBoxListener(samplerComboBox, "sampler", settingsManager::setString);
-        setupTextFieldListener(stepsField, "steps", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupTextFieldListener(seedField, "seed", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupComboBoxListener(generateCountComboBox, "generateCount", settingsManager::setString);
-        setupPromptAreaListener(positivePromptArea, "positivePrompt", settingsManager::setString);
-        setupPromptAreaListener(negativePromptArea, "negativePrompt", settingsManager::setString);
-        setupTextFieldListener(outputDirectoryField, "outputDirectory", settingsManager::setString);
-        setupComboBoxListener(generationModeComboBox, "generationMode", settingsManager::setString);
-        setupCheckBoxListener(smeaCheckBox, "smea", settingsManager::setBoolean);
-        setupCheckBoxListener(smeaDynCheckBox, "smeaDyn", settingsManager::setBoolean);
-        setupSliderListener(strengthSlider, "strength", settingsManager::setDouble);
-        setupTextFieldListener(extraNoiseSeedField, "extraNoiseSeed", (key, value) -> settingsManager.setLong(key, Long.parseLong(value)));
-
-        positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                updatePromptPreview(newValue, positivePromptPreviewArea));
-        negativePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                updatePromptPreview(newValue, negativePromptPreviewArea));
-    }
-
-    private void setupTextFieldListener(TextField textField, String key, BiConsumer<String, String> setter) {
-        textField.textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
-    }
-
-    private void setupComboBoxListener(ComboBox<String> comboBox, String key, BiConsumer<String, String> setter) {
-        comboBox.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
-    }
-
-    private void setupPromptAreaListener(PromptArea promptArea, String key, BiConsumer<String, String> setter) {
-        promptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
-    }
-
-    private void setupCheckBoxListener(CheckBox checkBox, String key, BiConsumer<String, Boolean> setter) {
-        checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
-    }
-
-    private void setupSliderListener(Slider slider, String key, BiConsumer<String, Double> setter) {
-        slider.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal.doubleValue()));
-    }
-
-    private void updatePromptPreview(String newValue, PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(newValue);
-        previewArea.setPreviewText(processedPrompt);
-    }
-
-    private void updatePromptPreviews() {
-        updatePromptPreview(positivePromptArea.getPromptText(), positivePromptPreviewArea);
-        updatePromptPreview(negativePromptArea.getPromptText(), negativePromptPreviewArea);
     }
 
     @FXML

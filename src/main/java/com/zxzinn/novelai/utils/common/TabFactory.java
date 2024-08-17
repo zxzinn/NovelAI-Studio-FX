@@ -8,6 +8,7 @@ import com.zxzinn.novelai.controller.generation.text2img.ImageGeneratorControlle
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
+import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
@@ -86,8 +87,9 @@ public class TabFactory {
 
     public Tab createUnifiedGeneratorTab() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/UnifiedGenerator.fxml"));
+        GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(settingsManager);
         loader.setControllerFactory(param -> new UnifiedGeneratorController(apiClient, embedProcessor, settingsManager,
-                imageGenerationService, imageUtils, filePreviewService));
+                imageGenerationService, imageUtils, filePreviewService, generationSettingsManager));
         BorderPane content = loader.load();
         return new TabBuilder()
                 .setContent(content)
