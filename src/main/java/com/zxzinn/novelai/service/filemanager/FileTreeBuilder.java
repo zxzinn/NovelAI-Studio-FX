@@ -22,10 +22,8 @@ public class FileTreeBuilder {
 
     private final ExecutorService executorService;
     private final Function<String, Boolean> isExpandedChecker;
-    @Setter
-    private Predicate<File> fileFilter;
-    @Setter
-    private Comparator<File> fileComparator;
+    @Setter private Predicate<File> fileFilter;
+    @Setter private Comparator<File> fileComparator;
 
     public FileTreeBuilder(ExecutorService executorService, Function<String, Boolean> isExpandedChecker,
                            Predicate<File> fileFilter, Comparator<File> fileComparator) {

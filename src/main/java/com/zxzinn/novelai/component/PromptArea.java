@@ -11,12 +11,8 @@ import java.io.IOException;
 
 public class PromptArea extends VBox {
 
-    @FXML
-    private Label promptLabel;
-
-    @Getter
-    @FXML
-    private TextArea promptTextArea;
+    @FXML private Label promptLabel;
+    @Getter @FXML private TextArea promptTextArea;
 
     public PromptArea() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/PromptArea.fxml"));

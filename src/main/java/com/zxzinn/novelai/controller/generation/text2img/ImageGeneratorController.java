@@ -30,11 +30,8 @@ public class ImageGeneratorController extends AbstractGenerationController {
     @Override
     public void initialize() {
         super.initialize();
-        // 添加 SMEA 相關的初始化
         smeaCheckBox.setSelected(settingsManager.getBoolean("smea", true));
         smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
-
-        // 添加 SMEA 相關的監聽器
         smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
                 settingsManager.setBoolean("smea", newVal));
         smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->

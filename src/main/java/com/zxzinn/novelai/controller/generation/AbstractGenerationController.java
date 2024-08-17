@@ -219,7 +219,7 @@ public abstract class AbstractGenerationController {
                         Platform.runLater(() -> NotificationService.showNotification("圖像生成成功！", Duration.seconds(3)));
                     });
 
-                    if (!generatedImage.isPresent()) {
+                    if (generatedImage.isEmpty()) {
                         Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)));
                     }
 

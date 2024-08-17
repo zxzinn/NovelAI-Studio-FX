@@ -30,8 +30,7 @@ public class FileManagerService {
     private final SettingsManager settingsManager;
     private final ExecutorService executorService;
     private final ScheduledExecutorService scheduledExecutorService;
-    @Setter
-    private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
+    @Setter private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
 
     public FileManagerService(SettingsManager settingsManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();

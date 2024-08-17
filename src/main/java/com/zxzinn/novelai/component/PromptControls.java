@@ -10,14 +10,9 @@ import java.io.IOException;
 
 public class PromptControls extends VBox {
 
-    @FXML
-    private Button refreshButton;
-
-    @FXML
-    private Button lockButton;
-
-    @FXML
-    private FontIcon lockIcon;
+    @FXML private Button refreshButton;
+    @FXML private Button lockButton;
+    @FXML private FontIcon lockIcon;
 
     public PromptControls() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/PromptControls.fxml"));
