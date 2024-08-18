@@ -6,4 +6,5 @@
 <fx:root type="javafx.scene.layout.VBox" xmlns:fx="http://javafx.com/fxml" spacing="5.0">
     <Label fx:id="previewLabel" text="提示詞預覽"/>
     <TextArea fx:id="previewTextArea" styleClass="prompt-preview" VBox.vgrow="ALWAYS"/>
+    <Label fx:id="tokenCountLabel" styleClass="token-count-label"/>
 </fx:root>

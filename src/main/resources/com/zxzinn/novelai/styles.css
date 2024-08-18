@@ -435,3 +435,31 @@
     -fx-background-color: rgba(52, 152, 219, 0.2);
     -fx-border-color: #2980b9;
 }
+
+.token-count-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #ECF0F1;
+}
+
+.prompt-preview {
+    -fx-transition: background-color 0.3s;
+}
+
+.prompt-preview .content {
+    -fx-background-color: transparent;
+}
+
+.progress-bar {
+    -fx-background-color: rgba(44, 62, 80, 0.7);
+}
+
+.progress-bar .bar {
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+.progress-bar .track {
+    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
