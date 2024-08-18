@@ -1,18 +1,18 @@
 /* 全局樣式 */
 .root {
-    -fx-background-color: linear-gradient(to bottom right, #1a2a3a, #2C3E50);
-    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    -fx-background-color: linear-gradient(to bottom right, #1E1E2E, #302D41);
+    -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
 }
 
 /* 標題欄樣式 */
 .title-bar {
-    -fx-background-color: linear-gradient(to right, #34495E, #2C3E50);
+    -fx-background-color: linear-gradient(to right, #302D41, #1E1E2E);
     -fx-padding: 10px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 5);
 }
 
 .title-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #FAE3B0;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
@@ -20,7 +20,7 @@
 /* 窗口按鈕樣式 */
 .window-button {
     -fx-background-color: transparent;
-    -fx-text-fill: white;
+    -fx-text-fill: #C9CBFF;
     -fx-padding: 5px 10px;
     -fx-border-color: transparent;
     -fx-border-width: 0;
@@ -29,16 +29,16 @@
 }
 
 .window-button:hover {
-    -fx-background-color: rgba(255,255,255,0.2);
+    -fx-background-color: rgba(201, 203, 255, 0.2);
 }
 
 .window-button .ikonli-font-icon {
-    -fx-icon-color: white;
+    -fx-icon-color: #C9CBFF;
     -fx-icon-size: 14px;
 }
 
 .window-button#closeButton:hover {
-    -fx-background-color: #E74C3C;
+    -fx-background-color: #F28FAD;
 }
 
 /* 標籤頁樣式 */
@@ -47,53 +47,53 @@
 }
 
 .tab-pane .tab {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(69, 71, 90, 0.7);
     -fx-background-radius: 5px 5px 0 0;
     -fx-padding: 10px 20px;
     -fx-transition: all 0.3s ease;
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: #3498DB;
+    -fx-background-color: #89DCEB;
 }
 
 .tab-pane .tab .tab-label {
-    -fx-text-fill: #ECF0F1;
+    -fx-text-fill: #D9E0EE;
     -fx-font-size: 14px;
 }
 
 .tab-pane .tab:selected .tab-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #1E1E2E;
     -fx-font-weight: bold;
 }
 
 /* 文本輸入框樣式 */
 .text-field {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-    -fx-text-fill: white;
-    -fx-prompt-text-fill: #95A5A6;
+    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-text-fill: #D9E0EE;
+    -fx-prompt-text-fill: #988BA2;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
-    -fx-border-color: #3498DB;
+    -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
 }
 
 .text-field:hover {
-    -fx-background-color: rgba(58, 90, 125, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
 }
 
 .text-field:focused {
-    -fx-background-color: rgba(74, 106, 141, 0.7);
-    -fx-border-color: #5d9cec;
+    -fx-background-color: rgba(108, 112, 134, 0.7);
+    -fx-border-color: #89DCEB;
     -fx-border-width: 2px;
 }
 
 /* 文本區域樣式 */
 .text-area {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-    -fx-text-fill: white;
-    -fx-border-color: #3498DB;
+    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-text-fill: #D9E0EE;
+    -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
 }
@@ -103,33 +103,33 @@
 }
 
 .text-area:focused {
-    -fx-border-color: #5d9cec;
+    -fx-border-color: #89DCEB;
     -fx-border-width: 2px;
 }
 
 /* 下拉框樣式 */
 .combo-box {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-    -fx-text-fill: white;
-    -fx-border-color: #3498DB;
+    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-text-fill: #D9E0EE;
+    -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
 }
 
 .combo-box .list-cell {
-    -fx-background-color: rgba(44, 62, 80, 0.9);
-    -fx-text-fill: white;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-text-fill: #D9E0EE;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: rgba(44, 62, 80, 0.9);
-    -fx-border-color: #3498DB;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-border-color: #96CDFB;
 }
 
 /* 按鈕樣式 */
 .button {
-    -fx-background-color: #3498DB;
-    -fx-text-fill: white;
+    -fx-background-color: #96CDFB;
+    -fx-text-fill: #1E1E2E;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -137,7 +137,7 @@
 }
 
 .button:hover {
-    -fx-background-color: #2980B9;
+    -fx-background-color: #89DCEB;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
@@ -151,33 +151,33 @@
 
 .scroll-bar:vertical .thumb,
 .scroll-bar:horizontal .thumb {
-    -fx-background-color: rgba(52, 152, 219, 0.7);
+    -fx-background-color: rgba(150, 205, 251, 0.7);
     -fx-background-radius: 5px;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: rgba(93, 156, 236, 0.7);
+    -fx-background-color: rgba(137, 220, 235, 0.7);
 }
 
 /* 提示區域樣式 */
 .prompt-area, .prompt-preview {
-    -fx-text-fill: white;
-    -fx-control-inner-background: rgba(39, 94, 119, 0.7);
+    -fx-text-fill: #D9E0EE;
+    -fx-control-inner-background: rgba(69, 71, 90, 0.7);
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
-    -fx-border-color: #3498DB;
+    -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-font-family: 'Courier New', monospace;
 }
 
 .prompt-area:focused, .prompt-preview:focused {
-    -fx-border-color: #5DADE2;
+    -fx-border-color: #89DCEB;
     -fx-border-width: 2px;
 }
 
 /* 刷新和鎖定按鈕樣式 */
 .refresh-button, .lock-button {
-    -fx-background-color: rgba(52, 152, 219, 0.7);
+    -fx-background-color: rgba(150, 205, 251, 0.7);
     -fx-background-radius: 50%;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
@@ -188,25 +188,25 @@
 }
 
 .refresh-button:hover, .lock-button:hover {
-    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-background-color: rgba(137, 220, 235, 0.7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
 }
 
 .refresh-button .ikonli-font-icon, .lock-button .ikonli-font-icon {
-    -fx-icon-color: white;
+    -fx-icon-color: #1E1E2E;
 }
 
 /* 圖像控制欄樣式 */
 .image-control-bar {
-    -fx-background-color: linear-gradient(to right, #34495E, #2C3E50);
+    -fx-background-color: linear-gradient(to right, #302D41, #1E1E2E);
     -fx-padding: 10px;
     -fx-spacing: 10px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 5);
 }
 
 .control-button {
-    -fx-background-color: rgba(52, 152, 219, 0.7);
-    -fx-text-fill: white;
+    -fx-background-color: rgba(150, 205, 251, 0.7);
+    -fx-text-fill: #1E1E2E;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
     -fx-max-width: 30px;
@@ -217,13 +217,13 @@
 }
 
 .control-button:hover {
-    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-background-color: rgba(137, 220, 235, 0.7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
 }
 
 /* 歷史面板樣式 */
 .history-panel {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
+    -fx-background-color: rgba(69, 71, 90, 0.7);
     -fx-padding: 10px;
     -fx-background-radius: 5px;
 }
@@ -236,17 +236,17 @@
 .history-list-view .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 5px 0;
-    -fx-text-fill: white;
+    -fx-text-fill: #D9E0EE;
 }
 
 .history-list-view .list-cell:filled:hover {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
 }
 
 /* 生成按鈕特殊樣式 */
 .generate-button {
-    -fx-background-color: #2ecc71;
-    -fx-text-fill: white;
+    -fx-background-color: #ABE9B3;
+    -fx-text-fill: #1E1E2E;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -254,20 +254,20 @@
 }
 
 .generate-button:hover {
-    -fx-background-color: #27ae60;
+    -fx-background-color: #B5E8E0;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
 .generate-button:disabled {
-    -fx-background-color: #95a5a6;
+    -fx-background-color: #988BA2;
     -fx-opacity: 0.7;
 }
 
 /* 設置部分樣式 */
 .settings-section {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
     -fx-background-radius: 10px;
     -fx-padding: 15px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
@@ -275,21 +275,21 @@
 
 /* 復選框樣式 */
 .check-box {
-    -fx-text-fill: white;
+    -fx-text-fill: #D9E0EE;
 }
 
 .check-box .box {
-    -fx-background-color: rgba(52, 152, 219, 0.3);
-    -fx-border-color: #3498DB;
+    -fx-background-color: rgba(150, 205, 251, 0.3);
+    -fx-border-color: #96CDFB;
     -fx-border-radius: 3px;
 }
 
 .check-box:selected .box {
-    -fx-background-color: #3498DB;
+    -fx-background-color: #96CDFB;
 }
 
 .check-box:selected .mark {
-    -fx-background-color: white;
+    -fx-background-color: #1E1E2E;
 }
 
 .check-box .mark {
@@ -298,7 +298,7 @@
 
 /* 解析度和大小標籤樣式 */
 .resolution-label, .size-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #D9E0EE;
     -fx-font-size: 14px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 3, 0, 0, 1);
 }
@@ -307,11 +307,9 @@
     -fx-min-width: 120px;
 }
 
-/* 在現有的樣式基礎上添加或修改以下內容 */
-
 /* 設置面板樣式 */
 .settings-panel {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
+    -fx-background-color: rgba(69, 71, 90, 0.7);
     -fx-padding: 10px;
     -fx-spacing: 10px;
 }
@@ -328,19 +326,19 @@
 
 /* 設置區域樣式 */
 .settings-section {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
     -fx-background-radius: 5px;
 }
 
 .settings-section > .title {
-    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-background-color: rgba(137, 220, 235, 0.7);
     -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: white;
+    -fx-text-fill: #1E1E2E;
 }
 
 .settings-section > .content {
     -fx-background-color: transparent;
-    -fx-border-color: rgba(41, 128, 185, 0.7);
+    -fx-border-color: rgba(137, 220, 235, 0.7);
     -fx-border-width: 1px;
     -fx-border-radius: 0 0 5px 5px;
 }
@@ -352,15 +350,15 @@
 
 /* 控制欄樣式 */
 .control-bar {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
     -fx-padding: 10px;
     -fx-spacing: 10px;
 }
 
 /* 生成按鈕樣式 */
 .generate-button {
-    -fx-background-color: #2ecc71;
-    -fx-text-fill: white;
+    -fx-background-color: #ABE9B3;
+    -fx-text-fill: #1E1E2E;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -368,7 +366,7 @@
 }
 
 .generate-button:hover {
-    -fx-background-color: #27ae60;
+    -fx-background-color: #B5E8E0;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
@@ -376,26 +374,26 @@
 
 /* 生成數量下拉框樣式 */
 .control-bar .combo-box {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-    -fx-text-fill: white;
+    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-text-fill: #D9E0EE;
 }
 
 /* 設置部分樣式 */
 .settings-section {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.7);
     -fx-background-radius: 5px;
 }
 
 .settings-section > .title {
-    -fx-background-color: #2980b9;
+    -fx-background-color: #89DCEB;
     -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: white;
+    -fx-text-fill: #1E1E2E;
     -fx-font-weight: bold;
 }
 
 .settings-section > .content {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-    -fx-border-color: #2980b9;
+    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-border-color: #89DCEB;
     -fx-border-width: 1px;
     -fx-border-radius: 0 0 5px 5px;
 }
@@ -405,7 +403,7 @@
 }
 
 .settings-label {
-    -fx-text-fill: #ecf0f1;
+    -fx-text-fill: #D9E0EE;
 }
 
 /* 解析度欄位樣式 */
@@ -415,7 +413,7 @@
 }
 
 .resolution-separator {
-    -fx-text-fill: #ecf0f1;
+    -fx-text-fill: #D9E0EE;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
 }
@@ -423,22 +421,22 @@
 /* 文本輸入框樣式 */
 .right-aligned-text {
     -fx-alignment: CENTER_RIGHT;
-    -fx-background-color: rgba(44, 62, 80, 0.9);
-    -fx-text-fill: #ecf0f1;
-    -fx-border-color: #3498db;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-text-fill: #D9E0EE;
+    -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-border-radius: 3px;
     -fx-padding: 5px;
 }
 
 .right-aligned-text:focused {
-    -fx-background-color: rgba(52, 152, 219, 0.2);
-    -fx-border-color: #2980b9;
+    -fx-background-color: rgba(150, 205, 251, 0.2);
+    -fx-border-color: #89DCEB;
 }
 
 /* 進度條容器樣式 */
 .token-progress-container {
-    -fx-background-color: rgba(44, 62, 80, 0.3);
+    -fx-background-color: rgba(69, 71, 90, 0.3);
     -fx-background-radius: 10;
     -fx-padding: 2;
 }
@@ -451,7 +449,7 @@
 }
 
 .token-progress-bar > .bar {
-    -fx-background-color: linear-gradient(to right, #4CAF50, #FFC107 50%, #F44336);
+    -fx-background-color: linear-gradient(to right, #ABE9B3, #FAE3B0 50%, #F28FAD);
     -fx-background-radius: 8;
     -fx-background-insets: 0;
     -fx-padding: 3;
@@ -464,7 +462,7 @@
 
 /* Token 計數標籤樣式 */
 .token-count-label {
-    -fx-text-fill: white;
+    -fx-text-fill: #D9E0EE;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
@@ -472,12 +470,12 @@
 
 /* 警告效果 */
 @keyframes pulse {
-    0% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0), 0, 0, 0, 0); }
-    50% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0.5), 10, 0, 0, 0); }
-    100% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0), 0, 0, 0, 0); }
+    0% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0), 0, 0, 0, 0); }
+    50% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0.5), 10, 0, 0, 0); }
+    100% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0), 0, 0, 0, 0); }
 }
 
 .token-progress-bar-warning > .bar {
-    -fx-background-color: #F44336;
+    -fx-background-color: #F28FAD;
     -fx-animation: pulse 1s infinite;
 }
