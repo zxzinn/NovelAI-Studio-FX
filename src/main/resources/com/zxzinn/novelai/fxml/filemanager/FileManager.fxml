@@ -7,7 +7,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
-            stylesheets="@../../css/styles.css">
+            stylesheets="@../../css/style-purple.css">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>

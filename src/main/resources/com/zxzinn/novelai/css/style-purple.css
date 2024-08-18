@@ -1,26 +1,26 @@
 /* 全局樣式 */
 .root {
-    -fx-background-color: linear-gradient(to bottom right, #1E1E2E, #302D41);
+    -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
     -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
 }
 
 /* 標題欄樣式 */
 .title-bar {
-    -fx-background-color: linear-gradient(to right, #302D41, #1E1E2E);
+    -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
     -fx-padding: 10px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 5);
 }
 
 .title-label {
-    -fx-text-fill: #FAE3B0;
-    -fx-font-size: 18px;
+    -fx-text-fill: #F0A8BB;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
 /* 窗口按鈕樣式 */
 .window-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #C9CBFF;
+    -fx-text-fill: #C0CAF5;
     -fx-padding: 5px 10px;
     -fx-border-color: transparent;
     -fx-border-width: 0;
@@ -29,16 +29,16 @@
 }
 
 .window-button:hover {
-    -fx-background-color: rgba(201, 203, 255, 0.2);
+    -fx-background-color: rgba(192, 202, 245, 0.2);
 }
 
 .window-button .ikonli-font-icon {
-    -fx-icon-color: #C9CBFF;
+    -fx-icon-color: #C0CAF5;
     -fx-icon-size: 14px;
 }
 
 .window-button#closeButton:hover {
-    -fx-background-color: #F28FAD;
+    -fx-background-color: #F7768E;
 }
 
 /* 標籤頁樣式 */
@@ -47,85 +47,85 @@
 }
 
 .tab-pane .tab {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-background-color: rgba(54, 59, 82, 0.7);
     -fx-background-radius: 5px 5px 0 0;
     -fx-padding: 10px 20px;
     -fx-transition: all 0.3s ease;
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: #89DCEB;
+    -fx-background-color: #BB9AF7;
 }
 
 .tab-pane .tab .tab-label {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #A9B1D6;
     -fx-font-size: 14px;
 }
 
 .tab-pane .tab:selected .tab-label {
-    -fx-text-fill: #1E1E2E;
+    -fx-text-fill: #1A1B26;
     -fx-font-weight: bold;
 }
 
-/* 調整文本輸入框樣式以匹配新的背景 */
+/* 文本輸入框樣式 */
 .text-field {
-    -fx-background-color: rgba(88, 91, 112, 0.9);  /* 稍微亮一點的輸入框背景 */
-    -fx-text-fill: #F5E0DC;
-    -fx-prompt-text-fill: #988BA2;
+    -fx-background-color: rgba(65, 72, 104, 0.9);
+    -fx-text-fill: #C0CAF5;
+    -fx-prompt-text-fill: #565F89;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
-    -fx-border-color: #6C7086;  /* 匹配新的邊框顏色 */
+    -fx-border-color: #414868;
     -fx-border-width: 1px;
 }
 
 .text-field:hover {
-    -fx-background-color: rgba(88, 91, 112, 0.9);
+    -fx-background-color: rgba(65, 72, 104, 0.95);
 }
 
 .text-field:focused {
-    -fx-background-color: rgba(108, 112, 134, 0.9);  /* 聚焦時稍微亮一點 */
-    -fx-border-color: #89DCEB;
+    -fx-background-color: rgba(82, 90, 128, 0.95);
+    -fx-border-color: #7AA2F7;
     -fx-border-width: 2px;
 }
 
 /* 文本區域樣式 */
 .text-area {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9) !important;
-    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9) !important;
+    -fx-background-color: rgba(54, 59, 82, 0.9) !important;
 }
 
 .text-area .content {
-    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
+    -fx-background-color: rgba(54, 59, 82, 0.9) !important;
 }
 
 .text-area:focused {
-    -fx-border-color: #89DCEB;
+    -fx-border-color: #7AA2F7;
     -fx-border-width: 2px;
 }
 
 /* 下拉框樣式 */
 .combo-box {
-    -fx-background-color: rgba(88, 91, 112, 0.9);  /* 匹配文本輸入框背景 */
-    -fx-text-fill: #F5E0DC;
-    -fx-border-color: #6C7086;
+    -fx-background-color: rgba(65, 72, 104, 0.9);
+    -fx-text-fill: #C0CAF5;
+    -fx-border-color: #414868;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
 }
 
 .combo-box .list-cell {
-    -fx-background-color: rgba(88, 91, 112, 0.9);
-    -fx-text-fill: #F5E0DC;
+    -fx-background-color: rgba(65, 72, 104, 0.9);
+    -fx-text-fill: #C0CAF5;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: rgba(88, 91, 112, 0.9);
-    -fx-border-color: #6C7086;
+    -fx-background-color: rgba(65, 72, 104, 0.9);
+    -fx-border-color: #414868;
 }
 
 /* 按鈕樣式 */
 .button {
-    -fx-background-color: #96CDFB;
-    -fx-text-fill: #1E1E2E;
+    -fx-background-color: linear-gradient(to bottom right, #7AA2F7, #BB9AF7);
+    -fx-text-fill: #1A1B26; /* 將文字顏色改為深色 */
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -133,7 +133,7 @@
 }
 
 .button:hover {
-    -fx-background-color: #89DCEB;
+    -fx-background-color: linear-gradient(to bottom right, #BB9AF7, #7AA2F7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
@@ -147,28 +147,28 @@
 
 .scroll-bar:vertical .thumb,
 .scroll-bar:horizontal .thumb {
-    -fx-background-color: rgba(150, 205, 251, 0.7);
+    -fx-background-color: rgba(122, 162, 247, 0.7);
     -fx-background-radius: 5px;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: rgba(137, 220, 235, 0.7);
+    -fx-background-color: rgba(187, 154, 247, 0.7);
 }
 
 /* 提示區域和預覽區域的共同樣式 */
 .prompt-area .text-area, .prompt-preview .text-area {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9) !important;
-    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9) !important;
+    -fx-background-color: rgba(54, 59, 82, 0.9) !important;
 }
 
 .prompt-area:focused, .prompt-preview:focused {
-    -fx-border-color: #89DCEB;
+    -fx-border-color: #7AA2F7;
     -fx-border-width: 2px;
 }
 
 /* 刷新和鎖定按鈕樣式 */
 .refresh-button, .lock-button {
-    -fx-background-color: rgba(150, 205, 251, 0.7);
+    -fx-background-color: rgba(122, 162, 247, 0.7);
     -fx-background-radius: 50%;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
@@ -179,25 +179,25 @@
 }
 
 .refresh-button:hover, .lock-button:hover {
-    -fx-background-color: rgba(137, 220, 235, 0.7);
+    -fx-background-color: rgba(187, 154, 247, 0.7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
 }
 
 .refresh-button .ikonli-font-icon, .lock-button .ikonli-font-icon {
-    -fx-icon-color: #1E1E2E;
+    -fx-icon-color: #1A1B26;
 }
 
 /* 圖像控制欄樣式 */
 .image-control-bar {
-    -fx-background-color: linear-gradient(to right, #302D41, #1E1E2E);
+    -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
     -fx-padding: 10px;
     -fx-spacing: 10px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 5);
 }
 
 .control-button {
-    -fx-background-color: rgba(150, 205, 251, 0.7);
-    -fx-text-fill: #1E1E2E;
+    -fx-background-color: rgba(122, 162, 247, 0.7);
+    -fx-text-fill: #1A1B26;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
     -fx-max-width: 30px;
@@ -208,13 +208,13 @@
 }
 
 .control-button:hover {
-    -fx-background-color: rgba(137, 220, 235, 0.7);
+    -fx-background-color: rgba(187, 154, 247, 0.7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
 }
 
 /* 歷史面板樣式 */
 .history-panel {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-background-color: rgba(54, 59, 82, 0.9);
     -fx-padding: 10px;
     -fx-background-radius: 5px;
 }
@@ -227,51 +227,30 @@
 .history-list-view .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 5px 0;
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
 }
 
 .history-list-view .list-cell:filled:hover {
-    -fx-background-color: rgba(88, 91, 112, 0.9);
+    -fx-background-color: rgba(65, 72, 104, 0.9);
 }
 
-/* 生成按鈕特殊樣式 */
-.generate-button {
-    -fx-background-color: #ABE9B3;
-    -fx-text-fill: #1E1E2E;
-    -fx-font-weight: bold;
-    -fx-background-radius: 5px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
-    -fx-transition: all 0.3s ease;
-}
-
-.generate-button:hover {
-    -fx-background-color: #B5E8E0;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-}
-
-.generate-button:disabled {
-    -fx-background-color: #988BA2;
-    -fx-opacity: 0.7;
-}
 
 /* 設置部分樣式 */
 .settings-section {
-    -fx-background-color: rgba(69, 71, 90, 0.8);  /* 更深、更不透明的背景 */
+    -fx-background-color: rgba(54, 59, 82, 0.8);
     -fx-background-radius: 5px;
 }
 
 .settings-section > .title {
-    -fx-background-color: #6C7086;  /* 更深的標題背景顏色 */
+    -fx-background-color: #414868;
     -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: #F5E0DC;  /* 更亮的文字顏色以增加對比度 */
+    -fx-text-fill: #C0CAF5;
     -fx-font-weight: bold;
 }
 
 .settings-section > .content {
-    -fx-background-color: rgba(54, 56, 69, 0.9);  /* 更深的內容背景 */
-    -fx-border-color: #6C7086;  /* 更深的邊框顏色 */
+    -fx-background-color: rgba(41, 46, 66, 0.9);
+    -fx-border-color: #414868;
     -fx-border-width: 1px;
     -fx-border-radius: 0 0 5px 5px;
 }
@@ -281,27 +260,27 @@
 }
 
 .settings-label {
-    -fx-text-fill: #F5E0DC;  /* 保持亮色文字以增加對比度 */
+    -fx-text-fill: #C0CAF5;
     -fx-font-weight: bold;
 }
 
 /* 復選框樣式 */
 .check-box {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
 }
 
 .check-box .box {
-    -fx-background-color: rgba(150, 205, 251, 0.3);
-    -fx-border-color: #96CDFB;
+    -fx-background-color: rgba(122, 162, 247, 0.3);
+    -fx-border-color: #7AA2F7;
     -fx-border-radius: 3px;
 }
 
 .check-box:selected .box {
-    -fx-background-color: #96CDFB;
+    -fx-background-color: #7AA2F7;
 }
 
 .check-box:selected .mark {
-    -fx-background-color: #1E1E2E;
+    -fx-background-color: #1A1B26;
 }
 
 .check-box .mark {
@@ -310,7 +289,7 @@
 
 /* 解析度和大小標籤樣式 */
 .resolution-label, .size-label {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
     -fx-font-size: 14px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 3, 0, 0, 1);
 }
@@ -321,7 +300,7 @@
 
 /* 設置面板樣式 */
 .settings-panel {
-    -fx-background-color: rgba(69, 71, 90, 0.8);
+    -fx-background-color: rgba(54, 59, 82, 0.8);
     -fx-padding: 10px;
     -fx-spacing: 10px;
 }
@@ -343,7 +322,7 @@
 
 /* 控制欄樣式 */
 .control-bar {
-    -fx-background-color: rgba(88, 91, 112, 0.8);
+    -fx-background-color: rgba(65, 72, 104, 0.8);
     -fx-padding: 10px;
     -fx-spacing: 10px;
 }
@@ -355,14 +334,14 @@
 }
 
 .resolution-separator {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
 }
 
 /* 進度條容器樣式 */
 .token-progress-container {
-    -fx-background-color: rgba(69, 71, 90, 0.3);
+    -fx-background-color: rgba(54, 59, 82, 0.3);
     -fx-background-radius: 10;
     -fx-padding: 2;
 }
@@ -376,7 +355,7 @@
 
 /* 進度條樣式（續） */
 .token-progress-bar > .bar {
-    -fx-background-color: linear-gradient(to right, #ABE9B3, #FAE3B0 50%, #F28FAD);
+    -fx-background-color: linear-gradient(to right, #9ECE6A, #F0A8BB 50%, #F7768E);
     -fx-background-radius: 8;
     -fx-background-insets: 0;
     -fx-padding: 3;
@@ -389,7 +368,7 @@
 
 /* Token 計數標籤樣式 */
 .token-count-label {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
@@ -397,20 +376,20 @@
 
 /* 警告效果 */
 @keyframes pulse {
-    0% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0), 0, 0, 0, 0); }
-    50% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0.5), 10, 0, 0, 0); }
-    100% { -fx-effect: dropshadow(three-pass-box, rgba(242,143,173,0), 0, 0, 0, 0); }
+    0% { -fx-effect: dropshadow(three-pass-box, rgba(247,118,142,0), 0, 0, 0, 0); }
+    50% { -fx-effect: dropshadow(three-pass-box, rgba(247,118,142,0.5), 10, 0, 0, 0); }
+    100% { -fx-effect: dropshadow(three-pass-box, rgba(247,118,142,0), 0, 0, 0, 0); }
 }
 
 .token-progress-bar-warning > .bar {
-    -fx-background-color: #F28FAD;
+    -fx-background-color: #F7768E;
     -fx-animation: pulse 1s infinite;
 }
 
 /* 上傳按鈕樣式 */
 .upload-button {
-    -fx-background-color: #96CDFB;
-    -fx-text-fill: #1E1E2E;
+    -fx-background-color: linear-gradient(to bottom right, #7AA2F7, #BB9AF7);
+    -fx-text-fill: #1A1B26; /* 將文字顏色改為深色 */
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -418,7 +397,7 @@
 }
 
 .upload-button:hover {
-    -fx-background-color: #89DCEB;
+    -fx-background-color: linear-gradient(to bottom right, #BB9AF7, #7AA2F7);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
@@ -431,25 +410,25 @@
 }
 
 .slider .track {
-    -fx-background-color: #96CDFB;
+    -fx-background-color: #7AA2F7;
 }
 
 .slider .thumb {
-    -fx-background-color: #89DCEB;
+    -fx-background-color: #BB9AF7;
 }
 
 /* 預覽容器樣式 */
 .preview-container {
-    -fx-background-color: rgba(69, 71, 90, 0.5);
+    -fx-background-color: rgba(54, 59, 82, 0.5);
     -fx-background-radius: 5px;
-    -fx-border-color: #96CDFB;
+    -fx-border-color: #7AA2F7;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
 }
 
 /* 主要內容區域樣式 */
 .main-content {
-    -fx-background-color: rgba(69, 71, 90, 0.5);
+    -fx-background-color: rgba(54, 59, 82, 0.5);
     -fx-background-radius: 5px;
     -fx-padding: 10px;
 }
@@ -465,49 +444,65 @@
 
 /* 標籤樣式 */
 .label {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #C0CAF5;
 }
 
 /* 提高對比度的一般文本 */
 .text {
-    -fx-fill: #F5E0DC;
+    -fx-fill: #C0CAF5;
 }
 
 /* 增強可讀性的提示文本 */
 .prompt-text {
-    -fx-fill: #C9CBFF;
+    -fx-fill: #A9B1D6;
 }
 
 /* 強調重要信息 */
 .emphasis-text {
-    -fx-fill: #FAE3B0;
+    -fx-fill: #F0A8BB;
     -fx-font-weight: bold;
 }
 
 /* 錯誤信息樣式 */
 .error-text {
-    -fx-fill: #F28FAD;
+    -fx-fill: #F7768E;
     -fx-font-weight: bold;
 }
 
 /* 成功信息樣式 */
 .success-text {
-    -fx-fill: #ABE9B3;
+    -fx-fill: #9ECE6A;
     -fx-font-weight: bold;
 }
 
 .prompt-preview-low {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
 }
 
 .prompt-preview-medium {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
 }
 
 .prompt-preview-high {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
 }
 
 .prompt-preview-max {
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
+}
+
+/* 櫻花效果 */
+.cherry-blossom {
+    -fx-background-color: rgba(240, 168, 187, 0.1);
+    -fx-shape: "M10,0 C5,5 0,10 0,15 C0,20 5,25 10,25 C15,25 20,20 20,15 C20,10 15,5 10,0 Z";
+}
+
+/* 櫻花動畫 */
+@keyframes fall {
+    from { -fx-translate-y: -100%; }
+    to { -fx-translate-y: 100%; }
+}
+
+.cherry-blossom-animation {
+    -fx-animation: fall 10s linear infinite;
 }

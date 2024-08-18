@@ -305,7 +305,6 @@ public class GenerationController {
     private void updateButtonState(boolean generating) {
         Platform.runLater(() -> {
             generateButton.setText(generating ? "停止" : "生成");
-            generateButton.setStyle(generating ? "-fx-background-color: #e53e3e;" : "-fx-background-color: #48bb78;");
             generateButton.setDisable(isStopping);
             UIUtils.animateButton(generateButton);
         });
