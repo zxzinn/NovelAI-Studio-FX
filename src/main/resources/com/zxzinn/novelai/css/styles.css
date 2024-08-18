@@ -91,15 +91,12 @@
 
 /* 文本區域樣式 */
 .text-area {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
-    -fx-text-fill: #F5E0DC;
-    -fx-border-color: #96CDFB;
-    -fx-border-width: 1px;
-    -fx-border-radius: 5px;
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9) !important;
+    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
 }
 
 .text-area .content {
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
 }
 
 .text-area:focused {
@@ -160,14 +157,9 @@
 }
 
 /* 提示區域和預覽區域的共同樣式 */
-.prompt-area, .prompt-preview {
-    -fx-text-fill: #F5E0DC;
-    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
-    -fx-background-radius: 5px;
-    -fx-border-radius: 5px;
-    -fx-border-color: #96CDFB;
-    -fx-border-width: 1px;
-    -fx-font-family: 'Courier New', monospace;
+.prompt-area .text-area, .prompt-preview .text-area {
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9) !important;
+    -fx-background-color: rgba(69, 71, 90, 0.9) !important;
 }
 
 .prompt-area:focused, .prompt-preview:focused {
@@ -503,4 +495,20 @@
 .success-text {
     -fx-fill: #ABE9B3;
     -fx-font-weight: bold;
+}
+
+.prompt-preview-low {
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+}
+
+.prompt-preview-medium {
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+}
+
+.prompt-preview-high {
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
+}
+
+.prompt-preview-max {
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
 }

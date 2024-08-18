@@ -32,6 +32,7 @@ public class PromptArea extends VBox {
         promptTextArea.setPrefHeight(100);
         promptTextArea.setMaxHeight(USE_PREF_SIZE);
         promptTextArea.setMinHeight(USE_PREF_SIZE);
+        promptTextArea.getStyleClass().add("prompt-area");
     }
 
     public void setPromptLabel(String label) {

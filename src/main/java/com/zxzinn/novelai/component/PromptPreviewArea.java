@@ -46,6 +46,7 @@ public class PromptPreviewArea extends VBox {
         previewTextArea.setMaxHeight(USE_PREF_SIZE);
         previewTextArea.setMinHeight(USE_PREF_SIZE);
         previewTextArea.setEditable(false);
+        previewTextArea.getStyleClass().add("prompt-preview");
 
         previewTextArea.textProperty().addListener((observable, oldValue, newValue) -> updateTokenCount());
 
