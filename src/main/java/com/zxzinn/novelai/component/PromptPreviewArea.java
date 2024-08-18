@@ -1,6 +1,6 @@
 package com.zxzinn.novelai.component;
 
-import com.zxzinn.novelai.test.SimpleTokenizer;
+import com.zxzinn.novelai.utils.tokenizer.SimpleTokenizer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

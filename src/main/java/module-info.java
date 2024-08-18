@@ -26,6 +26,8 @@ module com.zxzinn.novelai {
     opens com.zxzinn.novelai.controller.ui to javafx.fxml;
     opens com.zxzinn.novelai.utils.common to javafx.fxml;
     opens com.zxzinn.novelai.component to javafx.fxml;
+    opens com.zxzinn.novelai.service.filemanager to javafx.fxml;
+    opens com.zxzinn.novelai.utils.tokenizer to javafx.fxml;
 
     exports com.zxzinn.novelai;
     exports com.zxzinn.novelai.api to com.google.gson;
@@ -35,5 +37,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.utils.common;
     exports com.zxzinn.novelai.component;
     exports com.zxzinn.novelai.service.filemanager;
-    opens com.zxzinn.novelai.service.filemanager to javafx.fxml;
+    exports com.zxzinn.novelai.utils.tokenizer;
 }

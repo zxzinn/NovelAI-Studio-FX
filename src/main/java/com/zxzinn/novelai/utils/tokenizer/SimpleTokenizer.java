@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.test;
+package com.zxzinn.novelai.utils.tokenizer;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -6,8 +6,6 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
-
-import static java.lang.StringTemplate.STR;
 
 public class SimpleTokenizer {
     private final Map<Integer, String> byteEncoder;
@@ -144,18 +142,5 @@ public class SimpleTokenizer {
         }
 
         return bpeTokens;
-    }
-
-    public static void main(String[] args) {
-        try {
-            SimpleTokenizer tokenizer = new SimpleTokenizer("C:\\Users\\User\\Downloads\\bpe_simple_vocab_16e6.txt.gz");
-            String input = "test";
-            List<Integer> tokens = tokenizer.encode(input);
-            System.out.println(STR."Input: \{input}");
-            System.out.println(STR."Token count: \{tokens.size()}");
-            System.out.println(STR."Tokens: \{tokens}");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }
