@@ -58,7 +58,7 @@
 }
 
 .tab-pane .tab .tab-label {
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
     -fx-font-size: 14px;
 }
 
@@ -69,8 +69,8 @@
 
 /* 文本輸入框樣式 */
 .text-field {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
-    -fx-text-fill: #D9E0EE;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-text-fill: #F5E0DC;
     -fx-prompt-text-fill: #988BA2;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
@@ -80,19 +80,19 @@
 }
 
 .text-field:hover {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.9);
 }
 
 .text-field:focused {
-    -fx-background-color: rgba(108, 112, 134, 0.7);
+    -fx-background-color: rgba(108, 112, 134, 0.9);
     -fx-border-color: #89DCEB;
     -fx-border-width: 2px;
 }
 
 /* 文本區域樣式 */
 .text-area {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
-    -fx-text-fill: #D9E0EE;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-text-fill: #F5E0DC;
     -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
@@ -109,8 +109,8 @@
 
 /* 下拉框樣式 */
 .combo-box {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
-    -fx-text-fill: #D9E0EE;
+    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-text-fill: #F5E0DC;
     -fx-border-color: #96CDFB;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
@@ -118,7 +118,7 @@
 
 .combo-box .list-cell {
     -fx-background-color: rgba(69, 71, 90, 0.9);
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
 }
 
 .combo-box-popup .list-view {
@@ -159,10 +159,10 @@
     -fx-background-color: rgba(137, 220, 235, 0.7);
 }
 
-/* 提示區域樣式 */
+/* 提示區域和預覽區域的共同樣式 */
 .prompt-area, .prompt-preview {
-    -fx-text-fill: #D9E0EE;
-    -fx-control-inner-background: rgba(69, 71, 90, 0.7);
+    -fx-text-fill: #F5E0DC;
+    -fx-control-inner-background: rgba(69, 71, 90, 0.9);
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
     -fx-border-color: #96CDFB;
@@ -223,7 +223,7 @@
 
 /* 歷史面板樣式 */
 .history-panel {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-background-color: rgba(69, 71, 90, 0.9);
     -fx-padding: 10px;
     -fx-background-radius: 5px;
 }
@@ -236,11 +236,11 @@
 .history-list-view .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 5px 0;
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
 }
 
 .history-list-view .list-cell:filled:hover {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.9);
 }
 
 /* 生成按鈕特殊樣式 */
@@ -267,15 +267,36 @@
 
 /* 設置部分樣式 */
 .settings-section {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
-    -fx-background-radius: 10px;
-    -fx-padding: 15px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
+    -fx-background-color: rgba(88, 91, 112, 0.8);
+    -fx-background-radius: 5px;
+}
+
+.settings-section > .title {
+    -fx-background-color: #89DCEB;
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-text-fill: #1E1E2E;
+    -fx-font-weight: bold;
+}
+
+.settings-section > .content {
+    -fx-background-color: rgba(69, 71, 90, 0.8);
+    -fx-border-color: #89DCEB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0 0 5px 5px;
+}
+
+.settings-content {
+    -fx-padding: 10px;
+}
+
+.settings-label {
+    -fx-text-fill: #F5E0DC;
+    -fx-font-weight: bold;
 }
 
 /* 復選框樣式 */
 .check-box {
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
 }
 
 .check-box .box {
@@ -298,7 +319,7 @@
 
 /* 解析度和大小標籤樣式 */
 .resolution-label, .size-label {
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
     -fx-font-size: 14px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 3, 0, 0, 1);
 }
@@ -309,7 +330,7 @@
 
 /* 設置面板樣式 */
 .settings-panel {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
+    -fx-background-color: rgba(69, 71, 90, 0.8);
     -fx-padding: 10px;
     -fx-spacing: 10px;
 }
@@ -324,25 +345,6 @@
     -fx-background-color: transparent;
 }
 
-/* 設置區域樣式 */
-.settings-section {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
-    -fx-background-radius: 5px;
-}
-
-.settings-section > .title {
-    -fx-background-color: rgba(137, 220, 235, 0.7);
-    -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: #1E1E2E;
-}
-
-.settings-section > .content {
-    -fx-background-color: transparent;
-    -fx-border-color: rgba(137, 220, 235, 0.7);
-    -fx-border-width: 1px;
-    -fx-border-radius: 0 0 5px 5px;
-}
-
 /* 文本框和下拉框內容右對齊 */
 .right-aligned-text {
     -fx-alignment: CENTER_RIGHT;
@@ -350,60 +352,9 @@
 
 /* 控制欄樣式 */
 .control-bar {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
+    -fx-background-color: rgba(88, 91, 112, 0.8);
     -fx-padding: 10px;
     -fx-spacing: 10px;
-}
-
-/* 生成按鈕樣式 */
-.generate-button {
-    -fx-background-color: #ABE9B3;
-    -fx-text-fill: #1E1E2E;
-    -fx-font-weight: bold;
-    -fx-background-radius: 5px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
-    -fx-transition: all 0.3s ease;
-}
-
-.generate-button:hover {
-    -fx-background-color: #B5E8E0;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-}
-
-/* 生成數量下拉框樣式 */
-.control-bar .combo-box {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
-    -fx-text-fill: #D9E0EE;
-}
-
-/* 設置部分樣式 */
-.settings-section {
-    -fx-background-color: rgba(88, 91, 112, 0.7);
-    -fx-background-radius: 5px;
-}
-
-.settings-section > .title {
-    -fx-background-color: #89DCEB;
-    -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: #1E1E2E;
-    -fx-font-weight: bold;
-}
-
-.settings-section > .content {
-    -fx-background-color: rgba(69, 71, 90, 0.7);
-    -fx-border-color: #89DCEB;
-    -fx-border-width: 1px;
-    -fx-border-radius: 0 0 5px 5px;
-}
-
-.settings-content {
-    -fx-padding: 10px;
-}
-
-.settings-label {
-    -fx-text-fill: #D9E0EE;
 }
 
 /* 解析度欄位樣式 */
@@ -413,25 +364,9 @@
 }
 
 .resolution-separator {
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
-}
-
-/* 文本輸入框樣式 */
-.right-aligned-text {
-    -fx-alignment: CENTER_RIGHT;
-    -fx-background-color: rgba(69, 71, 90, 0.9);
-    -fx-text-fill: #D9E0EE;
-    -fx-border-color: #96CDFB;
-    -fx-border-width: 1px;
-    -fx-border-radius: 3px;
-    -fx-padding: 5px;
-}
-
-.right-aligned-text:focused {
-    -fx-background-color: rgba(150, 205, 251, 0.2);
-    -fx-border-color: #89DCEB;
 }
 
 /* 進度條容器樣式 */
@@ -448,6 +383,7 @@
     -fx-padding: 0;
 }
 
+/* 進度條樣式（續） */
 .token-progress-bar > .bar {
     -fx-background-color: linear-gradient(to right, #ABE9B3, #FAE3B0 50%, #F28FAD);
     -fx-background-radius: 8;
@@ -462,7 +398,7 @@
 
 /* Token 計數標籤樣式 */
 .token-count-label {
-    -fx-text-fill: #D9E0EE;
+    -fx-text-fill: #F5E0DC;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-padding: 0 5 0 5;
@@ -478,4 +414,93 @@
 .token-progress-bar-warning > .bar {
     -fx-background-color: #F28FAD;
     -fx-animation: pulse 1s infinite;
+}
+
+/* 上傳按鈕樣式 */
+.upload-button {
+    -fx-background-color: #96CDFB;
+    -fx-text-fill: #1E1E2E;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
+    -fx-transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+    -fx-background-color: #89DCEB;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* 滑塊樣式 */
+.slider {
+    -fx-show-tick-labels: true;
+    -fx-show-tick-marks: true;
+}
+
+.slider .track {
+    -fx-background-color: #96CDFB;
+}
+
+.slider .thumb {
+    -fx-background-color: #89DCEB;
+}
+
+/* 預覽容器樣式 */
+.preview-container {
+    -fx-background-color: rgba(69, 71, 90, 0.5);
+    -fx-background-radius: 5px;
+    -fx-border-color: #96CDFB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+/* 主要內容區域樣式 */
+.main-content {
+    -fx-background-color: rgba(69, 71, 90, 0.5);
+    -fx-background-radius: 5px;
+    -fx-padding: 10px;
+}
+
+/* 滾動面板樣式 */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* 標籤樣式 */
+.label {
+    -fx-text-fill: #F5E0DC;
+}
+
+/* 提高對比度的一般文本 */
+.text {
+    -fx-fill: #F5E0DC;
+}
+
+/* 增強可讀性的提示文本 */
+.prompt-text {
+    -fx-fill: #C9CBFF;
+}
+
+/* 強調重要信息 */
+.emphasis-text {
+    -fx-fill: #FAE3B0;
+    -fx-font-weight: bold;
+}
+
+/* 錯誤信息樣式 */
+.error-text {
+    -fx-fill: #F28FAD;
+    -fx-font-weight: bold;
+}
+
+/* 成功信息樣式 */
+.success-text {
+    -fx-fill: #ABE9B3;
+    -fx-font-weight: bold;
 }
