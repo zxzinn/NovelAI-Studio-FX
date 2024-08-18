@@ -1,9 +1,11 @@
 package com.zxzinn.novelai.component;
 
 import com.zxzinn.novelai.test.SimpleTokenizer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
@@ -18,6 +20,7 @@ public class PromptPreviewArea extends VBox {
 
     @FXML private Label previewLabel;
     @Getter @FXML private TextArea previewTextArea;
+    @FXML private ProgressBar tokenProgressBar;
     @FXML private Label tokenCountLabel;
 
     private SimpleTokenizer tokenizer;
@@ -46,9 +49,8 @@ public class PromptPreviewArea extends VBox {
 
         previewTextArea.textProperty().addListener((observable, oldValue, newValue) -> updateTokenCount());
 
-        tokenCountLabel = new Label();
-        tokenCountLabel.getStyleClass().add("token-count-label");
-        getChildren().add(tokenCountLabel);
+        tokenProgressBar.setPrefHeight(6);
+        tokenProgressBar.getStyleClass().add("token-progress-bar");
     }
 
     private void initializeTokenizer() {
@@ -59,14 +61,11 @@ public class PromptPreviewArea extends VBox {
                 throw new IOException("Cannot find resource: " + resourcePath);
             }
 
-            // 創建一個臨時文件
             Path tempFile = Files.createTempFile("bpe_vocab", ".txt.gz");
             Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
 
-            // 使用臨時文件初始化tokenizer
             tokenizer = new SimpleTokenizer(tempFile.toString());
 
-            // 在JVM退出時刪除臨時文件
             tempFile.toFile().deleteOnExit();
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize tokenizer", e);
@@ -76,23 +75,29 @@ public class PromptPreviewArea extends VBox {
     private void updateTokenCount() {
         String text = previewTextArea.getText();
         int tokenCount = tokenizer.encode(text).size();
-        tokenCountLabel.setText(String.format("Token Count: %d / %d", tokenCount, TOKEN_LIMIT));
-        updateBackgroundColor(tokenCount);
+        double ratio = (double) tokenCount / TOKEN_LIMIT;
+
+        Platform.runLater(() -> {
+            tokenProgressBar.setProgress(ratio);
+            tokenCountLabel.setText(String.format("%d / %d", tokenCount, TOKEN_LIMIT));
+            updateStyles(ratio);
+        });
     }
 
-    private void updateBackgroundColor(int tokenCount) {
-        double ratio = (double) tokenCount / TOKEN_LIMIT;
-        String color;
+    private void updateStyles(double ratio) {
+        previewTextArea.getStyleClass().removeAll("prompt-preview-low", "prompt-preview-medium", "prompt-preview-high", "prompt-preview-max");
+        tokenProgressBar.getStyleClass().remove("token-progress-bar-warning");
+
         if (ratio < 0.5) {
-            color = "lightgreen";
+            previewTextArea.getStyleClass().add("prompt-preview-low");
         } else if (ratio < 0.75) {
-            color = "yellow";
-        } else if (ratio < 1) {
-            color = "orange";
+            previewTextArea.getStyleClass().add("prompt-preview-medium");
+        } else if (ratio < 0.9) {
+            previewTextArea.getStyleClass().add("prompt-preview-high");
         } else {
-            color = "red";
+            previewTextArea.getStyleClass().add("prompt-preview-max");
+            tokenProgressBar.getStyleClass().add("token-progress-bar-warning");
         }
-        previewTextArea.setStyle("-fx-control-inner-background: " + color + ";");
     }
 
     public void setPreviewLabel(String label) {

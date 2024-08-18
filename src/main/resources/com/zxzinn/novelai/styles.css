@@ -436,30 +436,48 @@
     -fx-border-color: #2980b9;
 }
 
-.token-count-label {
-    -fx-font-size: 12px;
-    -fx-text-fill: #ECF0F1;
+/* 進度條容器樣式 */
+.token-progress-container {
+    -fx-background-color: rgba(44, 62, 80, 0.3);
+    -fx-background-radius: 10;
+    -fx-padding: 2;
 }
 
-.prompt-preview {
-    -fx-transition: background-color 0.3s;
-}
-
-.prompt-preview .content {
+/* 進度條樣式 */
+.token-progress-bar {
     -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 0;
 }
 
-.progress-bar {
-    -fx-background-color: rgba(44, 62, 80, 0.7);
-}
-
-.progress-bar .bar {
+.token-progress-bar > .bar {
+    -fx-background-color: linear-gradient(to right, #4CAF50, #FFC107 50%, #F44336);
+    -fx-background-radius: 8;
     -fx-background-insets: 0;
-    -fx-background-radius: 0;
+    -fx-padding: 3;
 }
 
-.progress-bar .track {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
+.token-progress-bar > .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+}
+
+/* Token 計數標籤樣式 */
+.token-count-label {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 5 0 5;
+}
+
+/* 警告效果 */
+@keyframes pulse {
+    0% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0), 0, 0, 0, 0); }
+    50% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0.5), 10, 0, 0, 0); }
+    100% { -fx-effect: dropshadow(three-pass-box, rgba(244,67,54,0), 0, 0, 0, 0); }
+}
+
+.token-progress-bar-warning > .bar {
+    -fx-background-color: #F44336;
+    -fx-animation: pulse 1s infinite;
 }
