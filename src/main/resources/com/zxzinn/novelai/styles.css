@@ -307,3 +307,75 @@
     -fx-min-width: 120px;
 }
 
+/* 在現有的樣式基礎上添加或修改以下內容 */
+
+/* 設置面板樣式 */
+.settings-panel {
+    -fx-background-color: rgba(44, 62, 80, 0.7);
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+/* 側邊欄樣式 */
+.side-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.side-panel > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* 設置區域樣式 */
+.settings-section {
+    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-radius: 5px;
+}
+
+.settings-section > .title {
+    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-text-fill: white;
+}
+
+.settings-section > .content {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(41, 128, 185, 0.7);
+    -fx-border-width: 1px;
+    -fx-border-radius: 0 0 5px 5px;
+}
+
+/* 文本框和下拉框內容右對齊 */
+.right-aligned-text {
+    -fx-alignment: CENTER_RIGHT;
+}
+
+/* 控制欄樣式 */
+.control-bar {
+    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+/* 生成按鈕樣式 */
+.generate-button {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
+    -fx-transition: all 0.3s ease;
+}
+
+.generate-button:hover {
+    -fx-background-color: #27ae60;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* 生成數量下拉框樣式 */
+.control-bar .combo-box {
+    -fx-background-color: rgba(44, 62, 80, 0.7);
+    -fx-text-fill: white;
+}
