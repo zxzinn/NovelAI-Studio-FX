@@ -9,6 +9,7 @@ import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
+import com.zxzinn.novelai.utils.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.fxml.FXMLLoader;
@@ -58,7 +59,7 @@ public class TabFactory {
     }
 
     public Tab createUnifiedGeneratorTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageGenerator.fxml"));
+        FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
         GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(settingsManager);
         loader.setControllerFactory(param -> new GenerationController(apiClient, embedProcessor, settingsManager,
                 imageGenerationService, imageUtils, filePreviewService, generationSettingsManager));
@@ -72,7 +73,7 @@ public class TabFactory {
     }
 
     public Tab createFileManagerTab() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/FileManager.fxml"));
+        FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.FILE_MANAGER_FXML);
         FileManagerController controller = new FileManagerController(
                 settingsManager,
                 fileManagerService,

@@ -1,8 +1,6 @@
 package com.zxzinn.novelai;
 
-import atlantafx.base.theme.NordDark;
 import atlantafx.base.theme.PrimerDark;
-import atlantafx.base.theme.PrimerLight;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.component.NotificationPane;
@@ -14,6 +12,7 @@ import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.service.ui.WindowService;
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -76,12 +75,11 @@ public class Application extends javafx.application.Application {
 
         Scene scene = new Scene(root, 300, 200);
 
-        String cssPath = "/com/zxzinn/novelai/loading-styles.css";
-        URL resource = getClass().getResource(cssPath);
+        URL resource = getClass().getResource(ResourcePaths.MAIN_VIEW_FXML);
         if (resource != null) {
             scene.getStylesheets().add(resource.toExternalForm());
         } else {
-            log.warn("無法找到樣式文件: {}", cssPath);
+            log.warn("無法找到樣式文件: {}", ResourcePaths.MAIN_VIEW_FXML);
         }
 
         Stage loadingStage = new Stage(StageStyle.UNDECORATED);
@@ -120,7 +118,7 @@ public class Application extends javafx.application.Application {
 
                 Platform.runLater(() -> {
                     try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/MainView.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/MainView.fxml"));
                         loader.setController(mainController);
                         Parent root = loader.load();
 
@@ -140,7 +138,7 @@ public class Application extends javafx.application.Application {
 
                         Scene scene = new Scene(rootPane, width, height);
                         scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
-                        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/com/zxzinn/novelai/styles.css")).toExternalForm());
+                        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(ResourcePaths.STYLES_CSS)).toExternalForm());
 
                         primaryStage.setScene(scene);
                         primaryStage.setX(x);

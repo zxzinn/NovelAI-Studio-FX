@@ -15,7 +15,7 @@ public class PromptArea extends VBox {
     @Getter @FXML private TextArea promptTextArea;
 
     public PromptArea() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/PromptArea.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptArea.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

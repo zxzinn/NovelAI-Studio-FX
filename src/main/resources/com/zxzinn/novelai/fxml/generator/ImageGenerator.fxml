@@ -8,7 +8,7 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
             fx:controller="com.zxzinn.novelai.controller.generation.GenerationController"
-            stylesheets="@styles.css">
+            stylesheets="@../../css/styles.css">
     <left>
         <VBox spacing="10.0" styleClass="settings-panel">
             <ScrollPane fitToWidth="true" styleClass="side-panel" VBox.vgrow="ALWAYS">

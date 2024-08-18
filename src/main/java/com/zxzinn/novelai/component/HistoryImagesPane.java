@@ -28,7 +28,7 @@ public class HistoryImagesPane extends VBox {
     @Setter private Consumer<File> onImageClickHandler;
 
     public HistoryImagesPane() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/HistoryImagesPane.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/HistoryImagesPane.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

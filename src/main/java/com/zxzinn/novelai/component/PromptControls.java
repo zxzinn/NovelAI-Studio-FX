@@ -15,7 +15,7 @@ public class PromptControls extends VBox {
     @FXML private FontIcon lockIcon;
 
     public PromptControls() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/PromptControls.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptControls.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

@@ -27,7 +27,7 @@ public class PromptPreviewArea extends VBox {
     private static final int TOKEN_LIMIT = 225;
 
     public PromptPreviewArea() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/PromptPreviewArea.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptPreviewArea.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

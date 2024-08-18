@@ -18,7 +18,7 @@ public class ImageControlBar extends HBox {
     @FXML private Button saveButton;
 
     public ImageControlBar() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/ImageControlBar.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/ImageControlBar.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
