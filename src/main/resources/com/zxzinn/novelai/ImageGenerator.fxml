@@ -2,101 +2,92 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import com.zxzinn.novelai.component.ImageControlBar?>
-<?import com.zxzinn.novelai.component.HistoryImagesPane?>
-<?import com.zxzinn.novelai.component.PromptPreviewArea?>
-<?import com.zxzinn.novelai.component.PromptControls?>
-<?import com.zxzinn.novelai.component.PromptArea?>
+<?import com.zxzinn.novelai.component.*?>
+
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             xmlns="http://javafx.com/javafx"
-            xmlns:ikonli="http://ikonli.org/javafx"
             fx:controller="com.zxzinn.novelai.controller.generation.GenerationController"
             stylesheets="@styles.css">
     <left>
-        <ScrollPane fitToWidth="true" styleClass="side-panel">
+        <ScrollPane fitToWidth="true" styleClass="side-panel" prefWidth="250">
             <VBox spacing="10.0" styleClass="settings-panel">
                 <TitledPane text="API Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <Label text="API Key" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="apiKeyField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Label text="模型" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <ComboBox fx:id="modelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="生成模式" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <ComboBox fx:id="generationModeComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                    </GridPane>
+                    <VBox spacing="5.0">
+                        <Label text="API Key" />
+                        <TextField fx:id="apiKeyField" />
+                        <Label text="模型" />
+                        <ComboBox fx:id="modelComboBox" maxWidth="Infinity" />
+                        <Label text="生成模式" />
+                        <ComboBox fx:id="generationModeComboBox" maxWidth="Infinity" />
+                    </VBox>
                 </TitledPane>
                 <TitledPane text="Output Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <Label text="寬度" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="widthField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Label text="高度" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="heightField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="比例" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <TextField fx:id="ratioField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                        <Label text="每次生成圖像數" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                        <TextField fx:id="countField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                        <Label text="輸出目錄" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                        <TextField fx:id="outputDirectoryField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                    </GridPane>
+                    <VBox spacing="5.0">
+                        <Label text="寬度" />
+                        <TextField fx:id="widthField" />
+                        <Label text="高度" />
+                        <TextField fx:id="heightField" />
+                        <Label text="比例" />
+                        <TextField fx:id="ratioField" />
+                        <Label text="每次生成圖像數" />
+                        <TextField fx:id="countField" />
+                        <Label text="輸出目錄" />
+                        <TextField fx:id="outputDirectoryField" />
+                    </VBox>
                 </TitledPane>
                 <TitledPane text="Sampling Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <Label text="採樣器" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <ComboBox fx:id="samplerComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Label text="步驟" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="stepsField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="種子" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <TextField fx:id="seedField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                    </GridPane>
+                    <VBox spacing="5.0">
+                        <Label text="採樣器" />
+                        <ComboBox fx:id="samplerComboBox" maxWidth="Infinity" />
+                        <Label text="步驟" />
+                        <TextField fx:id="stepsField" />
+                        <Label text="種子" />
+                        <TextField fx:id="seedField" />
+                    </VBox>
                 </TitledPane>
                 <TitledPane fx:id="txt2imgSettingsPane" text="Text2Image Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <CheckBox fx:id="smeaCheckBox" text="SMEA" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                    </GridPane>
+                    <VBox spacing="5.0">
+                        <CheckBox fx:id="smeaCheckBox" text="SMEA" />
+                        <CheckBox fx:id="smeaDynCheckBox" text="SMEA DYN" />
+                    </VBox>
                 </TitledPane>
                 <TitledPane fx:id="img2imgSettingsPane" text="Image2Image Settings" styleClass="settings-section">
-                    <GridPane hgap="10.0" vgap="10.0">
-                        <Label text="Strength" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <HBox spacing="10.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                            <Slider fx:id="strengthSlider" min="0" max="1" value="0.5" blockIncrement="0.1" />
-                            <Label fx:id="strengthLabel" text="0.5"/>
+                    <VBox spacing="5.0">
+                        <Label text="Strength" />
+                        <HBox spacing="5.0">
+                            <Slider fx:id="strengthSlider" min="0" max="1" value="0.5" blockIncrement="0.1" HBox.hgrow="ALWAYS" />
+                            <Label fx:id="strengthLabel" text="0.5" />
                         </HBox>
-                        <Label text="Extra Noise Seed" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="extraNoiseSeedField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="Upload Image" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <Button fx:id="uploadImageButton" text="選擇圖片" onAction="#handleUploadImage"
-                                GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="upload-button"/>
-                    </GridPane>
+                        <Label text="Extra Noise Seed" />
+                        <TextField fx:id="extraNoiseSeedField" />
+                        <Button fx:id="uploadImageButton" text="選擇圖片" onAction="#handleUploadImage" maxWidth="Infinity" styleClass="upload-button"/>
+                    </VBox>
                 </TitledPane>
                 <HBox spacing="10.0" alignment="CENTER">
-                    <Button text="生成" fx:id="generateButton" onAction="#handleGenerateOrStop" styleClass="generate-button"/>
-                    <ComboBox fx:id="generateCountComboBox" promptText="生成數量"/>
+                    <Button text="生成" fx:id="generateButton" onAction="#handleGenerateOrStop" styleClass="generate-button" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <ComboBox fx:id="generateCountComboBox" promptText="生成數量" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
             </VBox>
         </ScrollPane>
     </left>
     <center>
-        <VBox spacing="10.0" styleClass="main-content">
-            <HBox spacing="10.0" VBox.vgrow="NEVER">
-                <PromptArea fx:id="positivePromptArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
-                <PromptControls fx:id="positivePromptControls"/>
-                <PromptPreviewArea fx:id="positivePromptPreviewArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
-            </HBox>
-            <HBox spacing="10.0" VBox.vgrow="NEVER">
-                <PromptArea fx:id="negativePromptArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
-                <PromptControls fx:id="negativePromptControls"/>
-                <PromptPreviewArea fx:id="negativePromptPreviewArea" prefWidth="400" maxWidth="400" HBox.hgrow="NEVER"/>
-            </HBox>
-            <HBox spacing="10.0" VBox.vgrow="ALWAYS">
-                <VBox spacing="5.0" HBox.hgrow="ALWAYS" prefWidth="850">
-                    <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" />
-                    <ImageControlBar fx:id="imageControlBar" />
-                </VBox>
-                <HistoryImagesPane fx:id="historyImagesPane" prefWidth="150" HBox.hgrow="NEVER"/>
-            </HBox>
-        </VBox>
+        <HBox spacing="10.0">
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS" styleClass="main-content">
+                <HBox spacing="10.0" VBox.vgrow="NEVER">
+                    <PromptArea fx:id="positivePromptArea" HBox.hgrow="ALWAYS"/>
+                    <PromptControls fx:id="positivePromptControls"/>
+                    <PromptPreviewArea fx:id="positivePromptPreviewArea" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox spacing="10.0" VBox.vgrow="NEVER">
+                    <PromptArea fx:id="negativePromptArea" HBox.hgrow="ALWAYS"/>
+                    <PromptControls fx:id="negativePromptControls"/>
+                    <PromptPreviewArea fx:id="negativePromptPreviewArea" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" styleClass="preview-container"/>
+                <ImageControlBar fx:id="imageControlBar" />
+            </VBox>
+            <HistoryImagesPane fx:id="historyImagesPane" prefWidth="100" HBox.hgrow="NEVER"/>
+        </HBox>
     </center>
 </BorderPane>

@@ -104,6 +104,33 @@ public class GenerationController {
         setupPromptControls();
         updatePromptPreviews();
         setupGenerationModeComboBox();
+        setupVerticalLayout();
+    }
+
+    private void setupVerticalLayout() {
+        // 設置ComboBox的最大寬度
+        modelComboBox.setMaxWidth(Double.MAX_VALUE);
+        generationModeComboBox.setMaxWidth(Double.MAX_VALUE);
+        samplerComboBox.setMaxWidth(Double.MAX_VALUE);
+        generateCountComboBox.setMaxWidth(Double.MAX_VALUE);
+
+        // 設置TextField的最大寬度
+        apiKeyField.setMaxWidth(Double.MAX_VALUE);
+        widthField.setMaxWidth(Double.MAX_VALUE);
+        heightField.setMaxWidth(Double.MAX_VALUE);
+        ratioField.setMaxWidth(Double.MAX_VALUE);
+        countField.setMaxWidth(Double.MAX_VALUE);
+        outputDirectoryField.setMaxWidth(Double.MAX_VALUE);
+        stepsField.setMaxWidth(Double.MAX_VALUE);
+        seedField.setMaxWidth(Double.MAX_VALUE);
+        extraNoiseSeedField.setMaxWidth(Double.MAX_VALUE);
+
+        // 設置Button的最大寬度
+        uploadImageButton.setMaxWidth(Double.MAX_VALUE);
+        generateButton.setMaxWidth(Double.MAX_VALUE);
+
+        // 設置Slider的最大寬度
+        strengthSlider.setMaxWidth(Double.MAX_VALUE);
     }
 
     private void initializeFields() {

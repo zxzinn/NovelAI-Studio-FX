@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class HistoryImagesPane extends VBox {
 
     private static final int MAX_HISTORY_SIZE = 100;
-    private static final double THUMBNAIL_WIDTH = 150;
+    private static final double THUMBNAIL_WIDTH = 90;  // 减小缩略图宽度
 
     @FXML private ListView<HistoryImage> historyListView;
 
@@ -68,9 +68,9 @@ public class HistoryImagesPane extends VBox {
             }
         });
 
-        historyListView.setPrefWidth(THUMBNAIL_WIDTH + 20);
-        historyListView.setMaxWidth(THUMBNAIL_WIDTH + 20);
-        historyListView.setMinWidth(THUMBNAIL_WIDTH + 20);
+        historyListView.setPrefWidth(THUMBNAIL_WIDTH + 10);
+        historyListView.setMaxWidth(THUMBNAIL_WIDTH + 10);
+        historyListView.setMinWidth(THUMBNAIL_WIDTH + 10);
     }
 
     public void addImage(Image image, File imageFile) {

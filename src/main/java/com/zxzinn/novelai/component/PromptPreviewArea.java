@@ -30,9 +30,9 @@ public class PromptPreviewArea extends VBox {
 
     private void initializeTextArea() {
         previewTextArea.setWrapText(true);
-        previewTextArea.setMinHeight(100);
-        previewTextArea.setPrefRowCount(5);
-        previewTextArea.setMaxHeight(Double.MAX_VALUE);
+        previewTextArea.setPrefHeight(100);
+        previewTextArea.setMaxHeight(USE_PREF_SIZE);
+        previewTextArea.setMinHeight(USE_PREF_SIZE);
         previewTextArea.setEditable(false);
     }
 

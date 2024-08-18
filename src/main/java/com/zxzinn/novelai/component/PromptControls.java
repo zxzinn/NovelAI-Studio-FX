@@ -21,9 +21,15 @@ public class PromptControls extends VBox {
 
         try {
             fxmlLoader.load();
+            initializeButtons();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private void initializeButtons() {
+        refreshButton.setPrefSize(30, 30);
+        lockButton.setPrefSize(30, 30);
     }
 
     public void setOnRefreshAction(Runnable action) {

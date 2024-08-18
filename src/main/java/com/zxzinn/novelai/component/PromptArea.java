@@ -29,9 +29,9 @@ public class PromptArea extends VBox {
 
     private void initializeTextArea() {
         promptTextArea.setWrapText(true);
-        promptTextArea.setMinHeight(100);
-        promptTextArea.setPrefRowCount(5);
-        promptTextArea.setMaxHeight(Double.MAX_VALUE);
+        promptTextArea.setPrefHeight(100);
+        promptTextArea.setMaxHeight(USE_PREF_SIZE);
+        promptTextArea.setMinHeight(USE_PREF_SIZE);
     }
 
     public void setPromptLabel(String label) {
