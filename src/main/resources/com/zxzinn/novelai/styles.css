@@ -379,3 +379,59 @@
     -fx-background-color: rgba(44, 62, 80, 0.7);
     -fx-text-fill: white;
 }
+
+/* 設置部分樣式 */
+.settings-section {
+    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-background-radius: 5px;
+}
+
+.settings-section > .title {
+    -fx-background-color: #2980b9;
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.settings-section > .content {
+    -fx-background-color: rgba(44, 62, 80, 0.7);
+    -fx-border-color: #2980b9;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0 0 5px 5px;
+}
+
+.settings-content {
+    -fx-padding: 10px;
+}
+
+.settings-label {
+    -fx-text-fill: #ecf0f1;
+}
+
+/* 解析度欄位樣式 */
+.resolution-field {
+    -fx-pref-width: 60px;
+    -fx-max-width: 60px;
+}
+
+.resolution-separator {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-weight: bold;
+    -fx-padding: 0 5 0 5;
+}
+
+/* 文本輸入框樣式 */
+.right-aligned-text {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-background-color: rgba(44, 62, 80, 0.9);
+    -fx-text-fill: #ecf0f1;
+    -fx-border-color: #3498db;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-padding: 5px;
+}
+
+.right-aligned-text:focused {
+    -fx-background-color: rgba(52, 152, 219, 0.2);
+    -fx-border-color: #2980b9;
+}

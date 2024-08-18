@@ -24,17 +24,25 @@
                         </VBox>
                     </TitledPane>
                     <TitledPane text="Output Settings" styleClass="settings-section">
-                        <VBox spacing="5.0" styleClass="settings-content">
-                            <Label text="寬度" />
-                            <TextField fx:id="widthField" styleClass="right-aligned-text" />
-                            <Label text="高度" />
-                            <TextField fx:id="heightField" styleClass="right-aligned-text" />
-                            <Label text="比例" />
-                            <TextField fx:id="ratioField" styleClass="right-aligned-text" />
-                            <Label text="每次生成圖像數" />
-                            <TextField fx:id="countField" styleClass="right-aligned-text" />
-                            <Label text="輸出目錄" />
-                            <TextField fx:id="outputDirectoryField" styleClass="right-aligned-text" />
+                        <VBox spacing="10.0" styleClass="settings-content">
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Label text="解析度" styleClass="settings-label" minWidth="80"/>
+                                <TextField fx:id="widthField" styleClass="resolution-field, right-aligned-text"/>
+                                <Label text="×" styleClass="resolution-separator"/>
+                                <TextField fx:id="heightField" styleClass="resolution-field, right-aligned-text"/>
+                            </HBox>
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Label text="比例" styleClass="settings-label" minWidth="80"/>
+                                <TextField fx:id="ratioField" styleClass="right-aligned-text" HBox.hgrow="ALWAYS"/>
+                            </HBox>
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Label text="生成數量" styleClass="settings-label" minWidth="80"/>
+                                <TextField fx:id="countField" styleClass="right-aligned-text" HBox.hgrow="ALWAYS"/>
+                            </HBox>
+                            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                <Label text="輸出目錄" styleClass="settings-label" minWidth="80"/>
+                                <TextField fx:id="outputDirectoryField" styleClass="right-aligned-text" HBox.hgrow="ALWAYS"/>
+                            </HBox>
                         </VBox>
                     </TitledPane>
                     <TitledPane text="Sampling Settings" styleClass="settings-section">
