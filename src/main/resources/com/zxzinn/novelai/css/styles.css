@@ -67,16 +67,15 @@
     -fx-font-weight: bold;
 }
 
-/* 文本輸入框樣式 */
+/* 調整文本輸入框樣式以匹配新的背景 */
 .text-field {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-background-color: rgba(88, 91, 112, 0.9);  /* 稍微亮一點的輸入框背景 */
     -fx-text-fill: #F5E0DC;
     -fx-prompt-text-fill: #988BA2;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
-    -fx-border-color: #96CDFB;
+    -fx-border-color: #6C7086;  /* 匹配新的邊框顏色 */
     -fx-border-width: 1px;
-    -fx-transition: all 0.3s ease;
 }
 
 .text-field:hover {
@@ -84,7 +83,7 @@
 }
 
 .text-field:focused {
-    -fx-background-color: rgba(108, 112, 134, 0.9);
+    -fx-background-color: rgba(108, 112, 134, 0.9);  /* 聚焦時稍微亮一點 */
     -fx-border-color: #89DCEB;
     -fx-border-width: 2px;
 }
@@ -106,21 +105,21 @@
 
 /* 下拉框樣式 */
 .combo-box {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-background-color: rgba(88, 91, 112, 0.9);  /* 匹配文本輸入框背景 */
     -fx-text-fill: #F5E0DC;
-    -fx-border-color: #96CDFB;
+    -fx-border-color: #6C7086;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
 }
 
 .combo-box .list-cell {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
+    -fx-background-color: rgba(88, 91, 112, 0.9);
     -fx-text-fill: #F5E0DC;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: rgba(69, 71, 90, 0.9);
-    -fx-border-color: #96CDFB;
+    -fx-background-color: rgba(88, 91, 112, 0.9);
+    -fx-border-color: #6C7086;
 }
 
 /* 按鈕樣式 */
@@ -259,20 +258,20 @@
 
 /* 設置部分樣式 */
 .settings-section {
-    -fx-background-color: rgba(88, 91, 112, 0.8);
+    -fx-background-color: rgba(69, 71, 90, 0.8);  /* 更深、更不透明的背景 */
     -fx-background-radius: 5px;
 }
 
 .settings-section > .title {
-    -fx-background-color: #89DCEB;
+    -fx-background-color: #6C7086;  /* 更深的標題背景顏色 */
     -fx-background-radius: 5px 5px 0 0;
-    -fx-text-fill: #1E1E2E;
+    -fx-text-fill: #F5E0DC;  /* 更亮的文字顏色以增加對比度 */
     -fx-font-weight: bold;
 }
 
 .settings-section > .content {
-    -fx-background-color: rgba(69, 71, 90, 0.8);
-    -fx-border-color: #89DCEB;
+    -fx-background-color: rgba(54, 56, 69, 0.9);  /* 更深的內容背景 */
+    -fx-border-color: #6C7086;  /* 更深的邊框顏色 */
     -fx-border-width: 1px;
     -fx-border-radius: 0 0 5px 5px;
 }
@@ -282,7 +281,7 @@
 }
 
 .settings-label {
-    -fx-text-fill: #F5E0DC;
+    -fx-text-fill: #F5E0DC;  /* 保持亮色文字以增加對比度 */
     -fx-font-weight: bold;
 }
 
