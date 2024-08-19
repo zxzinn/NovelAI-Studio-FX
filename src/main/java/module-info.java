@@ -13,7 +13,6 @@ module com.zxzinn.novelai {
     requires org.apache.tika.core;
     requires org.apache.commons.io;
     requires javafx.web;
-    requires atlantafx.base;
     requires jdk.jsobject;
     requires org.controlsfx.controls;
     requires java.logging;

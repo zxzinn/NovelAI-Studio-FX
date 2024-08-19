@@ -1,6 +1,5 @@
 package com.zxzinn.novelai;
 
-import atlantafx.base.theme.PrimerDark;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.component.NotificationPane;
@@ -116,7 +115,6 @@ public class Application extends javafx.application.Application {
             double y = (screenBounds.getHeight() - height) / 2;
 
             Scene scene = new Scene(rootPane, width, height);
-            scene.getStylesheets().add(new PrimerDark().getUserAgentStylesheet());
             scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(ResourcePaths.STYLES_CSS)).toExternalForm());
 
             primaryStage.setScene(scene);

@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.zxzinn.novelai.component.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"

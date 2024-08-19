@@ -125,12 +125,6 @@
             <artifactId>javafx-web</artifactId>
             <version>22</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.github.mkpaz/atlantafx-base -->
-        <dependency>
-            <groupId>io.github.mkpaz</groupId>
-            <artifactId>atlantafx-base</artifactId>
-            <version>2.0.1</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-stdlib -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
