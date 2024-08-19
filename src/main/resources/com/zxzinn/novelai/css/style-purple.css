@@ -77,35 +77,47 @@
     -fx-background-color: #FF869E; /* 更亮的關閉按鈕懸停顏色 */
 }
 
-/* 標籤頁樣式 */
-.tab-pane .tab-header-area .tab-header-background {
-    -fx-background-color: transparent;
-}
+ /* 標籤頁樣式 */
+ .tab-pane .tab-header-area .tab-header-background {
+     -fx-background-color: transparent;
+ }
 
-.tab-pane .tab {
-    -fx-background-color: rgba(64, 69, 92, 0.8); /* 更亮的標籤背景 */
-    -fx-background-radius: 6px 6px 0 0;
-    -fx-padding: 12px 24px; /* 增加內邊距 */
-    -fx-transition: all 0.3s ease;
-}
+ .tab-pane .tab {
+     -fx-background-color: rgba(64, 69, 92, 0.8);
+     -fx-background-radius: 6px 6px 0 0;
+     -fx-padding: 8px 16px; /* 稍微減少內邊距以縮小空間 */
+     -fx-transition: all 0.3s ease;
+ }
 
-.tab-pane .tab:hover {
-    -fx-background-color: rgba(64, 69, 92, 1); /* 更亮的標籤懸停背景 */
-}
+ .tab-pane .tab:hover {
+     -fx-background-color: rgba(64, 69, 92, 1);
+ }
 
-.tab-pane .tab:selected {
-    -fx-background-color: #CBB9FF; /* 更亮的選中標籤背景 */
-}
+ .tab-pane .tab:selected {
+     -fx-background-color: #CBB9FF;
+     -fx-focus-color: transparent; /* 移除選中時的藍色邊框 */
+     -fx-faint-focus-color: transparent;
+ }
 
-.tab-pane .tab .tab-label {
-    -fx-text-fill: #B9C1E6; /* 更亮的標籤文本顏色 */
-    -fx-font-size: 16px; /* 增加標籤文本大小 */
-}
+ .tab-pane .tab .tab-label {
+     -fx-text-fill: #B9C1E6;
+     -fx-font-size: 14px; /* 稍微減小字體大小以縮小空間 */
+ }
 
-.tab-pane .tab:selected .tab-label {
-    -fx-text-fill: #1A1B26;
-    -fx-font-weight: bold;
-}
+ .tab-pane .tab:selected .tab-label {
+     -fx-text-fill: #1A1B26;
+     -fx-font-weight: bold;
+ }
+
+ /* 縮小標題和標籤的空間 */
+ .tab-pane > .tab-header-area {
+     -fx-padding: 0 0 0 0;
+     -fx-pref-height: 36px; /* 調整整體高度 */
+ }
+
+ .tab-pane > .tab-header-area > .headers-region > .tab {
+     -fx-pref-height: 36px; /* 確保標籤高度與header-area一致 */
+ }
 
 /* 文本輸入框樣式 */
 .text-field {
