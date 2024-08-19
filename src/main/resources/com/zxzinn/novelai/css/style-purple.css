@@ -108,6 +108,7 @@
     -fx-border-radius: 5px;
     -fx-border-color: #414868;
     -fx-border-width: 1px;
+    -fx-transition: all 0.3s ease;
 }
 
 .text-field:hover {
@@ -125,6 +126,7 @@
     -fx-control-inner-background: rgba(54, 59, 82, 0.9) !important;
     -fx-background-color: rgba(54, 59, 82, 0.9) !important;
     -fx-text-fill: #C0CAF5;
+    -fx-transition: all 0.3s ease;
 }
 
 .text-area .content {
@@ -143,6 +145,7 @@
     -fx-border-color: #414868;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
+    -fx-transition: all 0.3s ease;
 }
 
 .combo-box:hover {
@@ -174,6 +177,80 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
+}
+
+.generate-button, .generate-button-stop, .generate-button-generating {
+    -fx-background-color: linear-gradient(to right, #7AA2F7, #BB9AF7);
+    -fx-text-fill: #1A1B26;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
+    -fx-transition: all 0.3s ease;
+    -fx-min-width: 120px; /* 设置最小宽度 */
+    -fx-max-width: 120px; /* 设置最大宽度 */
+    -fx-min-height: 40px; /* 设置最小高度 */
+    -fx-max-height: 40px; /* 设置最大高度 */
+    -fx-alignment: center; /* 确保文本居中 */
+}
+
+.generate-button:hover, .generate-button-stop:hover, .generate-button-generating:hover {
+    -fx-background-color: linear-gradient(to right, #BB9AF7, #7AA2F7);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 1);
+}
+
+.generate-button:pressed, .generate-button-stop:pressed, .generate-button-generating:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 2, 0, 0, 1);
+}
+
+.generate-button-generating {
+    -fx-background-color: linear-gradient(to right, #F7768E, #FF9E64);
+}
+
+.generate-button-stop {
+    -fx-background-color: linear-gradient(to right, #FF9E64, #F7768E);
+}
+
+/* Settings hover效果 */
+.settings-section {
+    -fx-background-color: rgba(54, 59, 82, 0.8);
+    -fx-background-radius: 5px;
+    -fx-transition: all 0.3s ease;
+}
+
+.settings-section:hover {
+    -fx-background-color: rgba(54, 59, 82, 0.9);
+    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.4), 10, 0, 0, 0);
+}
+
+/* promptArea hover效果 */
+.prompt-area {
+    -fx-background-color: rgba(54, 59, 82, 0.9);
+    -fx-background-radius: 5px;
+    -fx-transition: all 0.3s ease;
+}
+
+.prompt-area:hover {
+    -fx-background-color: rgba(54, 59, 82, 1);
+    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.4), 10, 0, 0, 0);
+}
+
+/* previewPane hover效果 */
+.preview-container {
+    -fx-background-color: rgba(54, 59, 82, 0.5);
+    -fx-background-radius: 5px;
+    -fx-border-color: #7AA2F7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-transition: all 0.3s ease;
+}
+
+.preview-container:hover {
+    -fx-background-color: rgba(54, 59, 82, 0.7);
+    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.4), 10, 0, 0, 0);
 }
 
 /* 滾動條樣式 */
@@ -271,12 +348,7 @@
     -fx-background-color: rgba(65, 72, 104, 0.9);
 }
 
-/* 設置部分樣式 */
-.settings-section {
-    -fx-background-color: rgba(54, 59, 82, 0.8);
-    -fx-background-radius: 5px;
-}
-
+/* 設置部分樣式 (續) */
 .settings-section > .title {
     -fx-background-color: #414868;
     -fx-background-radius: 5px 5px 0 0;
@@ -456,15 +528,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(187,154,247,0.8), 10, 0, 0, 0);
 }
 
-/* 預覽容器樣式 */
-.preview-container {
-    -fx-background-color: rgba(54, 59, 82, 0.5);
-    -fx-background-radius: 5px;
-    -fx-border-color: #7AA2F7;
-    -fx-border-width: 1px;
-    -fx-border-radius: 5px;
-}
-
 /* 主要內容區域樣式 */
 .main-content {
     -fx-background-color: rgba(54, 59, 82, 0.5);
@@ -501,5 +564,98 @@
     -fx-animation: fall 10s linear infinite;
 }
 
-.generate-button {
+/* 新增：懸停時的放大效果 */
+.zoom-on-hover {
+    -fx-transition: -fx-scale-x 0.2s, -fx-scale-y 0.2s;
+}
+
+.zoom-on-hover:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* 新增：按鈕點擊時的縮小效果 */
+.button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* 新增：滑鼠懸停時的光暈效果 */
+.glow-on-hover {
+    -fx-transition: -fx-effect 0.3s;
+}
+
+.glow-on-hover:hover {
+    -fx-effect: dropshadow(gaussian, rgba(122,162,247,0.8), 10, 0, 0, 0);
+}
+
+/* 新增：漸變背景效果 */
+.gradient-background {
+    -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B, #414868);
+}
+
+/* 新增：波紋效果（用於按鈕點擊） */
+@keyframes ripple {
+    to {
+        -fx-opacity: 0;
+        -fx-scale-x: 2;
+        -fx-scale-y: 2;
+    }
+}
+
+.ripple {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-shape: "M 0 0 L 0 1 L 1 1 L 1 0 Z";
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+    -fx-opacity: 1;
+}
+
+.ripple-animation {
+    -fx-animation: ripple 0.5s linear;
+}
+
+/* 新增：淡入淡出效果 */
+.fade-transition {
+    -fx-transition: -fx-opacity 0.3s;
+}
+
+.fade-transition:hover {
+    -fx-opacity: 0.8;
+}
+
+/* 新增：文字陰影效果 */
+.text-shadow {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
+}
+
+/* 新增：閃爍效果 */
+@keyframes blink {
+    0% { -fx-opacity: 1; }
+    50% { -fx-opacity: 0; }
+    100% { -fx-opacity: 1; }
+}
+
+.blink {
+    -fx-animation: blink 1s infinite;
+}
+
+/* 新增：3D按鈕效果 */
+.button-3d {
+    -fx-background-color: linear-gradient(to bottom, #7AA2F7, #5E81E4);
+    -fx-background-radius: 5px;
+    -fx-border-color: #4A67B7;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 2, 0);
+}
+
+.button-3d:hover {
+    -fx-background-color: linear-gradient(to bottom, #5E81E4, #7AA2F7);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 4, 0);
+}
+
+.button-3d:pressed {
+    -fx-translate-y: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 2, 0, 1, 0);
 }

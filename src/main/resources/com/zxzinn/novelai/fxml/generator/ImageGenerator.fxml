@@ -75,7 +75,7 @@
                 </VBox>
             </ScrollPane>
             <HBox spacing="10.0" alignment="CENTER" styleClass="control-bar">
-                <Button text="生成" fx:id="generateButton" onAction="#handleGenerateOrStop" styleClass="generate-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="生成" fx:id="generateButton" onAction="#handleGenerateOrStop" styleClass="generate-button" HBox.hgrow="NEVER"/>
                 <ComboBox fx:id="generateCountComboBox" promptText="生成數量" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             </HBox>
         </VBox>

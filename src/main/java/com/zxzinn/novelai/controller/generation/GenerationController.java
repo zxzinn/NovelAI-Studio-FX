@@ -39,6 +39,9 @@ import java.util.concurrent.TimeUnit;
 public class GenerationController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
+    private static final String GENERATE_BUTTON_CLASS = "generate-button";
+    private static final String GENERATING_BUTTON_CLASS = "generate-button-generating";
+    private static final String STOP_BUTTON_CLASS = "generate-button-stop";
 
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
@@ -91,6 +94,7 @@ public class GenerationController {
         previewPane = new PreviewPane(filePreviewService);
         previewContainer.getChildren().add(previewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
+        generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
         initializeFields();
         loadSettings();
         setupListeners();
@@ -292,9 +296,18 @@ public class GenerationController {
 
     private void updateButtonState(boolean generating) {
         Platform.runLater(() -> {
-            generateButton.setText(generating ? "停止" : "生成");
+            generateButton.getStyleClass().removeAll("generate-button", "generate-button-generating", "generate-button-stop");
+            if (generating) {
+                generateButton.getStyleClass().add("generate-button-generating");
+                generateButton.setText("停止");
+            } else if (isStopping) {
+                generateButton.getStyleClass().add("generate-button-stop");
+                generateButton.setText("停止中...");
+            } else {
+                generateButton.getStyleClass().add("generate-button");
+                generateButton.setText("生成");
+            }
             generateButton.setDisable(isStopping);
-            UIUtils.animateButton(generateButton);
         });
     }
 
