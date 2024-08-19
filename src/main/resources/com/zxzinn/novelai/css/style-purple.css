@@ -112,7 +112,8 @@
 }
 
 .text-field:hover {
-    -fx-background-color: rgba(65, 72, 104, 0.95);
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-border-color: #7AA2F7;
 }
 
 .text-field:focused {
@@ -149,7 +150,14 @@
 }
 
 .combo-box:hover {
-    -fx-background-color: rgba(65, 72, 104, 0.95);
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-border-color: #7AA2F7;
+}
+
+.combo-box:showing {
+    -fx-background-color: rgba(82, 90, 128, 0.95);
+    -fx-border-color: #7AA2F7;
+    -fx-border-width: 2px;
 }
 
 .combo-box .list-cell {
@@ -223,7 +231,7 @@
 
 .settings-section:hover {
     -fx-background-color: rgba(54, 59, 82, 0.9);
-    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.4), 10, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.2), 10, 0, 0, 0);
 }
 
 /* promptArea hover效果 */
@@ -365,6 +373,16 @@
 
 .settings-content {
     -fx-padding: 10px;
+    -fx-transition: all 0.3s ease;
+}
+
+.settings-content:hover {
+    -fx-background-color: rgba(54, 59, 82, 0.6);
+}
+
+.settings-content .text-field:hover,
+.settings-content .combo-box:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(122,162,247,0.4), 5, 0, 0, 0);
 }
 
 .settings-label {
