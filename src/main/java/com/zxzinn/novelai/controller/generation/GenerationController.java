@@ -6,7 +6,6 @@ import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
-import com.zxzinn.novelai.utils.common.UIUtils;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -40,8 +39,6 @@ public class GenerationController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
-    private static final String GENERATING_BUTTON_CLASS = "generate-button-generating";
-    private static final String STOP_BUTTON_CLASS = "generate-button-stop";
 
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
@@ -314,7 +311,8 @@ public class GenerationController {
     private void generateImages() {
         CompletableFuture.runAsync(() -> {
             try {
-                while (isGenerating && !stopRequested && currentGeneratedCount < getMaxCount()) {
+                int maxCount = getMaxCount();
+                while (isGenerating && !stopRequested && currentGeneratedCount < maxCount) {
                     if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
                         log.warn("等待提示詞更新超時");
                     }
@@ -323,10 +321,14 @@ public class GenerationController {
                     Optional<BufferedImage> generatedImage = generateImageWithRetry(payload);
 
                     generatedImage.ifPresentOrElse(
-                            this::handleGeneratedImage,
+                            image -> {
+                                handleGeneratedImage(image);
+                                currentGeneratedCount++;
+                            },
                             () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)))
                     );
 
+                    // 更新提示詞預覽，即使是最後一次生成
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
                 }
@@ -403,9 +405,8 @@ public class GenerationController {
             saveImageToFile(originalImage, timeStamp).ifPresent(imageFile -> {
                 previewPane.updatePreview(imageFile);
                 addImageToHistory(fxImage, imageFile);
+                NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
-            currentGeneratedCount++;
-            NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
         });
     }
 
