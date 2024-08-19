@@ -6,7 +6,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class UIManager {
     private final WindowService windowService;
 
@@ -33,8 +35,7 @@ public class UIManager {
                     tabFactory.createFileManagerTab()
             );
         } catch (Exception e) {
-            // 使用適當的日誌記錄機制
-            e.printStackTrace();
+            log.error(e);
         }
     }
 }

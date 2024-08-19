@@ -45,11 +45,11 @@ public class LoadingScreen {
         Rectangle background = new Rectangle(300, 200);
         background.setArcWidth(20);
         background.setArcHeight(20);
-        background.setFill(Color.rgb(44, 62, 80)); // 深藍色背景
+        background.setFill(Color.rgb(44, 62, 80));
 
         progressBar = new ProgressBar(0);
         progressBar.setPrefWidth(260);
-        progressBar.setStyle("-fx-accent: #3498db;"); // 藍色進度條
+        progressBar.setStyle("-fx-accent: #3498db;");
 
         messageLabel = new Label("正在初始化...");
         messageLabel.setTextFill(Color.WHITE);
@@ -73,7 +73,7 @@ public class LoadingScreen {
 
         loadingStage = new Stage(StageStyle.TRANSPARENT);
         loadingStage.setScene(scene);
-        loadingStage.setAlwaysOnTop(true); // 確保loading screen始終在最上層
+        loadingStage.setAlwaysOnTop(true);
         loadingStage.show();
 
         // 添加淡入動畫
@@ -82,7 +82,7 @@ public class LoadingScreen {
         fadeIn.setToValue(1);
         fadeIn.play();
 
-        showLatch.countDown(); // 通知 loading screen 已顯示
+        showLatch.countDown();
     }
 
     public void hide() {

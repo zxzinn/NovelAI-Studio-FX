@@ -500,3 +500,6 @@
 .cherry-blossom-animation {
     -fx-animation: fall 10s linear infinite;
 }
+
+.generate-button {
+}

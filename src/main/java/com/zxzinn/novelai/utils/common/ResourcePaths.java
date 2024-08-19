@@ -11,6 +11,5 @@ public final class ResourcePaths {
     public static final String STYLES_CSS = CSS_ROOT + "style-purple.css";
 
     private ResourcePaths() {
-        // 私有構造函數防止實例化
     }
 }

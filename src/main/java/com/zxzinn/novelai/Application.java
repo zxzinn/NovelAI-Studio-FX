@@ -1,7 +1,6 @@
 package com.zxzinn.novelai;
 
 import atlantafx.base.theme.PrimerDark;
-import atlantafx.base.theme.PrimerLight;
 import com.google.gson.Gson;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.component.NotificationPane;
@@ -31,7 +30,6 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,7 +50,6 @@ public class Application extends javafx.application.Application {
 
         primaryStage.initStyle(StageStyle.UNDECORATED);
 
-        // 在單獨的線程中顯示 loading screen
         CompletableFuture.runAsync(() -> {
             loadingScreen.show();
             Platform.runLater(this::initializeComponents);
@@ -88,7 +85,7 @@ public class Application extends javafx.application.Application {
             loadingScreen.setProgress(0.8);
             loadingScreen.setMessage("正在載入主界面...");
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/MainView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(ResourcePaths.MAIN_VIEW_FXML));
             MainController mainController = new MainController(
                     settingsManager,
                     apiClient,
@@ -133,8 +130,7 @@ public class Application extends javafx.application.Application {
             loadingScreen.setProgress(1.0);
             loadingScreen.setMessage("載入完成");
 
-            // 添加兩秒緩衝時間和淡入效果
-            CompletableFuture.delayedExecutor(2, java.util.concurrent.TimeUnit.SECONDS).execute(() -> {
+            CompletableFuture.delayedExecutor(1, java.util.concurrent.TimeUnit.SECONDS).execute(() -> {
                 Platform.runLater(() -> {
                     loadingScreen.hide();
                     primaryStage.show();

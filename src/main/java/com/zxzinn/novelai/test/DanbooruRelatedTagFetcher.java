@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import lombok.Getter;
 import lombok.Setter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

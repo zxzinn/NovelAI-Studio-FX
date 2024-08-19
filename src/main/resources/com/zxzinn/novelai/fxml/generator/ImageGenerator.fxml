@@ -65,7 +65,7 @@
                         <VBox spacing="5.0" styleClass="settings-content">
                             <Label text="Strength" />
                             <HBox spacing="5.0">
-                                <Slider fx:id="strengthSlider" min="0" max="1" value="0.5" blockIncrement="0.1" HBox.hgrow="ALWAYS" />
+                                <Slider fx:id="strengthSlider" max="1" value="0.5" blockIncrement="0.1" HBox.hgrow="ALWAYS" />
                                 <Label fx:id="strengthLabel" text="0.5" />
                             </HBox>
                             <Label text="Extra Noise Seed" />

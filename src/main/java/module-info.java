@@ -38,4 +38,8 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.component;
     exports com.zxzinn.novelai.service.filemanager;
     exports com.zxzinn.novelai.utils.tokenizer;
+    exports com.zxzinn.novelai.service.generation;
+    exports com.zxzinn.novelai.service.ui;
+    exports com.zxzinn.novelai.utils.image;
+    exports com.zxzinn.novelai.utils.embed;
 }

@@ -68,7 +68,7 @@ public class EmbedProcessor {
                     .collect(Collectors.toList());
 
             if (sampling == null || sampling.isEmpty() || !isValidSampling(sampling)) {
-                return allTags.stream().map(this::processTag).collect(Collectors.toList());
+                return allTags;
             } else {
                 int sampleSize = getSampleSize(sampling, allTags.size());
                 return selectRandomTags(allTags, sampleSize);
@@ -103,13 +103,7 @@ public class EmbedProcessor {
     private List<String> selectRandomTags(List<String> tags, int count) {
         List<String> shuffled = new ArrayList<>(tags);
         Collections.shuffle(shuffled);
-        return shuffled.subList(0, Math.min(count, shuffled.size())).stream()
-                .map(this::processTag)
-                .collect(Collectors.toList());
-    }
-
-    private String processTag(String tag) {
-        return tag; // 保持原樣，因為文件中已經包含了 {} 和 [] 的標記
+        return shuffled.subList(0, Math.min(count, shuffled.size()));
     }
 
     private String processStringPatterns(String input) {
