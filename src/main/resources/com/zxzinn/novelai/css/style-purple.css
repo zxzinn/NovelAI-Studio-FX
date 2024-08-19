@@ -39,39 +39,64 @@
     -fx-font-size: 16px; /* 增加成功文本大小 */
 }
 
-/* 標題欄樣式 */
-.title-bar {
-    -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
-    -fx-padding: 12px; /* 增加內邊距 */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 6);
-}
+ /* 標題欄樣式 */
+ .title-bar {
+     -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
+     -fx-padding: 5px 10px;
+     -fx-spacing: 10px;
+ }
 
-.title-label {
-    -fx-text-fill: #FFB8CB; /* 更亮的標題顏色 */
-    -fx-font-size: 24px; /* 增加標題大小 */
-    -fx-font-weight: bold;
-}
+ .title-label {
+     -fx-text-fill: #FFB8CB;
+     -fx-font-size: 16px; /* 減小字體大小 */
+     -fx-font-weight: bold;
+ }
 
-/* 窗口按鈕樣式 */
-.window-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #E0E0F0; /* 更亮的按鈕文本顏色 */
-    -fx-padding: 6px 12px; /* 增加內邊距 */
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
-    -fx-background-radius: 6px;
-    -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加按鈕文本大小 */
-}
+ .window-buttons-container {
+     -fx-spacing: 20px; /* 增加按钮之间的间距 */
+     -fx-padding: 0 5px; /* 在容器两侧添加一些内边距 */
+ }
 
-.window-button:hover {
-    -fx-background-color: rgba(224, 224, 240, 0.3); /* 更亮的懸停背景 */
-}
+ /* 窗口按钮样式 */
+ .window-button {
+     -fx-background-color: rgba(255, 255, 255, 0.1);
+     -fx-background-radius: 50%;
+     -fx-min-width: 28px;
+     -fx-min-height: 28px;
+     -fx-max-width: 28px;
+     -fx-max-height: 28px;
+     -fx-padding: 0;
+     -fx-content-display: graphic-only;
+     -fx-transition: all 0.2s ease-in-out;
+ }
 
-.window-button .ikonli-font-icon {
-    -fx-icon-color: #E0E0F0; /* 更亮的圖標顏色 */
-    -fx-icon-size: 16px; /* 增加圖標大小 */
-}
+ .window-button:hover {
+     -fx-background-color: rgba(255, 255, 255, 0.2);
+     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
+ }
+
+ .window-button .ikonli-font-icon {
+     -fx-icon-color: #E0E0F0;
+     -fx-icon-size: 12px;
+ }
+
+ #minimizeButton:hover {
+     -fx-background-color: #FFD700;
+ }
+
+ #maximizeButton:hover {
+     -fx-background-color: #32CD32;
+ }
+
+ #closeButton:hover {
+     -fx-background-color: #FF6347;
+ }
+
+ #minimizeButton:hover .ikonli-font-icon,
+ #maximizeButton:hover .ikonli-font-icon,
+ #closeButton:hover .ikonli-font-icon {
+     -fx-icon-color: #1A1B26;
+ }
 
 .window-button#closeButton:hover {
     -fx-background-color: #FF869E; /* 更亮的關閉按鈕懸停顏色 */
@@ -345,10 +370,10 @@
 .control-button {
     -fx-background-color: rgba(138, 162, 255, 0.8); /* 更亮的控制按鈕背景 */
     -fx-text-fill: #1A1B26;
-    -fx-min-width: 36px; /* 增加按鈕大小 */
-    -fx-min-height: 36px;
-    -fx-max-width: 36px;
-    -fx-max-height: 36px;
+    -fx-min-width: 18px; /* 增加按鈕大小 */
+    -fx-min-height: 18px;
+    -fx-max-width: 18px;
+    -fx-max-height: 18px;
     -fx-background-radius: 18px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);
     -fx-transition: all 0.3s ease;
