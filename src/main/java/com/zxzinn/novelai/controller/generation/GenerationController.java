@@ -46,6 +46,10 @@ public class GenerationController {
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
 
+    private UIInitializer uiInitializer;
+    private GenerationHandler generationHandler;
+    private PromptManager promptManager;
+
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
     @FXML private ComboBox<String> generationModeComboBox;
@@ -88,52 +92,24 @@ public class GenerationController {
 
     @FXML
     public void initialize() {
+        uiInitializer = new UIInitializer();
+        generationHandler = new GenerationHandler(imageGenerationService, imageUtils);
+        promptManager = new PromptManager(embedProcessor);
+
         previewPane = new PreviewPane(filePreviewService);
         previewContainer.getChildren().add(previewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
-        initializeFields();
+
+        UIInitializer.initializeFields(modelComboBox, samplerComboBox, generateCountComboBox,
+                positivePromptArea, negativePromptArea, positivePromptPreviewArea, negativePromptPreviewArea, strengthSlider);
         loadSettings();
         setupListeners();
-        setupPromptControls();
+        promptManager.setupPromptControls(positivePromptControls, negativePromptControls,
+                positivePromptArea, negativePromptArea, positivePromptPreviewArea, negativePromptPreviewArea);
         updatePromptPreviews();
         setupGenerationModeComboBox();
-        setupVerticalLayout();
-    }
-
-    private void setupVerticalLayout() {
-        modelComboBox.setMaxWidth(Double.MAX_VALUE);
-        generationModeComboBox.setMaxWidth(Double.MAX_VALUE);
-        samplerComboBox.setMaxWidth(Double.MAX_VALUE);
-        generateCountComboBox.setMaxWidth(Double.MAX_VALUE);
-        apiKeyField.setMaxWidth(Double.MAX_VALUE);
-        widthField.setMaxWidth(Double.MAX_VALUE);
-        heightField.setMaxWidth(Double.MAX_VALUE);
-        ratioField.setMaxWidth(Double.MAX_VALUE);
-        countField.setMaxWidth(Double.MAX_VALUE);
-        outputDirectoryField.setMaxWidth(Double.MAX_VALUE);
-        stepsField.setMaxWidth(Double.MAX_VALUE);
-        seedField.setMaxWidth(Double.MAX_VALUE);
-        extraNoiseSeedField.setMaxWidth(Double.MAX_VALUE);
-
-        uploadImageButton.setMaxWidth(Double.MAX_VALUE);
-        generateButton.setMaxWidth(Double.MAX_VALUE);
-
-        strengthSlider.setMaxWidth(Double.MAX_VALUE);
-    }
-
-    private void initializeFields() {
-        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
-        modelComboBox.setValue(NAIConstants.MODELS[0]);
-        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
-        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
-        generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
-        generateCountComboBox.setValue("1");
-        positivePromptArea.setPromptLabel("正面提示詞:");
-        negativePromptArea.setPromptLabel("負面提示詞:");
-        positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
-        negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
-        setupStrengthSlider();
+        UIInitializer.setupVerticalLayout(modelComboBox, generationModeComboBox, samplerComboBox, generateCountComboBox);
     }
 
     private void loadSettings() {
@@ -160,14 +136,6 @@ public class GenerationController {
                 .loadSettings(generationSettingsManager);
     }
 
-    private void setupStrengthSlider() {
-        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
-            strengthSlider.setValue(roundedValue);
-            strengthLabel.setText(String.format("%.1f", roundedValue));
-        });
-    }
-
     private void setupGenerationModeComboBox() {
         generationModeComboBox.getItems().addAll("Text2Image", "Image2Image");
         generationModeComboBox.setValue("Text2Image");
@@ -181,23 +149,6 @@ public class GenerationController {
         txt2imgSettingsPane.setManaged(isText2Image);
         img2imgSettingsPane.setVisible(!isText2Image);
         img2imgSettingsPane.setManaged(!isText2Image);
-    }
-
-    private void setupPromptControls() {
-        positivePromptControls.setOnRefreshAction(() -> refreshPromptPreview(positivePromptArea, positivePromptPreviewArea));
-        negativePromptControls.setOnRefreshAction(() -> refreshPromptPreview(negativePromptArea, negativePromptPreviewArea));
-        positivePromptControls.setOnLockAction(() -> toggleLock(true));
-        negativePromptControls.setOnLockAction(() -> toggleLock(false));
-    }
-
-    private void toggleLock(boolean isPositive) {
-        if (isPositive) {
-            isPositivePromptLocked = !isPositivePromptLocked;
-            positivePromptControls.setLockIcon(isPositivePromptLocked);
-        } else {
-            isNegativePromptLocked = !isNegativePromptLocked;
-            negativePromptControls.setLockIcon(isNegativePromptLocked);
-        }
     }
 
     private void handleHistoryImageClick(File imageFile) {
@@ -214,11 +165,6 @@ public class GenerationController {
             }
             promptUpdateLatch.countDown();
         });
-    }
-
-    private void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
-        previewArea.setPreviewText(processedPrompt);
     }
 
     private void setupListeners() {
@@ -342,24 +288,11 @@ public class GenerationController {
     }
 
     private Optional<BufferedImage> generateImageWithRetry(GenerationPayload payload) {
-        for (int retry = 0; retry < MAX_RETRIES; retry++) {
-            try {
-                return Optional.of(imageGenerationService.generateImage(payload, apiKeyField.getText()));
-            } catch (IOException e) {
-                if (retry == MAX_RETRIES - 1) {
-                    log.error("生成圖像失敗，已達到最大重試次數", e);
-                    return Optional.empty();
-                }
-                log.warn("生成圖像失敗,將在{}毫秒後重試. 錯誤: {}", RETRY_DELAY, e.getMessage());
-                try {
-                    Thread.sleep(RETRY_DELAY);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return Optional.empty();
-                }
-            }
-        }
-        return Optional.empty();
+        return generationHandler.generateImageWithRetry(payload, apiKeyField.getText());
+    }
+
+    private Optional<File> saveImageToFile(BufferedImage image, String timeStamp) {
+        return generationHandler.saveImageToFile(image, outputDirectoryField.getText(), timeStamp, currentGeneratedCount);
     }
 
     private int getMaxCount() {
@@ -408,24 +341,6 @@ public class GenerationController {
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
         });
-    }
-
-    private Optional<File> saveImageToFile(BufferedImage image, String timeStamp) {
-        try {
-            String outputDir = outputDirectoryField.getText();
-            Path outputPath = Paths.get(outputDir);
-            if (!Files.exists(outputPath)) {
-                Files.createDirectories(outputPath);
-            }
-
-            String fileName = String.format("generated_image_%s_%d.png", timeStamp.replace(":", "-"), currentGeneratedCount);
-            File outputFile = outputPath.resolve(fileName).toFile();
-            ImageProcessor.saveImage(image, outputFile);
-            return Optional.of(outputFile);
-        } catch (IOException e) {
-            log.error("保存圖像時發生錯誤：{}", e.getMessage(), e);
-            return Optional.empty();
-        }
     }
 
     private void addImageToHistory(Image image, File imageFile) {
