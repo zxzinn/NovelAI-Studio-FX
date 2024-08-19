@@ -1,13 +1,11 @@
 package com.zxzinn.novelai.controller.generation;
 
-import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
-import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.common.UIUtils;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
@@ -18,7 +16,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +40,7 @@ public class GenerationController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
 
-    private final APIClient apiClient;
     private final EmbedProcessor embedProcessor;
-    private final SettingsManager settingsManager;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
@@ -68,9 +63,7 @@ public class GenerationController {
     @FXML private PromptControls positivePromptControls;
     @FXML private PromptControls negativePromptControls;
     @FXML private ComboBox<String> generateCountComboBox;
-    @FXML private VBox historyImagesContainer;
     @FXML private StackPane previewContainer;
-    @FXML private ImageControlBar imageControlBar;
     @FXML private HistoryImagesPane historyImagesPane;
     @FXML private TextField outputDirectoryField;
     @FXML private PreviewPane previewPane;
@@ -108,13 +101,10 @@ public class GenerationController {
     }
 
     private void setupVerticalLayout() {
-        // 設置ComboBox的最大寬度
         modelComboBox.setMaxWidth(Double.MAX_VALUE);
         generationModeComboBox.setMaxWidth(Double.MAX_VALUE);
         samplerComboBox.setMaxWidth(Double.MAX_VALUE);
         generateCountComboBox.setMaxWidth(Double.MAX_VALUE);
-
-        // 設置TextField的最大寬度
         apiKeyField.setMaxWidth(Double.MAX_VALUE);
         widthField.setMaxWidth(Double.MAX_VALUE);
         heightField.setMaxWidth(Double.MAX_VALUE);
@@ -125,11 +115,9 @@ public class GenerationController {
         seedField.setMaxWidth(Double.MAX_VALUE);
         extraNoiseSeedField.setMaxWidth(Double.MAX_VALUE);
 
-        // 設置Button的最大寬度
         uploadImageButton.setMaxWidth(Double.MAX_VALUE);
         generateButton.setMaxWidth(Double.MAX_VALUE);
 
-        // 設置Slider的最大寬度
         strengthSlider.setMaxWidth(Double.MAX_VALUE);
     }
 
@@ -421,7 +409,7 @@ public class GenerationController {
             ImageProcessor.saveImage(image, outputFile);
             return Optional.of(outputFile);
         } catch (IOException e) {
-            log.error("保存圖像時發生錯誤：" + e.getMessage(), e);
+            log.error("保存圖像時發生錯誤：{}", e.getMessage(), e);
             return Optional.empty();
         }
     }

@@ -42,7 +42,6 @@ public class FileManagerController {
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
 
-    private final SettingsManager settingsManager;
     private final FileManagerService fileManagerService;
     private final FilePreviewService filePreviewService;
     private final MetadataService metadataService;
@@ -51,12 +50,10 @@ public class FileManagerController {
     protected PreviewPane previewPane;
     private final ExecutorService executorService;
 
-    public FileManagerController(SettingsManager settingsManager,
-                                 FileManagerService fileManagerService,
+    public FileManagerController(FileManagerService fileManagerService,
                                  FilePreviewService filePreviewService,
                                  MetadataService metadataService,
                                  AlertService alertService) {
-        this.settingsManager = settingsManager;
         this.fileManagerService = fileManagerService;
         this.filePreviewService = filePreviewService;
         this.metadataService = metadataService;

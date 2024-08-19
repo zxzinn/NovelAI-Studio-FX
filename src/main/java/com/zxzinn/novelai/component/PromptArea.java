@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -15,7 +16,7 @@ public class PromptArea extends VBox {
     @Getter @FXML private TextArea promptTextArea;
 
     public PromptArea() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptArea.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_AREA));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

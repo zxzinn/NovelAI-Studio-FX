@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -18,7 +19,7 @@ public class ImageControlBar extends HBox {
     @FXML private Button saveButton;
 
     public ImageControlBar() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/ImageControlBar.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.IMAGE_CONTROL_BAR_FXML));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

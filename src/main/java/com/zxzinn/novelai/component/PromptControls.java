@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -15,7 +16,7 @@ public class PromptControls extends VBox {
     @FXML private FontIcon lockIcon;
 
     public PromptControls() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptControls.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_CONTROLS));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

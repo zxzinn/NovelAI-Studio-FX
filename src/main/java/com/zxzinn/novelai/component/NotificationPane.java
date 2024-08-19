@@ -24,8 +24,8 @@ public class NotificationPane extends StackPane {
         background.setArcHeight(20);
 
         Stop[] stops = new Stop[] {
-                new Stop(0, Color.rgb(66, 165, 245, 0.9)),  // 藍色起始
-                new Stop(1, Color.rgb(21, 101, 192, 0.9))   // 深藍色結束
+                new Stop(0, Color.rgb(66, 165, 245, 0.9)),
+                new Stop(1, Color.rgb(21, 101, 192, 0.9))
         };
         LinearGradient gradient = new LinearGradient(0, 0, 1, 0, true, javafx.scene.paint.CycleMethod.NO_CYCLE, stops);
         background.setFill(gradient);
@@ -47,7 +47,6 @@ public class NotificationPane extends StackPane {
         setOpacity(0);
         setTranslateY(-50);
 
-        // 設置 NotificationPane 不接受鼠標事件
         setMouseTransparent(true);
 
         showAnimation = new Timeline(

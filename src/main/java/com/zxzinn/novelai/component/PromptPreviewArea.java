@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.tokenizer.SimpleTokenizer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -27,7 +28,7 @@ public class PromptPreviewArea extends VBox {
     private static final int TOKEN_LIMIT = 225;
 
     public PromptPreviewArea() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/PromptPreviewArea.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_PREVIEW_AREA));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
@@ -56,7 +57,7 @@ public class PromptPreviewArea extends VBox {
 
     private void initializeTokenizer() {
         try {
-            String resourcePath = "/com/zxzinn/novelai/tokenizers/bpe_simple_vocab_16e6.txt.gz";
+            String resourcePath = ResourcePaths.SIMPLE_TOKENIZER;
             InputStream inputStream = getClass().getResourceAsStream(resourcePath);
             if (inputStream == null) {
                 throw new IOException("Cannot find resource: " + resourcePath);

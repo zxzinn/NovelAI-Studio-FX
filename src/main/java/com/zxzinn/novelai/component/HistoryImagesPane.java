@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +20,7 @@ import java.util.function.Consumer;
 public class HistoryImagesPane extends VBox {
 
     private static final int MAX_HISTORY_SIZE = 100;
-    private static final double THUMBNAIL_WIDTH = 90;  // 减小缩略图宽度
+    private static final double THUMBNAIL_WIDTH = 90;
 
     @FXML private ListView<HistoryImage> historyListView;
 
@@ -28,7 +29,7 @@ public class HistoryImagesPane extends VBox {
     @Setter private Consumer<File> onImageClickHandler;
 
     public HistoryImagesPane() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/zxzinn/novelai/fxml/generator/HistoryImagesPane.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.HISTORY_IMAGE_PANE));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
