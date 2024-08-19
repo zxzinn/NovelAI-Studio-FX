@@ -2,7 +2,7 @@
    .root {
        -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
        -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
-       -fx-font-size: 14px; /* 增加全局字體大小 */
+       -fx-font-size: 18px; /* 增加全局字體大小 */
    }
 
 /* 文本樣式 */
@@ -741,3 +741,87 @@
     -fx-translate-y: 3px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 3, 0, 1, 0);
 }
+
+ /* 文件樹視圖樣式 */
+ .file-tree {
+     -fx-background-color: rgba(64, 69, 92, 0.8);
+     -fx-background-radius: 6px;
+ }
+
+ .file-tree .tree-cell {
+     -fx-background-color: transparent;
+     -fx-text-fill: #E0E0F0;
+     -fx-font-size: 14px;
+ }
+
+ .file-tree .tree-cell:selected {
+     -fx-background-color: #8AA2FF;
+ }
+
+ .file-tree .tree-cell > .tree-disclosure-node > .arrow {
+     -fx-background-color: #E0E0F0;
+ }
+
+ /* 搜索欄樣式 */
+ #searchField {
+     -fx-background-color: rgba(75, 82, 114, 0.95);
+     -fx-text-fill: #E0E0F0;
+     -fx-prompt-text-fill: #666F99;
+ }
+
+ /* 添加和刪除按鈕樣式 */
+ .icon-button {
+     -fx-background-color: rgba(138, 162, 255, 0.8);
+     -fx-background-radius: 50%;
+     -fx-min-width: 30px;
+     -fx-min-height: 30px;
+     -fx-max-width: 30px;
+     -fx-max-height: 30px;
+ }
+
+ .icon-button:hover {
+     -fx-background-color: rgba(203, 185, 255, 0.8);
+ }
+
+ .icon-button .ikonli-font-icon {
+     -fx-icon-color: #1A1B26;
+ }
+
+ /* 元數據列表視圖樣式 */
+ .metadata-list {
+     -fx-background-color: rgba(64, 69, 92, 0.8);
+     -fx-background-radius: 6px;
+ }
+
+ .metadata-list .list-cell {
+     -fx-background-color: transparent;
+     -fx-text-fill: #E0E0F0;
+     -fx-font-size: 14px;
+ }
+
+ .metadata-list .list-cell:filled:selected, .metadata-list .list-cell:filled:selected:hover {
+     -fx-background-color: #8AA2FF;
+ }
+
+ /* 預覽容器樣式 */
+ .preview-container {
+     -fx-background-color: rgba(64, 69, 92, 0.6);
+     -fx-background-radius: 6px;
+     -fx-border-color: #8AA2FF;
+     -fx-border-width: 1px;
+     -fx-border-radius: 6px;
+ }
+
+ /* 進度條和標籤樣式 */
+ .progress-bar {
+     -fx-accent: #8AA2FF;
+ }
+
+ .progress-bar .track {
+     -fx-background-color: rgba(64, 69, 92, 0.6);
+ }
+
+ #progressLabel {
+     -fx-text-fill: #E0E0F0;
+     -fx-font-size: 14px;
+ }
