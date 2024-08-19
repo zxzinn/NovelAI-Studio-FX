@@ -4,6 +4,34 @@
     -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
 }
 
+/* 文本樣式 */
+.text {
+    -fx-fill: #C0CAF5;
+}
+
+.label {
+    -fx-text-fill: #C0CAF5;
+}
+
+.prompt-text {
+    -fx-fill: #A9B1D6;
+}
+
+.emphasis-text {
+    -fx-fill: #F0A8BB;
+    -fx-font-weight: bold;
+}
+
+.error-text {
+    -fx-fill: #F7768E;
+    -fx-font-weight: bold;
+}
+
+.success-text {
+    -fx-fill: #9ECE6A;
+    -fx-font-weight: bold;
+}
+
 /* 標題欄樣式 */
 .title-bar {
     -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
@@ -53,6 +81,10 @@
     -fx-transition: all 0.3s ease;
 }
 
+.tab-pane .tab:hover {
+    -fx-background-color: rgba(54, 59, 82, 0.9);
+}
+
 .tab-pane .tab:selected {
     -fx-background-color: #BB9AF7;
 }
@@ -92,6 +124,7 @@
 .text-area {
     -fx-control-inner-background: rgba(54, 59, 82, 0.9) !important;
     -fx-background-color: rgba(54, 59, 82, 0.9) !important;
+    -fx-text-fill: #C0CAF5;
 }
 
 .text-area .content {
@@ -112,6 +145,10 @@
     -fx-border-radius: 5px;
 }
 
+.combo-box:hover {
+    -fx-background-color: rgba(65, 72, 104, 0.95);
+}
+
 .combo-box .list-cell {
     -fx-background-color: rgba(65, 72, 104, 0.9);
     -fx-text-fill: #C0CAF5;
@@ -125,7 +162,7 @@
 /* 按鈕樣式 */
 .button {
     -fx-background-color: linear-gradient(to bottom right, #7AA2F7, #BB9AF7);
-    -fx-text-fill: #1A1B26; /* 將文字顏色改為深色 */
+    -fx-text-fill: #1A1B26;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -233,7 +270,6 @@
 .history-list-view .list-cell:filled:hover {
     -fx-background-color: rgba(65, 72, 104, 0.9);
 }
-
 
 /* 設置部分樣式 */
 .settings-section {
@@ -353,7 +389,6 @@
     -fx-padding: 0;
 }
 
-/* 進度條樣式（續） */
 .token-progress-bar > .bar {
     -fx-background-color: linear-gradient(to right, #9ECE6A, #F0A8BB 50%, #F7768E);
     -fx-background-radius: 8;
@@ -389,7 +424,7 @@
 /* 上傳按鈕樣式 */
 .upload-button {
     -fx-background-color: linear-gradient(to bottom right, #7AA2F7, #BB9AF7);
-    -fx-text-fill: #1A1B26; /* 將文字顏色改為深色 */
+    -fx-text-fill: #1A1B26;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 1);
@@ -417,6 +452,10 @@
     -fx-background-color: #BB9AF7;
 }
 
+.slider .thumb:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(187,154,247,0.8), 10, 0, 0, 0);
+}
+
 /* 預覽容器樣式 */
 .preview-container {
     -fx-background-color: rgba(54, 59, 82, 0.5);
@@ -442,52 +481,7 @@
     -fx-background-color: transparent;
 }
 
-/* 標籤樣式 */
-.label {
-    -fx-text-fill: #C0CAF5;
-}
-
-/* 提高對比度的一般文本 */
-.text {
-    -fx-fill: #C0CAF5;
-}
-
-/* 增強可讀性的提示文本 */
-.prompt-text {
-    -fx-fill: #A9B1D6;
-}
-
-/* 強調重要信息 */
-.emphasis-text {
-    -fx-fill: #F0A8BB;
-    -fx-font-weight: bold;
-}
-
-/* 錯誤信息樣式 */
-.error-text {
-    -fx-fill: #F7768E;
-    -fx-font-weight: bold;
-}
-
-/* 成功信息樣式 */
-.success-text {
-    -fx-fill: #9ECE6A;
-    -fx-font-weight: bold;
-}
-
-.prompt-preview-low {
-    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
-}
-
-.prompt-preview-medium {
-    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
-}
-
-.prompt-preview-high {
-    -fx-control-inner-background: rgba(54, 59, 82, 0.9);
-}
-
-.prompt-preview-max {
+.prompt-preview-low, .prompt-preview-medium, .prompt-preview-high, .prompt-preview-max {
     -fx-control-inner-background: rgba(54, 59, 82, 0.9);
 }
 
