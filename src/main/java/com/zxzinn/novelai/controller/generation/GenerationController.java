@@ -6,6 +6,7 @@ import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.NAIConstants;
+import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -95,6 +96,12 @@ public class GenerationController {
         uiInitializer = new UIInitializer();
         generationHandler = new GenerationHandler(imageGenerationService, imageUtils);
         promptManager = new PromptManager(embedProcessor);
+        EmbedFileManager embedFileManager = new EmbedFileManager();
+        embedFileManager.scanEmbedFiles();
+
+        positivePromptArea.setEmbedFileManager(embedFileManager);
+        negativePromptArea.setEmbedFileManager(embedFileManager);
+
 
         previewPane = new PreviewPane(filePreviewService);
         previewContainer.getChildren().add(previewPane);

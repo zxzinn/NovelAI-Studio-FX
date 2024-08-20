@@ -825,3 +825,32 @@
      -fx-text-fill: #E0E0F0;
      -fx-font-size: 14px;
  }
+
+ .auto-complete-list {
+     -fx-background-color: #2A2A2A;
+     -fx-text-fill: #E0E0F0;
+     -fx-border-color: #3A3A3A;
+     -fx-border-width: 1px;
+     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+ }
+
+ .auto-complete-list .list-cell {
+     -fx-background-color: #2A2A2A;
+     -fx-text-fill: #E0E0F0;
+     -fx-padding: 5px;
+ }
+
+ .auto-complete-list .list-cell:filled:hover,
+ .auto-complete-list .list-cell:filled:selected {
+     -fx-background-color: #8AA2FF;
+     -fx-text-fill: #1A1B26;
+ }
+
+ .auto-complete-list .scroll-bar:vertical {
+     -fx-background-color: #2A2A2A;
+     -fx-border-color: #3A3A3A;
+ }
+
+ .auto-complete-list .scroll-bar:vertical .thumb {
+     -fx-background-color: #8AA2FF;
+ }
