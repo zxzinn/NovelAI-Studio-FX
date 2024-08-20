@@ -16,10 +16,10 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 public class PromptArea extends VBox {
-
     private static final Logger LOGGER = Logger.getLogger(PromptArea.class.getName());
 
     @FXML private Label promptLabel;
@@ -27,15 +27,21 @@ public class PromptArea extends VBox {
     private ListView<String> autoCompleteList;
     private Popup autoCompletePopup;
     @Setter private EmbedFileManager embedFileManager;
+    private boolean isAutoCompleteActive = false;
+    private String lastPrefix = "";
 
     public PromptArea() {
+        loadFXML();
+        initializeComponents();
+        setupListeners();
+    }
+
+    private void loadFXML() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_AREA));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-
         try {
             fxmlLoader.load();
-            initializeComponents();
         } catch (IOException exception) {
             LOGGER.severe("Failed to load FXML: " + exception.getMessage());
             throw new RuntimeException(exception);
@@ -43,62 +49,88 @@ public class PromptArea extends VBox {
     }
 
     private void initializeComponents() {
+        setupPromptTextArea();
+        setupAutoCompleteList();
+        setupAutoCompletePopup();
+    }
+
+    private void setupPromptTextArea() {
         promptTextArea.setWrapText(true);
         promptTextArea.setPrefHeight(100);
         promptTextArea.setMaxHeight(USE_PREF_SIZE);
         promptTextArea.setMinHeight(USE_PREF_SIZE);
         promptTextArea.getStyleClass().add("prompt-area");
+    }
 
+    private void setupAutoCompleteList() {
         autoCompleteList = new ListView<>();
         autoCompleteList.setPrefWidth(200);
         autoCompleteList.setPrefHeight(200);
         autoCompleteList.getStyleClass().add("auto-complete-list");
+    }
 
+    private void setupAutoCompletePopup() {
         autoCompletePopup = new Popup();
         autoCompletePopup.getContent().add(autoCompleteList);
         autoCompletePopup.setAutoHide(true);
-
-        setupAutoComplete();
     }
 
-    private void setupAutoComplete() {
+    private void setupListeners() {
+        promptTextArea.textProperty().addListener((observable, oldValue, newValue) -> handleTextChange(oldValue, newValue));
+        promptTextArea.caretPositionProperty().addListener((observable, oldValue, newValue) -> handleCaretChange(newValue.intValue()));
         promptTextArea.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
-        promptTextArea.textProperty().addListener((observable, oldValue, newValue) -> updateAutoComplete(newValue));
         autoCompleteList.setOnMouseClicked(event -> selectAutoComplete());
-
-        // Add this new event handler
         autoCompletePopup.addEventFilter(KeyEvent.KEY_PRESSED, this::handlePopupKeyPress);
     }
 
-    private void handleKeyPress(KeyEvent event) {
-        LOGGER.info("Key pressed in TextArea: " + event.getCode() + ", Popup showing: " + autoCompletePopup.isShowing());
+    private void handleTextChange(String oldValue, String newValue) {
+        int caretPosition = promptTextArea.getCaretPosition();
+        updateAutoComplete(caretPosition, oldValue, newValue);
+    }
 
-        if (event.getCode() == KeyCode.ENTER && autoCompletePopup.isShowing()) {
-            LOGGER.info("Enter pressed in TextArea while popup is showing");
-            selectAutoComplete();
-            event.consume();
-        } else if (autoCompletePopup.isShowing()) {
+    private void handleCaretChange(int newPosition) {
+        String text = promptTextArea.getText();
+        updateAutoComplete(newPosition, text, text);
+    }
+
+    private void updateAutoComplete(int caretPosition, String oldValue, String newValue) {
+        int start = newValue.lastIndexOf('<', caretPosition - 1);
+        if (start != -1 && start < caretPosition) {
+            String prefix = newValue.substring(start + 1, caretPosition);
+            if (!prefix.equals(lastPrefix)) {
+                showAutoComplete(prefix);
+                lastPrefix = prefix;
+            }
+            isAutoCompleteActive = true;
+        } else {
+            hideAutoComplete();
+        }
+    }
+
+    private void handleKeyPress(KeyEvent event) {
+        if (autoCompletePopup.isShowing()) {
             switch (event.getCode()) {
-                case UP -> {
+                case UP:
                     navigateAutoComplete(-1);
                     event.consume();
-                }
-                case DOWN -> {
+                    break;
+                case DOWN:
                     navigateAutoComplete(1);
                     event.consume();
-                }
-                case ESCAPE -> {
+                    break;
+                case ESCAPE:
                     hideAutoComplete();
                     event.consume();
-                }
+                    break;
             }
+        } else if (event.isControlDown() && event.getCode() == KeyCode.SPACE) {
+            showAutoComplete("");
+            event.consume();
         }
     }
 
     private void handlePopupKeyPress(KeyEvent event) {
-        LOGGER.info("Key pressed in Popup: " + event.getCode());
-        if (event.getCode() == KeyCode.ENTER) {
-            LOGGER.info("Enter pressed in Popup");
+        if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.TAB) {
             selectAutoComplete();
             event.consume();
         }
@@ -112,38 +144,28 @@ public class PromptArea extends VBox {
         autoCompleteList.scrollTo(newIndex);
     }
 
-    private void updateAutoComplete(String newValue) {
-        int caretPosition = promptTextArea.getCaretPosition();
-        int start = newValue.lastIndexOf('<', caretPosition - 1);
-        if (start != -1 && start < caretPosition) {
-            String prefix = newValue.substring(start + 1, caretPosition);
-            showAutoComplete(prefix);
-        } else {
-            hideAutoComplete();
-        }
-    }
-
     private void showAutoComplete(String prefix) {
         if (embedFileManager == null) {
             LOGGER.warning("EmbedFileManager is null");
             return;
         }
-        List<String> matches = embedFileManager.getMatchingEmbeds(prefix);
-        if (!matches.isEmpty()) {
-            autoCompleteList.getItems().setAll(matches);
-            autoCompleteList.getSelectionModel().selectFirst();
-            positionAutoCompletePopup();
-            autoCompletePopup.show(promptTextArea,
-                    autoCompletePopup.getX(),
-                    autoCompletePopup.getY());
-            Platform.runLater(() -> {
-                promptTextArea.requestFocus();
-                autoCompleteList.requestFocus();
-            });
-            LOGGER.info("Showing autocomplete popup with " + matches.size() + " matches");
-        } else {
-            hideAutoComplete();
-        }
+        CompletableFuture<List<String>> futureMatches = embedFileManager.getMatchingEmbedsAsync(prefix);
+        futureMatches.thenAcceptAsync(matches -> {
+            if (!matches.isEmpty()) {
+                Platform.runLater(() -> {
+                    autoCompleteList.getItems().setAll(matches);
+                    autoCompleteList.getSelectionModel().selectFirst();
+                    positionAutoCompletePopup();
+                    autoCompletePopup.show(promptTextArea, autoCompletePopup.getX(), autoCompletePopup.getY());
+                });
+                LOGGER.info("Showing autocomplete popup with " + matches.size() + " matches");
+            } else {
+                hideAutoComplete();
+            }
+        }).exceptionally(ex -> {
+            LOGGER.severe("Error fetching autocomplete matches: " + ex.getMessage());
+            return null;
+        });
     }
 
     private void positionAutoCompletePopup() {
@@ -153,8 +175,12 @@ public class PromptArea extends VBox {
     }
 
     private void hideAutoComplete() {
-        autoCompletePopup.hide();
-        LOGGER.info("Hiding autocomplete popup");
+        Platform.runLater(() -> {
+            autoCompletePopup.hide();
+            promptTextArea.requestFocus();
+        });
+        isAutoCompleteActive = false;
+        lastPrefix = "";
     }
 
     private void selectAutoComplete() {
@@ -162,7 +188,6 @@ public class PromptArea extends VBox {
         if (selected != null) {
             insertAutoComplete(selected);
             hideAutoComplete();
-            LOGGER.info("Autocomplete selected: " + selected);
         }
     }
 
@@ -173,7 +198,7 @@ public class PromptArea extends VBox {
         if (start != -1) {
             String newText = text.substring(0, start + 1) + selected + ":1>" + text.substring(caretPosition);
             promptTextArea.setText(newText);
-            promptTextArea.positionCaret(start + selected.length() + 3); // +3 for ":1>"
+            promptTextArea.positionCaret(start + selected.length() + 3);
         }
     }
 
