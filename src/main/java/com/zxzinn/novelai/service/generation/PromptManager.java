@@ -19,14 +19,14 @@ public class PromptManager {
     public void setupPromptControls(PromptControls positivePromptControls, PromptControls negativePromptControls,
                                     PromptArea positivePromptArea, PromptArea negativePromptArea,
                                     PromptPreviewArea positivePromptPreviewArea, PromptPreviewArea negativePromptPreviewArea) {
-        setupPromptControl(positivePromptControls, positivePromptArea, positivePromptPreviewArea, isPositivePromptLocked);
-        setupPromptControl(negativePromptControls, negativePromptArea, negativePromptPreviewArea, isNegativePromptLocked);
+        setupPromptControl(positivePromptControls, positivePromptArea, positivePromptPreviewArea, isPositivePromptLocked, true);
+        setupPromptControl(negativePromptControls, negativePromptArea, negativePromptPreviewArea, isNegativePromptLocked, false);
     }
 
-    private void setupPromptControl(PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked) {
+    private void setupPromptControl(PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
         controls.setOnRefreshAction(() -> {
             if (!isLocked.get()) {
-                refreshPromptPreview(promptArea, previewArea);
+                refreshPromptPreview(promptArea, previewArea, isPositive);
             }
         });
 
@@ -36,14 +36,22 @@ public class PromptManager {
         });
     }
 
-    public void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
-        previewArea.setPreviewText(processedPrompt);
+    public void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea, boolean isPositive) {
+        if (!isPromptLocked(isPositive)) {
+            String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
+            previewArea.setPreviewText(processedPrompt);
+        }
     }
 
-    public void updatePromptPreview(String newValue, PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(newValue);
-        previewArea.setPreviewText(processedPrompt);
+    public void updatePromptPreview(String newValue, PromptPreviewArea previewArea, boolean isPositive) {
+        if (!isPromptLocked(isPositive)) {
+            String processedPrompt = embedProcessor.processPrompt(newValue);
+            previewArea.setPreviewText(processedPrompt);
+        }
+    }
+
+    public boolean isPromptLocked(boolean isPositive) {
+        return isPositive ? isPositivePromptLocked.get() : isNegativePromptLocked.get();
     }
 
     public boolean isPositivePromptLocked() {

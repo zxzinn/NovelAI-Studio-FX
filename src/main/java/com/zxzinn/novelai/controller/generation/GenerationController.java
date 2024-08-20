@@ -5,13 +5,10 @@ import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
-import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
-import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -24,9 +21,6 @@ import lombok.extern.log4j.Log4j2;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -164,12 +158,8 @@ public class GenerationController {
 
     private void updatePromptPreviewsAsync() {
         Platform.runLater(() -> {
-            if (!isPositivePromptLocked) {
-                positivePromptPreviewArea.setPreviewText(embedProcessor.processPrompt(positivePromptArea.getPromptText()));
-            }
-            if (!isNegativePromptLocked) {
-                negativePromptPreviewArea.setPreviewText(embedProcessor.processPrompt(negativePromptArea.getPromptText()));
-            }
+            promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+            promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
             promptUpdateLatch.countDown();
         });
     }
@@ -199,19 +189,14 @@ public class GenerationController {
 
 
         positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                updatePromptPreview(newValue, positivePromptPreviewArea));
+                promptManager.updatePromptPreview(newValue, positivePromptPreviewArea, true));
         negativePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                updatePromptPreview(newValue, negativePromptPreviewArea));
-    }
-
-    private void updatePromptPreview(String newValue, PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(newValue);
-        previewArea.setPreviewText(processedPrompt);
+                promptManager.updatePromptPreview(newValue, negativePromptPreviewArea, false));
     }
 
     private void updatePromptPreviews() {
-        updatePromptPreview(positivePromptArea.getPromptText(), positivePromptPreviewArea);
-        updatePromptPreview(negativePromptArea.getPromptText(), negativePromptPreviewArea);
+        promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+        promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
     }
 
     @FXML
@@ -347,6 +332,9 @@ public class GenerationController {
                 addImageToHistory(fxImage, imageFile);
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
+
+            // 只在未锁定的情况下更新提示词预览
+            updatePromptPreviews();
         });
     }
 
