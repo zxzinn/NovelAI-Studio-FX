@@ -899,3 +899,16 @@
  .auto-complete-list .scroll-bar:vertical .thumb {
      -fx-background-color: #8AA2FF;
  }
+
+ /* 鎖定按鈕樣式 */
+ .lock-button.locked {
+     -fx-background-color: rgba(255, 134, 158, 0.8); /* 更亮的鎖定按鈕背景 */
+ }
+
+ .lock-button.locked:hover {
+     -fx-background-color: rgba(255, 134, 158, 1); /* 更亮的鎖定按鈕懸停背景 */
+ }
+
+ .lock-button.locked .ikonli-font-icon {
+     -fx-icon-color: #1A1B26;
+ }

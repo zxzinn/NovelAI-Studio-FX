@@ -41,7 +41,12 @@ public class PromptControls extends VBox {
         lockButton.setOnAction(event -> action.run());
     }
 
-    public void setLockIcon(boolean isLocked) {
+    public void setLockState(boolean isLocked) {
         lockIcon.setIconLiteral(isLocked ? "fas-lock" : "fas-lock-open");
+        if (isLocked) {
+            lockButton.getStyleClass().add("locked");
+        } else {
+            lockButton.getStyleClass().remove("locked");
+        }
     }
 }
