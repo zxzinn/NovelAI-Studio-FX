@@ -283,17 +283,61 @@
     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.3), 12, 0, 0, 0);
 }
 
-/* promptArea hover效果 */
-.prompt-area {
-    -fx-background-color: rgba(64, 69, 92, 1); /* 更亮的提示區域背景 */
-    -fx-background-radius: 6px;
-    -fx-transition: all 0.3s ease;
-}
+ /* 提示词区域样式 */
+ .prompt-area {
+     -fx-background-color: rgba(64, 69, 92, 1);
+     -fx-background-radius: 6px;
+     -fx-transition: all 0.3s ease;
+ }
 
-.prompt-area:hover {
-    -fx-background-color: rgba(64, 69, 92, 1.1); /* 更亮的提示區域懸停背景 */
-    -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
-}
+ .prompt-area:hover {
+     -fx-background-color: rgba(64, 69, 92, 1.1);
+     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
+ }
+
+ /* 提示词预览区域样式 */
+ .prompt-preview {
+     -fx-background-color: rgba(64, 69, 92, 1);
+     -fx-background-radius: 6px;
+     -fx-transition: all 0.3s ease;
+ }
+
+ .prompt-preview:hover {
+     -fx-background-color: rgba(64, 69, 92, 1.1);
+     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
+ }
+
+ /* 提示词区域和预览区域的共同样式 */
+ .prompt-area .text-area, .prompt-preview .text-area {
+     -fx-control-inner-background: rgba(64, 69, 92, 1) !important;
+     -fx-background-color: rgba(64, 69, 92, 1) !important;
+ }
+
+ .prompt-area:focused, .prompt-preview:focused {
+     -fx-border-color: #8AA2FF;
+     -fx-border-width: 2px;
+ }
+
+ /* 确保滚动条在需要时显示 */
+ .prompt-area .text-area .scroll-pane,
+ .prompt-preview .text-area .scroll-pane {
+     -fx-fit-to-height: false;
+ }
+
+ /* Token 进度条容器样式 */
+ .token-progress-container {
+     -fx-background-color: rgba(64, 69, 92, 0.4);
+     -fx-background-radius: 12;
+     -fx-padding: 3;
+ }
+
+ /* Token 计数标签样式 */
+ .token-count-label {
+     -fx-text-fill: #E0E0F0;
+     -fx-font-size: 14px;
+     -fx-font-weight: bold;
+     -fx-padding: 0 6 0 6;
+ }
 
 /* previewPane hover效果 */
 .preview-container {
@@ -480,6 +524,7 @@
 
 /* 設置面板樣式 */
 .settings-panel {
+    -fx-max-width: 350px;
     -fx-background-color: rgba(64, 69, 92, 0.9); /* 更亮的設置面板背景 */
     -fx-padding: 12px; /* 增加內邊距 */
     -fx-spacing: 12px; /* 增加間距 */
