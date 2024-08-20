@@ -1,7 +1,6 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.utils.image.ImageProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -56,7 +55,7 @@ public class GenerationHandler {
 
             String fileName = String.format("generated_image_%s_%d.png", timeStamp.replace(":", "-"), currentGeneratedCount);
             File outputFile = outputPath.resolve(fileName).toFile();
-            ImageProcessor.saveImage(image, outputFile);
+            ImageUtils.saveImage(image, outputFile);
             return Optional.of(outputFile);
         } catch (IOException e) {
             log.error("保存圖像時發生錯誤：{}", e.getMessage(), e);

@@ -13,14 +13,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 
+@Log4j2
 public class PromptArea extends VBox {
-    private static final Logger LOGGER = Logger.getLogger(PromptArea.class.getName());
 
     @FXML private Label promptLabel;
     @Getter @FXML private TextArea promptTextArea;
@@ -43,7 +43,7 @@ public class PromptArea extends VBox {
         try {
             fxmlLoader.load();
         } catch (IOException exception) {
-            LOGGER.severe("Failed to load FXML: " + exception.getMessage());
+            log.error("Failed to load FXML: {}", exception.getMessage());
             throw new RuntimeException(exception);
         }
     }
@@ -146,7 +146,7 @@ public class PromptArea extends VBox {
 
     private void showAutoComplete(String prefix) {
         if (embedFileManager == null) {
-            LOGGER.warning("EmbedFileManager is null");
+            log.warn("EmbedFileManager is null");
             return;
         }
         CompletableFuture<List<String>> futureMatches = embedFileManager.getMatchingEmbedsAsync(prefix);
@@ -158,12 +158,12 @@ public class PromptArea extends VBox {
                     positionAutoCompletePopup();
                     autoCompletePopup.show(promptTextArea, autoCompletePopup.getX(), autoCompletePopup.getY());
                 });
-                LOGGER.info("Showing autocomplete popup with " + matches.size() + " matches");
+                log.info("Showing autocomplete popup with " + matches.size() + " matches");
             } else {
                 hideAutoComplete();
             }
         }).exceptionally(ex -> {
-            LOGGER.severe("Error fetching autocomplete matches: " + ex.getMessage());
+            log.error("Error fetching autocomplete matches: {}", ex.getMessage());
             return null;
         });
     }

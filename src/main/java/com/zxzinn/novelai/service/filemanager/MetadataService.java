@@ -29,13 +29,13 @@ public class MetadataService {
             return metadataList;
         }
 
-        try (FileInputStream inputstream = new FileInputStream(file)) {
+        try (FileInputStream fileinputstream = new FileInputStream(file)) {
             BodyContentHandler handler = new BodyContentHandler();
             Metadata metadata = new Metadata();
             ParseContext context = new ParseContext();
 
             AutoDetectParser parser = new AutoDetectParser();
-            parser.parse(inputstream, handler, metadata, context);
+            parser.parse(fileinputstream, handler, metadata, context);
 
             for (String name : metadata.names()) {
                 metadataList.add(name + ": " + metadata.get(name));

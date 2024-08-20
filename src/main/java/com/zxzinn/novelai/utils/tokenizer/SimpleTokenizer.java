@@ -122,7 +122,7 @@ public class SimpleTokenizer {
         while (matcher.find()) {
             if (!currentToken.isEmpty()) {
                 String encodedToken = currentToken.toString().chars()
-                        .mapToObj(ch -> byteEncoder.get((int) ch))
+                        .mapToObj(byteEncoder::get)
                         .collect(Collectors.joining());
                 for (String bpeToken : bpe(encodedToken).split(" ")) {
                     bpeTokens.add(encoder.getOrDefault(bpeToken, encoder.get("<|endoftext|>")));
@@ -134,7 +134,7 @@ public class SimpleTokenizer {
 
         if (!currentToken.isEmpty()) {
             String encodedToken = currentToken.toString().chars()
-                    .mapToObj(ch -> byteEncoder.get((int) ch))
+                    .mapToObj(byteEncoder::get)
                     .collect(Collectors.joining());
             for (String bpeToken : bpe(encodedToken).split(" ")) {
                 bpeTokens.add(encoder.getOrDefault(bpeToken, encoder.get("<|endoftext|>")));

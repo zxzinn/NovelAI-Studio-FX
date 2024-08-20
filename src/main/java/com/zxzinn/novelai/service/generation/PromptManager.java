@@ -25,9 +25,7 @@ public class PromptManager {
 
     private void setupPromptControl(PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
         controls.setOnRefreshAction(() -> {
-            if (!isLocked.get()) {
-                refreshPromptPreview(promptArea, previewArea, isPositive);
-            }
+            forceRefreshPromptPreview(promptArea, previewArea);
         });
 
         controls.setOnLockAction(() -> {
@@ -41,6 +39,11 @@ public class PromptManager {
             String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
             previewArea.setPreviewText(processedPrompt);
         }
+    }
+
+    public void forceRefreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
+        previewArea.setPreviewText(processedPrompt);
     }
 
     public void updatePromptPreview(String newValue, PromptPreviewArea previewArea, boolean isPositive) {

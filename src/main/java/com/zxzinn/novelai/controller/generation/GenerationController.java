@@ -333,8 +333,13 @@ public class GenerationController {
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
 
-            // 只在未锁定的情况下更新提示词预览
-            updatePromptPreviews();
+            // 根據鎖定狀態更新提示詞預覽
+            if (!promptManager.isPositivePromptLocked()) {
+                promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+            }
+            if (!promptManager.isNegativePromptLocked()) {
+                promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+            }
         });
     }
 

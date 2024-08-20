@@ -3,9 +3,8 @@ package com.zxzinn.novelai.controller.filemanager;
 import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
-import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.common.TxtProcessor;
-import com.zxzinn.novelai.utils.image.ImageProcessor;
+import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -175,7 +174,7 @@ public class FileManagerController {
             throw new IOException("無法讀取圖像文件: " + file.getName());
         }
 
-        ImageProcessor.clearMetadata(image);
+        ImageUtils.clearMetadata(image);
 
         File cleanedDir = new File(file.getParentFile(), "cleaned");
         if (!cleanedDir.exists() && !cleanedDir.mkdir()) {
@@ -183,7 +182,7 @@ public class FileManagerController {
         }
 
         File outputFile = new File(cleanedDir, file.getName());
-        ImageProcessor.saveImage(image, outputFile);
+        ImageUtils.saveImage(image, outputFile);
     }
 
     private void updateProgressOnUI(int completed, int total) {
