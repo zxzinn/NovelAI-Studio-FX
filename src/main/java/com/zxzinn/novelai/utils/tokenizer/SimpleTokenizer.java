@@ -34,7 +34,8 @@ public class SimpleTokenizer {
         }
 
         cache = new HashMap<>();
-        pat = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}]+", Pattern.CASE_INSENSITIVE);
+        // 修改正則表達式，排除 { } [ ] 和換行符
+        pat = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
     }
 
     private Map<Integer, String> bytesToUnicode() {
@@ -129,7 +130,11 @@ public class SimpleTokenizer {
                 }
                 currentToken = new StringBuilder();
             }
-            currentToken.append(matcher.group());
+            String group = matcher.group();
+            // 檢查是否為 { } [ ] 或換行符，如果是則跳過
+            if (!group.matches("[{}\\[\\]\n]")) {
+                currentToken.append(group);
+            }
         }
 
         if (!currentToken.isEmpty()) {
