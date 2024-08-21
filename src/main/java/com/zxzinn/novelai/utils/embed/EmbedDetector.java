@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 @Log4j2
 public class EmbedDetector {
-    private static final Pattern EMBED_PATTERN = Pattern.compile("<([\\w\\s/]+)(?::([\\d~]+))?>");
+    private static final Pattern EMBED_PATTERN = Pattern.compile("<([\\w\\s/]+)(?::([\\d~]+))?(?::([\\-\\d~]+))?>");
 
     public List<EmbedTag> detectEmbeds(String input) {
         if (input == null || input.isEmpty()) {
@@ -21,14 +21,15 @@ public class EmbedDetector {
         while (matcher.find()) {
             String tagName = matcher.group(1);
             String sampling = matcher.group(2); // 可能為 null
+            String bracketing = matcher.group(3); // 新增的 bracketing 參數，可能為 null
             int start = matcher.start();
             int end = matcher.end();
-            embeds.add(new EmbedTag(tagName, sampling, start, end));
-            log.debug("Detected embed tag: {} with sampling {} at position {}-{}", tagName, sampling, start, end);
+            embeds.add(new EmbedTag(tagName, sampling, bracketing, start, end));
+            log.debug("Detected embed tag: {} with sampling {} and bracketing {} at position {}-{}", tagName, sampling, bracketing, start, end);
         }
         return embeds;
     }
 
-    public record EmbedTag(String name, String sampling, int start, int end) {
+    public record EmbedTag(String name, String sampling, String bracketing, int start, int end) {
     }
 }

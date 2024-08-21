@@ -12,11 +12,12 @@ import java.util.stream.Collectors;
 public class EmbedProcessor {
     private static final String EMBEDS_DIRECTORY = "embeds";
     private final EmbedDetector embedDetector;
+    private final Random random;
 
     public EmbedProcessor() {
         this.embedDetector = new EmbedDetector();
+        this.random = new Random();
     }
-
     public String processPrompt(String input) {
         log.info("Processing prompt: {}", input);
 
@@ -34,7 +35,7 @@ public class EmbedProcessor {
         for (int i = embeds.size() - 1; i >= 0; i--) {
             EmbedDetector.EmbedTag embed = embeds.get(i);
             try {
-                List<String> generatedTags = processEmbedFile(embed.name(), embed.sampling());
+                List<String> generatedTags = processEmbedFile(embed.name(), embed.sampling(), embed.bracketing());
 
                 if (!generatedTags.isEmpty()) {
                     String replacement = String.join(",", generatedTags);
@@ -53,7 +54,7 @@ public class EmbedProcessor {
         return result.toString();
     }
 
-    private List<String> processEmbedFile(String tagName, String sampling) throws IOException {
+    private List<String> processEmbedFile(String tagName, String sampling, String bracketing) throws IOException {
         String filePath = EMBEDS_DIRECTORY + File.separator + tagName.replace("/", File.separator) + ".txt";
         File file = new File(filePath);
 
@@ -68,16 +69,41 @@ public class EmbedProcessor {
                     .collect(Collectors.toList());
 
             if (sampling == null || sampling.isEmpty() || !isValidSampling(sampling)) {
-                return allTags;
+                return applyBracketing(allTags, bracketing);
             } else {
                 int sampleSize = getSampleSize(sampling, allTags.size());
-                return selectRandomTags(allTags, sampleSize);
+                List<String> sampledTags = selectRandomTags(allTags, sampleSize);
+                return applyBracketing(sampledTags, bracketing);
             }
         }
     }
 
+    private List<String> applyBracketing(List<String> tags, String bracketing) {
+        if (bracketing == null || bracketing.isEmpty() || !isValidBracketing(bracketing)) {
+            return tags;
+        }
+
+        return tags.stream()
+                .map(tag -> applyBracketToTag(tag, bracketing))
+                .collect(Collectors.toList());
+    }
+
+    private String applyBracketToTag(String tag, String bracketing) {
+        int bracketCount = getBracketCount(bracketing);
+        if (bracketCount == 0) {
+            return tag;
+        }
+        String openBracket = bracketCount > 0 ? "{" : "[";
+        String closeBracket = bracketCount > 0 ? "}" : "]";
+        return openBracket.repeat(Math.abs(bracketCount)) + tag + closeBracket.repeat(Math.abs(bracketCount));
+    }
+
     private boolean isValidSampling(String sampling) {
         return sampling.matches("\\d+") || sampling.matches("\\d+~\\d+");
+    }
+
+    private boolean isValidBracketing(String bracketing) {
+        return bracketing.matches("-?\\d+") || bracketing.matches("-?\\d+~-?\\d+");
     }
 
     private int getSampleSize(String sampling, int totalTags) {
@@ -97,6 +123,26 @@ public class EmbedProcessor {
         } catch (NumberFormatException e) {
             log.warn("Invalid sampling format: {}", sampling);
             return totalTags;
+        }
+    }
+
+    private int getBracketCount(String bracketing) {
+        try {
+            if (bracketing.contains("~")) {
+                String[] range = bracketing.split("~");
+                if (range.length != 2) {
+                    log.warn("Invalid bracketing range: {}", bracketing);
+                    return 0;
+                }
+                int min = Integer.parseInt(range[0]);
+                int max = Integer.parseInt(range[1]);
+                return random.nextInt(max - min + 1) + min;
+            } else {
+                return Integer.parseInt(bracketing);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Invalid bracketing format: {}", bracketing);
+            return 0;
         }
     }
 
