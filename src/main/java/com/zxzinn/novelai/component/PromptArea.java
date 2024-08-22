@@ -6,9 +6,12 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import lombok.Getter;
@@ -24,11 +27,12 @@ public class PromptArea extends VBox {
 
     @FXML private Label promptLabel;
     @Getter @FXML private TextArea promptTextArea;
-    private ListView<String> autoCompleteList;
+    private ListView<EmbedFileManager.EmbedFile> autoCompleteList;
     private Popup autoCompletePopup;
     @Setter private EmbedFileManager embedFileManager;
     private boolean isAutoCompleteActive = false;
-    private String lastPrefix = "";
+    private String lastQuery = "";
+    private int autoCompleteStartIndex = -1;
 
     public PromptArea() {
         loadFXML();
@@ -64,9 +68,35 @@ public class PromptArea extends VBox {
 
     private void setupAutoCompleteList() {
         autoCompleteList = new ListView<>();
-        autoCompleteList.setPrefWidth(200);
-        autoCompleteList.setPrefHeight(200);
+        autoCompleteList.setPrefWidth(400);
+        autoCompleteList.setPrefHeight(300);
         autoCompleteList.getStyleClass().add("auto-complete-list");
+        autoCompleteList.setCellFactory(listView -> new ListCell<EmbedFileManager.EmbedFile>() {
+            @Override
+            protected void updateItem(EmbedFileManager.EmbedFile item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    HBox hbox = new HBox(10);
+                    hbox.setAlignment(Pos.CENTER_LEFT);
+
+                    Label fileNameLabel = new Label(item.fileName());
+                    fileNameLabel.setMaxWidth(Double.MAX_VALUE);
+                    HBox.setHgrow(fileNameLabel, Priority.ALWAYS);
+
+                    Label folderLabel = new Label(item.folder());
+                    folderLabel.getStyleClass().add("folder-label");
+                    folderLabel.setAlignment(Pos.CENTER_RIGHT);
+                    folderLabel.setMaxWidth(Double.MAX_VALUE);
+                    HBox.setHgrow(folderLabel, Priority.ALWAYS);
+
+                    hbox.getChildren().addAll(fileNameLabel, folderLabel);
+                    setGraphic(hbox);
+                }
+            }
+        });
     }
 
     private void setupAutoCompletePopup() {
@@ -94,17 +124,29 @@ public class PromptArea extends VBox {
     }
 
     private void updateAutoComplete(int caretPosition, String oldValue, String newValue) {
-        int start = newValue.lastIndexOf('<', caretPosition - 1);
-        if (start != -1 && start < caretPosition) {
-            String prefix = newValue.substring(start + 1, caretPosition);
-            if (!prefix.equals(lastPrefix)) {
-                showAutoComplete(prefix);
-                lastPrefix = prefix;
-            }
+        String currentWord = getCurrentWord(newValue, caretPosition);
+        if (!currentWord.isEmpty() && !currentWord.equals(lastQuery)) {
+            showAutoComplete(currentWord);
+            lastQuery = currentWord;
+            autoCompleteStartIndex = caretPosition - currentWord.length();
             isAutoCompleteActive = true;
-        } else {
+        } else if (currentWord.isEmpty()) {
             hideAutoComplete();
         }
+    }
+
+    private String getCurrentWord(String text, int caretPosition) {
+        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
+            return "";
+        }
+
+        int start = caretPosition - 1;
+        while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) {
+            start--;
+        }
+        start++; // Move back to the first valid character
+
+        return text.substring(start, caretPosition);
     }
 
     private void handleKeyPress(KeyEvent event) {
@@ -122,9 +164,15 @@ public class PromptArea extends VBox {
                     hideAutoComplete();
                     event.consume();
                     break;
+                case ENTER:
+                case TAB:
+                    selectAutoComplete();
+                    event.consume();
+                    break;
             }
         } else if (event.isControlDown() && event.getCode() == KeyCode.SPACE) {
-            showAutoComplete("");
+            String currentWord = getCurrentWord(promptTextArea.getText(), promptTextArea.getCaretPosition());
+            showAutoComplete(currentWord);
             event.consume();
         }
     }
@@ -144,12 +192,12 @@ public class PromptArea extends VBox {
         autoCompleteList.scrollTo(newIndex);
     }
 
-    private void showAutoComplete(String prefix) {
+    private void showAutoComplete(String query) {
         if (embedFileManager == null) {
             log.warn("EmbedFileManager is null");
             return;
         }
-        CompletableFuture<List<String>> futureMatches = embedFileManager.getMatchingEmbedsAsync(prefix);
+        CompletableFuture<List<EmbedFileManager.EmbedFile>> futureMatches = embedFileManager.getMatchingEmbedsAsync(query);
         futureMatches.thenAcceptAsync(matches -> {
             if (!matches.isEmpty()) {
                 Platform.runLater(() -> {
@@ -180,25 +228,30 @@ public class PromptArea extends VBox {
             promptTextArea.requestFocus();
         });
         isAutoCompleteActive = false;
-        lastPrefix = "";
+        lastQuery = "";
     }
 
     private void selectAutoComplete() {
-        String selected = autoCompleteList.getSelectionModel().getSelectedItem();
+        EmbedFileManager.EmbedFile selected = autoCompleteList.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            insertAutoComplete(selected);
+            insertAutoComplete(selected.fullPath());
             hideAutoComplete();
         }
     }
 
     private void insertAutoComplete(String selected) {
-        String text = promptTextArea.getText();
-        int caretPosition = promptTextArea.getCaretPosition();
-        int start = text.lastIndexOf('<', caretPosition - 1);
-        if (start != -1) {
-            String newText = text.substring(0, start + 1) + selected + ":1>" + text.substring(caretPosition);
-            promptTextArea.setText(newText);
-            promptTextArea.positionCaret(start + selected.length() + 3);
+        if (autoCompleteStartIndex != -1) {
+            String text = promptTextArea.getText();
+            int caretPosition = promptTextArea.getCaretPosition();
+            if (autoCompleteStartIndex <= text.length() && caretPosition <= text.length()) {
+                if (selected.endsWith(".txt")) {
+                    selected = selected.substring(0, selected.length() - 4);
+                }
+                String newText = text.substring(0, autoCompleteStartIndex) + selected + ":1>" + text.substring(caretPosition);
+                promptTextArea.setText(newText);
+                promptTextArea.positionCaret(autoCompleteStartIndex + selected.length() + 3);
+            }
+            autoCompleteStartIndex = -1;
         }
     }
 

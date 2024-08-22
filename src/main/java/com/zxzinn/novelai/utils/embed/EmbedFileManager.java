@@ -5,15 +5,17 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class EmbedFileManager {
     private static final String EMBEDS_DIRECTORY = "embeds";
-    private TrieNode root;
+    private List<EmbedFile> allEmbeds;
 
     public EmbedFileManager() {
-        root = new TrieNode();
+        allEmbeds = new ArrayList<>();
         CompletableFuture.runAsync(this::scanEmbedFiles)
                 .exceptionally(ex -> {
                     log.error("Error scanning embed files", ex);
@@ -29,76 +31,80 @@ public class EmbedFileManager {
                 return;
             }
 
-            Files.walk(embedsPath)
+            allEmbeds = Files.walk(embedsPath)
                     .filter(Files::isRegularFile)
-                    .map(path -> embedsPath.relativize(path).toString())
-                    .map(path -> path.replaceAll("\\\\", "/"))
-                    .map(path -> path.replaceAll("\\.txt$", ""))
-                    .forEach(this::addToTrie);
+                    .map(path -> {
+                        String relativePath = embedsPath.relativize(path).toString().replaceAll("\\\\", "/");
+                        String fileName = path.getFileName().toString().replaceAll("\\.txt$", "");
+                        String folder = relativePath.contains("/")
+                                ? relativePath.substring(0, relativePath.lastIndexOf('/'))
+                                : "";
+                        return new EmbedFile(fileName, folder, relativePath);
+                    })
+                    .collect(Collectors.toList());
 
-            log.info("Scanned and indexed embed files");
+            log.info("Scanned and indexed {} embed files", allEmbeds.size());
         } catch (IOException e) {
             log.error("Error scanning embed files", e);
         }
     }
 
-    private void addToTrie(String word) {
-        TrieNode node = root;
-        for (char c : word.toLowerCase().toCharArray()) {
-            node.children.putIfAbsent(c, new TrieNode());
-            node = node.children.get(c);
-        }
-        node.isEndOfWord = true;
-        node.word = word;
+    public CompletableFuture<List<EmbedFile>> getMatchingEmbedsAsync(String query) {
+        return CompletableFuture.supplyAsync(() -> getMatchingEmbeds(query));
     }
 
-    public CompletableFuture<List<String>> getMatchingEmbedsAsync(String prefix) {
-        return CompletableFuture.supplyAsync(() -> getMatchingEmbeds(prefix));
+    private List<EmbedFile> getMatchingEmbeds(String query) {
+        String lowercaseQuery = query.toLowerCase();
+        return allEmbeds.stream()
+                .filter(embed -> fuzzyMatch(embed.fullPath().toLowerCase(), lowercaseQuery))
+                .sorted((a, b) -> {
+                    int scoreA = calculateMatchScore(a.fullPath().toLowerCase(), lowercaseQuery);
+                    int scoreB = calculateMatchScore(b.fullPath().toLowerCase(), lowercaseQuery);
+                    return Integer.compare(scoreB, scoreA); // Descending order
+                })
+                .limit(10)
+                .collect(Collectors.toList());
     }
 
-    private List<String> getMatchingEmbeds(String prefix) {
-        String lowercasePrefix = prefix.toLowerCase();
-        TrieNode node = root;
-        for (char c : lowercasePrefix.toCharArray()) {
-            if (!node.children.containsKey(c)) {
-                return Collections.emptyList();
+    private boolean fuzzyMatch(String embed, String query) {
+        int embedIndex = 0;
+        int queryIndex = 0;
+        while (embedIndex < embed.length() && queryIndex < query.length()) {
+            if (embed.charAt(embedIndex) == query.charAt(queryIndex)) {
+                queryIndex++;
             }
-            node = node.children.get(c);
+            embedIndex++;
         }
-        List<String> results = new ArrayList<>();
-        collectWords(node, results);
-        results.sort((a, b) -> {
-            int prefixDiff = Integer.compare(
-                    commonPrefixLength(b, lowercasePrefix),
-                    commonPrefixLength(a, lowercasePrefix)
-            );
-            return prefixDiff != 0 ? prefixDiff : a.compareTo(b);
-        });
-        return results.stream().limit(10).collect(Collectors.toList());
+        return queryIndex == query.length();
     }
 
-    private void collectWords(TrieNode node, List<String> results) {
-        if (node.isEndOfWord) {
-            results.add(node.word);
-        }
-        for (TrieNode child : node.children.values()) {
-            collectWords(child, results);
-        }
-    }
+    private int calculateMatchScore(String embed, String query) {
+        int score = 0;
+        int embedIndex = 0;
+        int queryIndex = 0;
+        boolean lastMatched = false;
 
-    private int commonPrefixLength(String s, String prefix) {
-        int minLength = Math.min(s.length(), prefix.length());
-        for (int i = 0; i < minLength; i++) {
-            if (s.charAt(i) != prefix.charAt(i)) {
-                return i;
+        while (embedIndex < embed.length() && queryIndex < query.length()) {
+            if (embed.charAt(embedIndex) == query.charAt(queryIndex)) {
+                score += lastMatched ? 2 : 1;
+                lastMatched = true;
+                queryIndex++;
+            } else {
+                lastMatched = false;
             }
+            embedIndex++;
         }
-        return minLength;
+
+        if (queryIndex == query.length()) {
+            score += 5;
+        }
+
+        if (embed.startsWith(query)) {
+            score += 3;
+        }
+
+        return score;
     }
 
-    private static class TrieNode {
-        Map<Character, TrieNode> children = new HashMap<>();
-        boolean isEndOfWord;
-        String word;
-    }
+    public record EmbedFile(String fileName, String folder, String fullPath) { }
 }

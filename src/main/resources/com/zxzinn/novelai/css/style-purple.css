@@ -912,3 +912,12 @@
  .lock-button.locked .ikonli-font-icon {
      -fx-icon-color: #1A1B26;
  }
+
+ .auto-complete-list .list-cell {
+     -fx-padding: 5 10 5 10;
+ }
+
+ .auto-complete-list .folder-label {
+     -fx-text-fill: #888888;
+     -fx-font-style: italic;
+ }
