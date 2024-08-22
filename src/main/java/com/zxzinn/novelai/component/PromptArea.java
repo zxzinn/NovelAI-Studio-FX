@@ -21,6 +21,8 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Log4j2
 public class PromptArea extends VBox {
@@ -33,6 +35,8 @@ public class PromptArea extends VBox {
     private boolean isAutoCompleteActive = false;
     private String lastQuery = "";
     private int autoCompleteStartIndex = -1;
+
+    private static final Pattern EMBED_PATTERN = Pattern.compile(",?<([^>]+)>(?=,|$)");
 
     public PromptArea() {
         loadFXML();
@@ -71,7 +75,7 @@ public class PromptArea extends VBox {
         autoCompleteList.setPrefWidth(400);
         autoCompleteList.setPrefHeight(300);
         autoCompleteList.getStyleClass().add("auto-complete-list");
-        autoCompleteList.setCellFactory(listView -> new ListCell<EmbedFileManager.EmbedFile>() {
+        autoCompleteList.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(EmbedFileManager.EmbedFile item, boolean empty) {
                 super.updateItem(item, empty);
@@ -115,12 +119,21 @@ public class PromptArea extends VBox {
 
     private void handleTextChange(String oldValue, String newValue) {
         int caretPosition = promptTextArea.getCaretPosition();
-        updateAutoComplete(caretPosition, oldValue, newValue);
+        if (newValue.length() > oldValue.length() && newValue.charAt(caretPosition - 1) == '<') {
+            updateAutoComplete(caretPosition, oldValue, newValue);
+        } else {
+            if (!isValidAutoCompletePosition(caretPosition)) {
+                hideAutoComplete();
+            }
+        }
     }
 
     private void handleCaretChange(int newPosition) {
-        String text = promptTextArea.getText();
-        updateAutoComplete(newPosition, text, text);
+        if (isValidAutoCompletePosition(newPosition)) {
+            updateAutoComplete(newPosition, promptTextArea.getText(), promptTextArea.getText());
+        } else {
+            hideAutoComplete();
+        }
     }
 
     private void updateAutoComplete(int caretPosition, String oldValue, String newValue) {
@@ -130,26 +143,60 @@ public class PromptArea extends VBox {
             lastQuery = currentWord;
             autoCompleteStartIndex = caretPosition - currentWord.length();
             isAutoCompleteActive = true;
-        } else if (currentWord.isEmpty()) {
-            hideAutoComplete();
         }
     }
 
     private String getCurrentWord(String text, int caretPosition) {
-        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
+        int start = text.lastIndexOf('<', caretPosition - 1);
+        if (start == -1 || start >= caretPosition) {
             return "";
         }
+        return text.substring(start + 1, caretPosition);
+    }
 
-        int start = caretPosition - 1;
-        while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) {
-            start--;
+    private boolean isValidAutoCompletePosition(int caretPosition) {
+        String text = promptTextArea.getText();
+        if (caretPosition <= 0 || caretPosition > text.length()) {
+            return false;
         }
-        start++; // Move back to the first valid character
 
-        return text.substring(start, caretPosition);
+        int lastOpenBracket = text.lastIndexOf('<', caretPosition - 1);
+        if (lastOpenBracket == -1) {
+            return false;
+        }
+
+        int nextCloseBracket = text.indexOf('>', lastOpenBracket);
+        if (nextCloseBracket != -1 && nextCloseBracket < caretPosition) {
+            return false;
+        }
+
+        // 檢查是否在已完成的 embed 標籤內
+        Matcher matcher = EMBED_PATTERN.matcher(text);
+        while (matcher.find()) {
+            if (matcher.start() < caretPosition && matcher.end() > caretPosition) {
+                // 在已完成的 embed 標籤內，不觸發自動補全
+                return false;
+            }
+        }
+
+        // 檢查是否在未完成的 embed 標籤內
+        matcher = Pattern.compile("<([^>]*)").matcher(text);
+        while (matcher.find()) {
+            if (matcher.start() < caretPosition && matcher.end() >= caretPosition) {
+                return true;
+            }
+        }
+
+        return text.charAt(caretPosition - 1) == '<';
     }
 
     private void handleKeyPress(KeyEvent event) {
+        if (event.getCode() == KeyCode.ESCAPE) {
+            hideAutoComplete();
+            event.consume();
+            return;
+        }
+
         if (autoCompletePopup.isShowing()) {
             switch (event.getCode()) {
                 case UP:
@@ -158,10 +205,6 @@ public class PromptArea extends VBox {
                     break;
                 case DOWN:
                     navigateAutoComplete(1);
-                    event.consume();
-                    break;
-                case ESCAPE:
-                    hideAutoComplete();
                     event.consume();
                     break;
                 case ENTER:
@@ -180,6 +223,9 @@ public class PromptArea extends VBox {
     private void handlePopupKeyPress(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.TAB) {
             selectAutoComplete();
+            event.consume();
+        } else if (event.getCode() == KeyCode.ESCAPE) {
+            hideAutoComplete();
             event.consume();
         }
     }
