@@ -5,6 +5,8 @@ import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.scene.control.*;
 import lombok.RequiredArgsConstructor;
 
+import java.util.function.BiConsumer;
+
 @RequiredArgsConstructor
 public class GenerationSettingsManager {
     private final SettingsManager settingsManager;
@@ -55,7 +57,7 @@ public class GenerationSettingsManager {
         setupComboBoxListener(generationModeComboBox, "generationMode", settingsManager::setString);
         setupCheckBoxListener(smeaCheckBox, "smea", settingsManager::setBoolean);
         setupCheckBoxListener(smeaDynCheckBox, "smeaDyn", settingsManager::setBoolean);
-        setupSliderListener(strengthSlider, "strength", settingsManager::setDouble);
+        setupSliderListener(strengthSlider, settingsManager::setDouble);
         setupTextFieldListener(extraNoiseSeedField, "extraNoiseSeed", (key, value) -> settingsManager.setLong(key, Long.parseLong(value)));
         setupTextFieldListener(ratioField, "ratio", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
         setupTextFieldListener(countField, "count", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
@@ -77,7 +79,7 @@ public class GenerationSettingsManager {
         checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupSliderListener(Slider slider, String key, java.util.function.BiConsumer<String, Double> setter) {
-        slider.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal.doubleValue()));
+    private void setupSliderListener(Slider slider, BiConsumer<String, Double> setter) {
+        slider.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept("strength", newVal.doubleValue()));
     }
 }

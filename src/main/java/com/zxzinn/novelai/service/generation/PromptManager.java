@@ -24,9 +24,7 @@ public class PromptManager {
     }
 
     private void setupPromptControl(PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
-        controls.setOnRefreshAction(() -> {
-            forceRefreshPromptPreview(promptArea, previewArea);
-        });
+        controls.setOnRefreshAction(() -> forceRefreshPromptPreview(promptArea, previewArea));
 
         controls.setOnLockAction(() -> {
             isLocked.set(!isLocked.get());

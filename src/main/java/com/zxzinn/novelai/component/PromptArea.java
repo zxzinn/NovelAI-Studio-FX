@@ -119,8 +119,11 @@ public class PromptArea extends VBox {
 
     private void handleTextChange(String oldValue, String newValue) {
         int caretPosition = promptTextArea.getCaretPosition();
-        if (newValue.length() > oldValue.length() && newValue.charAt(caretPosition - 1) == '<') {
-            updateAutoComplete(caretPosition, oldValue, newValue);
+        if (newValue.length() > oldValue.length() && caretPosition > 0 && caretPosition <= newValue.length()) {
+            char lastChar = newValue.charAt(caretPosition - 1);
+            if (lastChar == '<') {
+                updateAutoComplete(caretPosition, oldValue, newValue);
+            }
         } else {
             if (!isValidAutoCompletePosition(caretPosition)) {
                 hideAutoComplete();
@@ -147,6 +150,9 @@ public class PromptArea extends VBox {
     }
 
     private String getCurrentWord(String text, int caretPosition) {
+        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
+            return "";
+        }
         int start = text.lastIndexOf('<', caretPosition - 1);
         if (start == -1 || start >= caretPosition) {
             return "";
@@ -156,7 +162,7 @@ public class PromptArea extends VBox {
 
     private boolean isValidAutoCompletePosition(int caretPosition) {
         String text = promptTextArea.getText();
-        if (caretPosition <= 0 || caretPosition > text.length()) {
+        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
             return false;
         }
 
@@ -310,6 +316,9 @@ public class PromptArea extends VBox {
     }
 
     public void setPromptText(String text) {
+        if (text == null) {
+            text = "";
+        }
         promptTextArea.setText(text);
     }
 }
