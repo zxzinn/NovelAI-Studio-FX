@@ -17,6 +17,7 @@ module com.zxzinn.novelai {
     requires org.controlsfx.controls;
     requires java.logging;
     requires org.jsoup;
+    requires com.fasterxml.jackson.databind;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
