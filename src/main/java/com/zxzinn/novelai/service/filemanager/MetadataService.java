@@ -2,24 +2,49 @@ package com.zxzinn.novelai.service.filemanager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.log4j.Log4j2;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.*;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
 
 @Log4j2
 public class MetadataService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper jsonMapper = new ObjectMapper();
+    private static final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    private final Path executablePath;
+
+    public MetadataService() {
+        this.executablePath = extractExecutable();
+    }
+
+    private Path extractExecutable() {
+        String resourcePath = "/com/zxzinn/novelai/executable/metareader.exe";
+        try {
+            URL resource = getClass().getResource(resourcePath);
+            if (resource == null) {
+                throw new IOException("無法找到資源：" + resourcePath);
+            }
+
+            Path tempDir = Files.createTempDirectory("novelai-metadata");
+            Path exePath = tempDir.resolve("metareader.exe");
+
+            try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
+                Files.copy(in, exePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            exePath.toFile().deleteOnExit();
+            tempDir.toFile().deleteOnExit();
+
+            return exePath;
+        } catch (IOException e) {
+            log.error("無法提取可執行文件", e);
+            throw new RuntimeException("無法提取可執行文件", e);
+        }
+    }
 
     public List<String> getMetadata(File file) {
         List<String> metadataList = new ArrayList<>();
@@ -37,16 +62,10 @@ public class MetadataService {
         }
 
         try {
-            Optional<String> metadata = extractMetadata(file);
-            if (metadata.isPresent()) {
+            String metadata = extractMetadata(file);
+            if (metadata != null && !metadata.isEmpty()) {
                 metadataList.add("原始元數據:");
-                metadataList.add(metadata.get());
-
-                Optional<String> formattedComment = formatCommentJson(metadata.get());
-                if (formattedComment.isPresent()) {
-                    metadataList.add("格式化的 Comment JSON:");
-                    metadataList.add(formattedComment.get());
-                }
+                metadataList.addAll(formatYamlOutput(metadata));
             } else {
                 metadataList.add("無法提取元數據");
             }
@@ -58,71 +77,61 @@ public class MetadataService {
         return metadataList;
     }
 
-    private Optional<String> extractMetadata(File file) {
-        log.debug("Extracting metadata from file: {}", file.getAbsolutePath());
-        StringBuilder metadata = new StringBuilder();
+    private String extractMetadata(File file) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder(executablePath.toString(), file.getAbsolutePath());
+        processBuilder.redirectErrorStream(true);
 
-        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            if (readers.hasNext()) {
-                ImageReader reader = readers.next();
-                try {
-                    reader.setInput(iis);
-                    IIOMetadata imageMetadata = reader.getImageMetadata(0);
-                    String[] names = imageMetadata.getMetadataFormatNames();
-                    for (String name : names) {
-                        Node root = imageMetadata.getAsTree(name);
-                        processNode(root, "", metadata);
-                    }
-                } finally {
-                    reader.dispose();
-                }
-            }
-        } catch (IOException e) {
-            log.warn("Unable to extract metadata from file: {}. Error: {}", file.getName(), e.getMessage());
-            return Optional.empty();
-        }
+        Process process = processBuilder.start();
 
-        return Optional.of(metadata.toString());
-    }
-
-    private void processNode(Node node, String indent, StringBuilder metadata) {
-        metadata.append(indent).append(node.getNodeName());
-        NamedNodeMap attributes = node.getAttributes();
-        if (attributes != null) {
-            for (int i = 0; i < attributes.getLength(); i++) {
-                Node attr = attributes.item(i);
-                metadata.append(" ").append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append("\"");
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
             }
         }
-        metadata.append("\n");
 
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            processNode(children.item(i), indent + "  ", metadata);
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Metadata extraction failed with exit code: " + exitCode);
         }
+
+        return output.toString();
     }
 
-    private Optional<String> formatCommentJson(String metadata) {
-        String commentLine = Arrays.stream(metadata.split("\n"))
-                .filter(line -> line.contains("keyword=\"Comment\""))
-                .findFirst()
-                .orElse(null);
-
-        if (commentLine == null) {
-            return Optional.empty();
-        }
-
+    private List<String> formatYamlOutput(String yamlString) {
+        List<String> formattedOutput = new ArrayList<>();
         try {
-            int startIndex = commentLine.indexOf("value=\"") + 7;
-            int endIndex = commentLine.lastIndexOf("\"");
-            String jsonString = commentLine.substring(startIndex, endIndex);
-
-            JsonNode jsonNode = objectMapper.readTree(jsonString);
-            return Optional.of(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode));
+            JsonNode jsonNode = yamlMapper.readTree(yamlString);
+            formattedOutput.addAll(formatJsonNode(jsonNode, 0));
         } catch (IOException e) {
-            log.warn("Unable to format comment JSON. Error: {}", e.getMessage());
-            return Optional.empty();
+            log.error("無法解析YAML輸出", e);
+            formattedOutput.add("無法解析YAML輸出：" + e.getMessage());
         }
+        return formattedOutput;
+    }
+
+    private List<String> formatJsonNode(JsonNode node, int indent) {
+        List<String> lines = new ArrayList<>();
+        if (node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode value = entry.getValue();
+                lines.add(getIndent(indent) + key + ":");
+                lines.addAll(formatJsonNode(value, indent + 2));
+            });
+        } else if (node.isArray()) {
+            for (JsonNode element : node) {
+                lines.add(getIndent(indent) + "-");
+                lines.addAll(formatJsonNode(element, indent + 2));
+            }
+        } else {
+            lines.add(getIndent(indent) + node.asText());
+        }
+        return lines;
+    }
+
+    private String getIndent(int indent) {
+        return " ".repeat(indent);
     }
 }
