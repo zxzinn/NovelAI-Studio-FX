@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +33,7 @@ public class FileManagerController {
     @FXML private TreeView<String> fileTreeView;
     @FXML private Button selectAllButton;
     @FXML protected StackPane previewContainer;
-    @FXML private ListView<String> metadataListView;
+    @FXML private TextArea metadataTextArea;
     @FXML private TextField searchField;
     @FXML private Button addButton;
     @FXML private Button removeButton;
@@ -144,7 +145,7 @@ public class FileManagerController {
     private void clearMetadataForSelectedFiles() {
         List<File> selectedFiles = getSelectedImageFiles();
         if (selectedFiles.isEmpty()) {
-            alertService.showAlert("警告", "請選擇要清除元數據的圖像文件。");
+            alertService.showAlert("警告", "請選擇要清除元數據的 PNG 文件。");
             return;
         }
 
@@ -152,6 +153,9 @@ public class FileManagerController {
         int totalFiles = selectedFiles.size();
 
         for (File file : selectedFiles) {
+            if (!file.getName().toLowerCase().endsWith(".png")) {
+                continue;
+            }
             executorService.submit(() -> {
                 try {
                     processFile(file);
@@ -273,15 +277,31 @@ public class FileManagerController {
     }
 
     private void updateMetadataList(File file) {
-        if (file != null) {
-            metadataListView.getItems().setAll(metadataService.getMetadata(file));
+        if (file != null && file.isFile() && file.getName().toLowerCase().endsWith(".png")) {
+            metadataTextArea.setText("正在讀取元數據...");
+
+            CompletableFuture<String> futureMetadata = metadataService.getFormattedMetadataAsync(file);
+            futureMetadata.thenAcceptAsync(metadata -> {
+                Platform.runLater(() -> {
+                    metadataTextArea.setText(metadata);
+                });
+            }, executorService).exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    metadataTextArea.setText("讀取元數據時發生錯誤: " + ex.getMessage());
+                });
+                return null;
+            });
         } else {
-            metadataListView.getItems().clear();
+            metadataTextArea.clear();
+            if (file != null && file.isFile() && !file.getName().toLowerCase().endsWith(".png")) {
+                metadataTextArea.setText("不支持的文件類型：僅支持 PNG 文件");
+            }
         }
     }
 
     public void shutdown() {
         fileManagerService.shutdown();
         executorService.shutdown();
+        metadataService.shutdown();
     }
 }

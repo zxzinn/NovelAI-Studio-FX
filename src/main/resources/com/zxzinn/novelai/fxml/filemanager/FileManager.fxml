@@ -52,7 +52,7 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <ListView fx:id="metadataListView" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
+            <TextArea fx:id="metadataTextArea" VBox.vgrow="ALWAYS" styleClass="metadata-list"/>
             <Button fx:id="clearMetadataButton" text="清除元數據" maxWidth="Infinity"/>
             <Button fx:id="mergeTxtButton" text="合併Txt文件" maxWidth="Infinity"/>
         </VBox>

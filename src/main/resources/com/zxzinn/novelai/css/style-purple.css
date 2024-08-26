@@ -832,22 +832,6 @@
      -fx-icon-color: #1A1B26;
  }
 
- /* 元數據列表視圖樣式 */
- .metadata-list {
-     -fx-background-color: rgba(64, 69, 92, 0.8);
-     -fx-background-radius: 6px;
- }
-
- .metadata-list .list-cell {
-     -fx-background-color: transparent;
-     -fx-text-fill: #E0E0F0;
-     -fx-font-size: 14px;
- }
-
- .metadata-list .list-cell:filled:selected, .metadata-list .list-cell:filled:selected:hover {
-     -fx-background-color: #8AA2FF;
- }
-
  /* 預覽容器樣式 */
  .preview-container {
      -fx-background-color: rgba(64, 69, 92, 0.6);
