@@ -17,6 +17,7 @@ import javafx.stage.Popup;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -117,7 +118,7 @@ public class PromptArea extends VBox {
         autoCompletePopup.addEventFilter(KeyEvent.KEY_PRESSED, this::handlePopupKeyPress);
     }
 
-    private void handleTextChange(String oldValue, String newValue) {
+    private void handleTextChange(@NotNull String oldValue, @NotNull String newValue) {
         int caretPosition = promptTextArea.getCaretPosition();
         if (newValue.length() > oldValue.length() && caretPosition > 0 && caretPosition <= newValue.length()) {
             char lastChar = newValue.charAt(caretPosition - 1);
@@ -149,8 +150,9 @@ public class PromptArea extends VBox {
         }
     }
 
-    private String getCurrentWord(String text, int caretPosition) {
-        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
+    @NotNull
+    private String getCurrentWord(@NotNull String text, int caretPosition) {
+        if (caretPosition <= 0 || caretPosition > text.length()) {
             return "";
         }
         int start = text.lastIndexOf('<', caretPosition - 1);
@@ -196,7 +198,7 @@ public class PromptArea extends VBox {
         return text.charAt(caretPosition - 1) == '<';
     }
 
-    private void handleKeyPress(KeyEvent event) {
+    private void handleKeyPress(@NotNull KeyEvent event) {
         if (event.getCode() == KeyCode.ESCAPE) {
             hideAutoComplete();
             event.consume();
@@ -226,7 +228,7 @@ public class PromptArea extends VBox {
         }
     }
 
-    private void handlePopupKeyPress(KeyEvent event) {
+    private void handlePopupKeyPress(@NotNull KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.TAB) {
             selectAutoComplete();
             event.consume();

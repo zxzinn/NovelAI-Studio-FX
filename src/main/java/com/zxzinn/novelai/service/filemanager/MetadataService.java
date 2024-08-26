@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.filemanager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.zxzinn.novelai.utils.common.ResourcePaths;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
@@ -34,8 +36,9 @@ public class MetadataService {
         this.executorService = Executors.newCachedThreadPool();
     }
 
+    @NotNull
     private Path extractExecutable() {
-        String resourcePath = "/com/zxzinn/novelai/executable/metareader.exe";
+        String resourcePath = ResourcePaths.META_READER_PATH;
         try {
             URL resource = getClass().getResource(resourcePath);
             if (resource == null) {
@@ -43,7 +46,7 @@ public class MetadataService {
             }
 
             Path tempDir = Files.createTempDirectory("novelai-metadata");
-            Path exePath = tempDir.resolve("metareader.exe");
+            Path exePath = tempDir.resolve("meta_reader.exe");
 
             try (InputStream in = getClass().getResourceAsStream(resourcePath)) {
                 assert in != null;
@@ -60,51 +63,7 @@ public class MetadataService {
         }
     }
 
-    public CompletableFuture<List<String>> getMetadataAsync(File file) {
-        return CompletableFuture.supplyAsync(() -> getMetadata(file), executorService);
-    }
-
-    public List<String> getMetadata(File file) {
-        List<String> metadataList = new ArrayList<>();
-        if (file == null || !file.exists()) {
-            metadataList.add("文件不存在或無法訪問");
-            return metadataList;
-        }
-
-        if (file.isDirectory()) {
-            metadataList.add("名稱: " + file.getName());
-            metadataList.add("路徑: " + file.getAbsolutePath());
-            metadataList.add("類型: 目錄");
-            metadataList.add("最後修改時間: " + new java.util.Date(file.lastModified()));
-            return metadataList;
-        }
-
-        if (!file.getName().toLowerCase().endsWith(".png")) {
-            metadataList.add("不支持的文件類型：僅支持 PNG 文件");
-            return metadataList;
-        }
-
-        try {
-            Optional<String> metadata = extractMetadataJava(file);
-            if (metadata.isPresent()) {
-                return formatOutput(metadata.get());
-            } else {
-                String exeMetadata = extractMetadataExe(file);
-                if (!exeMetadata.isEmpty()) {
-                    return Collections.singletonList(formatYamlOutput(exeMetadata));
-                } else {
-                    metadataList.add("無法提取元數據");
-                }
-            }
-        } catch (Exception e) {
-            log.error("無法讀取檔案元數據", e);
-            metadataList.add("無法讀取元數據：" + e.getMessage());
-        }
-
-        return metadataList;
-    }
-
-    private Optional<String> extractMetadataJava(File file) {
+    private Optional<String> extractMetadataJava(@NotNull File file) {
         log.debug("Extracting metadata from file using Java: {}", file.getAbsolutePath());
         StringBuilder metadata = new StringBuilder();
 
@@ -132,7 +91,7 @@ public class MetadataService {
         return Optional.of(metadata.toString());
     }
 
-    private void processNode(Node node, String indent, StringBuilder metadata) {
+    private void processNode(@NotNull Node node, String indent, @NotNull StringBuilder metadata) {
         metadata.append(indent).append(node.getNodeName());
         NamedNodeMap attributes = node.getAttributes();
         if (attributes != null) {
@@ -149,7 +108,8 @@ public class MetadataService {
         }
     }
 
-    private String extractMetadataExe(File file) throws IOException, InterruptedException {
+    @NotNull
+    private String extractMetadataExe(@NotNull File file) throws IOException, InterruptedException {
         log.debug("Extracting metadata from file using exe: {}", file.getAbsolutePath());
         ProcessBuilder processBuilder = new ProcessBuilder(executablePath.toString(), file.getAbsolutePath());
         processBuilder.redirectErrorStream(true);
@@ -172,23 +132,7 @@ public class MetadataService {
         return output.toString();
     }
 
-    private List<String> formatOutput(String metadata) {
-        List<String> formattedOutput = new ArrayList<>();
-        formattedOutput.add("元數據:");
-        Arrays.stream(metadata.split("\n"))
-                .forEach(line -> formattedOutput.add("  " + line));
-
-        Optional<String> formattedComment = formatCommentJson(metadata);
-        if (formattedComment.isPresent()) {
-            formattedOutput.add("格式化的 Comment JSON:");
-            Arrays.stream(formattedComment.get().split("\n"))
-                    .forEach(line -> formattedOutput.add("  " + line));
-        }
-
-        return formattedOutput;
-    }
-
-    private Optional<String> formatCommentJson(String metadata) {
+    private Optional<String> formatCommentJson(@NotNull String metadata) {
         String commentLine = Arrays.stream(metadata.split("\n"))
                 .filter(line -> line.contains("keyword=\"Comment\""))
                 .findFirst()
@@ -250,30 +194,6 @@ public class MetadataService {
             log.error("無法解析YAML輸出", e);
             return "無法解析YAML輸出：" + e.getMessage();
         }
-    }
-
-    private List<String> formatJsonNode(JsonNode node, int indent) {
-        List<String> lines = new ArrayList<>();
-        if (node.isObject()) {
-            node.fields().forEachRemaining(entry -> {
-                String key = entry.getKey();
-                JsonNode value = entry.getValue();
-                lines.add(getIndent(indent) + key + ":");
-                lines.addAll(formatJsonNode(value, indent + 2));
-            });
-        } else if (node.isArray()) {
-            for (JsonNode element : node) {
-                lines.add(getIndent(indent) + "-");
-                lines.addAll(formatJsonNode(element, indent + 2));
-            }
-        } else {
-            lines.add(getIndent(indent) + node.asText());
-        }
-        return lines;
-    }
-
-    private String getIndent(int indent) {
-        return " ".repeat(indent);
     }
 
     public void shutdown() {

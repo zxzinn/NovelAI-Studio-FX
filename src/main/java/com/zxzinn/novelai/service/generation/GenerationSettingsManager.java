@@ -4,6 +4,7 @@ import com.zxzinn.novelai.component.PromptArea;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.scene.control.*;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 
@@ -63,23 +64,23 @@ public class GenerationSettingsManager {
         setupTextFieldListener(countField, "count", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
     }
 
-    private void setupTextFieldListener(TextField textField, String key, java.util.function.BiConsumer<String, String> setter) {
+    private void setupTextFieldListener(@NotNull TextField textField, String key, java.util.function.BiConsumer<String, String> setter) {
         textField.textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupComboBoxListener(ComboBox<String> comboBox, String key, java.util.function.BiConsumer<String, String> setter) {
+    private void setupComboBoxListener(@NotNull ComboBox<String> comboBox, String key, java.util.function.BiConsumer<String, String> setter) {
         comboBox.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupPromptAreaListener(PromptArea promptArea, String key, java.util.function.BiConsumer<String, String> setter) {
+    private void setupPromptAreaListener(@NotNull PromptArea promptArea, String key, java.util.function.BiConsumer<String, String> setter) {
         promptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupCheckBoxListener(CheckBox checkBox, String key, java.util.function.BiConsumer<String, Boolean> setter) {
+    private void setupCheckBoxListener(@NotNull CheckBox checkBox, String key, java.util.function.BiConsumer<String, Boolean> setter) {
         checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> setter.accept(key, newVal));
     }
 
-    private void setupSliderListener(Slider slider, BiConsumer<String, Double> setter) {
+    private void setupSliderListener(@NotNull Slider slider, BiConsumer<String, Double> setter) {
         slider.valueProperty().addListener((obs, oldVal, newVal) -> setter.accept("strength", newVal.doubleValue()));
     }
 }

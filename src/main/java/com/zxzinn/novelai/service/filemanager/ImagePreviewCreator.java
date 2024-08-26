@@ -3,11 +3,12 @@ package com.zxzinn.novelai.service.filemanager;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
 public class ImagePreviewCreator {
-    public Pane createImagePreview(File file) {
+    public Pane createImagePreview(@NotNull File file) {
         Image image = new Image(file.toURI().toString());
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
@@ -23,7 +24,7 @@ public class ImagePreviewCreator {
         return pane;
     }
 
-    private void addZoomAndPanHandlers(Pane pane, ImageView imageView) {
+    private void addZoomAndPanHandlers(@NotNull Pane pane, @NotNull ImageView imageView) {
         final double[] dragDelta = new double[2];
 
         pane.setOnScroll(event -> {

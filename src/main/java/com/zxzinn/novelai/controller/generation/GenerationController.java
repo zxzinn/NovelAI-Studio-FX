@@ -88,7 +88,7 @@ public class GenerationController {
     @FXML
     public void initialize() {
         uiInitializer = new UIInitializer();
-        generationHandler = new GenerationHandler(imageGenerationService, imageUtils);
+        generationHandler = new GenerationHandler(imageGenerationService);
         promptManager = new PromptManager(embedProcessor);
         EmbedFileManager embedFileManager = new EmbedFileManager();
         embedFileManager.scanEmbedFiles();

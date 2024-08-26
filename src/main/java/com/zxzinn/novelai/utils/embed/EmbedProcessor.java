@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.utils.embed;
 
+import com.zxzinn.novelai.utils.common.CommonPaths;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.*;
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Log4j2
 public class EmbedProcessor {
-    private static final String EMBEDS_DIRECTORY = "embeds";
+    private static final String EMBEDS_DIRECTORY = CommonPaths.EMBEDS_DIRECTORY;
     private final EmbedDetector embedDetector;
     private final Random random;
 
@@ -18,6 +19,7 @@ public class EmbedProcessor {
         this.embedDetector = new EmbedDetector();
         this.random = new Random();
     }
+
     public String processPrompt(String input) {
         log.info("Processing prompt: {}", input);
 

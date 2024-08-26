@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -137,7 +138,7 @@ public class FileManagerController {
                 .collect(Collectors.toList());
     }
 
-    private boolean isTxtFile(File file) {
+    private boolean isTxtFile(@NotNull File file) {
         if (!file.isFile()) return false;
         return file.getName().toLowerCase().endsWith(".txt");
     }
@@ -207,7 +208,7 @@ public class FileManagerController {
         });
     }
 
-    private void refreshProcessedDirectories(List<File> processedFiles) {
+    private void refreshProcessedDirectories(@NotNull List<File> processedFiles) {
         for (File file : processedFiles) {
             Path parentDir = file.getParentFile().toPath();
             Path cleanedDir = parentDir.resolve("cleaned");
@@ -235,7 +236,7 @@ public class FileManagerController {
         }
     }
 
-    private boolean isImageFile(File file) {
+    private boolean isImageFile(@NotNull File file) {
         if (!file.isFile()) return false;
         String name = file.getName().toLowerCase();
         return name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif");

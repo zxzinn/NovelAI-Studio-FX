@@ -3,6 +3,7 @@ package com.zxzinn.novelai.api;
 import com.google.gson.Gson;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,6 +23,7 @@ public class APIClient {
         this.httpClient = createHttpClient();
     }
 
+    @NotNull
     private OkHttpClient createHttpClient() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
@@ -54,6 +56,7 @@ public class APIClient {
         return sendRequest(request);
     }
 
+    @NotNull
     private Request createRequest(Object payload, String apiKey) {
         RequestBody body = RequestBody.create(gson.toJson(payload), JSON);
         return new Request.Builder()
@@ -63,6 +66,7 @@ public class APIClient {
                 .build();
     }
 
+    @NotNull
     private byte[] sendRequest(Request request) throws IOException {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);

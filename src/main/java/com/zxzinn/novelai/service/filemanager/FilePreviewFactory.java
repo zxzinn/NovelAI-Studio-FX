@@ -6,6 +6,8 @@ import javafx.scene.web.WebView;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class FilePreviewFactory {
         this.imagePreviewCreator = new ImagePreviewCreator();
     }
 
-    public Node createPreview(File file) {
+    public Node createPreview(@NotNull File file) {
         if (file.isFile()) {
             try {
                 String mimeType = tika.detect(file);
@@ -41,7 +43,8 @@ public class FilePreviewFactory {
         }
     }
 
-    private Node createTextPreview(File file) throws IOException {
+    @NotNull
+    private Node createTextPreview(@NotNull File file) throws IOException {
         String content = Files.readString(file.toPath());
         String extension = FilenameUtils.getExtension(file.getName());
         String highlightLanguage = getHighlightLanguage(extension);
@@ -53,6 +56,7 @@ public class FilePreviewFactory {
         return webView;
     }
 
+    @NotNull
     private String createTextPreviewHtml(String content, String highlightLanguage) {
         return String.format("""
             <!DOCTYPE html>
@@ -87,7 +91,9 @@ public class FilePreviewFactory {
             """, highlightLanguage, escapeHtml(content));
     }
 
-    private String getHighlightLanguage(String extension) {
+    @NotNull
+    @Contract(pure = true)
+    private String getHighlightLanguage(@NotNull String extension) {
         return switch (extension.toLowerCase()) {
             case "java" -> "java";
             case "py" -> "python";
@@ -100,7 +106,8 @@ public class FilePreviewFactory {
         };
     }
 
-    private String escapeHtml(String content) {
+    @NotNull
+    private String escapeHtml(@NotNull String content) {
         return content.replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")

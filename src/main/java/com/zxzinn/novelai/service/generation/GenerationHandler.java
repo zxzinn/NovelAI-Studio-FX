@@ -18,11 +18,9 @@ public class GenerationHandler {
     private static final long RETRY_DELAY = 20000;
 
     private final ImageGenerationService imageGenerationService;
-    private final ImageUtils imageUtils;
 
-    public GenerationHandler(ImageGenerationService imageGenerationService, ImageUtils imageUtils) {
+    public GenerationHandler(ImageGenerationService imageGenerationService) {
         this.imageGenerationService = imageGenerationService;
-        this.imageUtils = imageUtils;
     }
 
     public Optional<BufferedImage> generateImageWithRetry(GenerationPayload payload, String apiKey) {

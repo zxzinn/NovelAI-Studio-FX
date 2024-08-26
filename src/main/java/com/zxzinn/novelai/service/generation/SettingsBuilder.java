@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.generation;
 import com.zxzinn.novelai.component.PromptArea;
 import javafx.scene.control.*;
 import lombok.Builder;
+import org.jetbrains.annotations.NotNull;
 
 @Builder
 public class SettingsBuilder {
@@ -25,7 +26,7 @@ public class SettingsBuilder {
     private TextField ratioField;
     private TextField countField;
 
-    public void loadSettings(GenerationSettingsManager settingsManager) {
+    public void loadSettings(@NotNull GenerationSettingsManager settingsManager) {
         settingsManager.loadSettings(
                 apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
                 stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,

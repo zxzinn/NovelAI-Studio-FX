@@ -21,8 +21,6 @@ import java.util.zip.ZipInputStream;
 @Log4j2
 public class ImageUtils {
 
-    private final Gson gson = new Gson();
-
     public BufferedImage extractImageFromZip(byte[] zipData) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
             ZipEntry entry = zis.getNextEntry();
@@ -45,14 +43,10 @@ public class ImageUtils {
         return wr;
     }
 
-    public BufferedImage loadImage(File file) throws IOException {
-        return ImageIO.read(file);
-    }
-
     public String imageToBase64(BufferedImage image) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", baos);
-        byte[] imageBytes = baos.toByteArray();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", outputStream);
+        byte[] imageBytes = outputStream.toByteArray();
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 
@@ -72,13 +66,12 @@ public class ImageUtils {
     }
 
     public static void saveImage(BufferedImage image, File outputFile) throws IOException {
-        ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
-        ImageWriteParam writeParam = writer.getDefaultWriteParam();
-        ImageOutputStream outputStream = ImageIO.createImageOutputStream(outputFile);
-        writer.setOutput(outputStream);
-        IIOImage iioImage = new IIOImage(image, null, null);
-        writer.write(null, iioImage, writeParam);
-        writer.dispose();
-        outputStream.close();
+        if (!ImageIO.write(image, "png", outputFile)) {
+            throw new IOException("無法將圖像保存為PNG格式");
+        }
+    }
+
+    public BufferedImage loadImage(File file) throws IOException {
+        return ImageIO.read(file);
     }
 }

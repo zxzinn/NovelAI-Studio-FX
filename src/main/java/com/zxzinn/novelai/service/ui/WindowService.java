@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,18 +27,18 @@ public class WindowService {
         this.settingsManager = settingsManager;
     }
 
-    public void setupDraggableWindow(VBox titleBar) {
+    public void setupDraggableWindow(@NotNull VBox titleBar) {
         titleBar.setOnMousePressed(this::handleMousePressed);
         titleBar.setOnMouseDragged(this::handleMouseDragged);
         titleBar.setOnMouseReleased(this::handleMouseReleased);
     }
 
-    private void handleMousePressed(MouseEvent event) {
+    private void handleMousePressed(@NotNull MouseEvent event) {
         xOffset = event.getSceneX();
         yOffset = event.getSceneY();
     }
 
-    private void handleMouseReleased(MouseEvent event) {
+    private void handleMouseReleased(@NotNull MouseEvent event) {
         if (event.getScreenY() <= 0) {
             toggleMaximize();
         }
@@ -102,7 +103,7 @@ public class WindowService {
         });
     }
 
-    private boolean isInResizeZone(MouseEvent event) {
+    private boolean isInResizeZone(@NotNull MouseEvent event) {
         return event.getSceneX() > stage.getWidth() - 20 && event.getSceneY() > stage.getHeight() - 20;
     }
 

@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Log4j2
 public class SettingsManager {
-    private static final String SETTINGS_FILE = "novelai_settings.properties";
+    private static final String SETTINGS_FILE = CommonPaths.SETTINGS_FILE;
     private final Map<String, String> settingsCache;
     private final ReadWriteLock lock;
     private boolean isDirty = false;

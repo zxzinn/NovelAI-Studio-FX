@@ -4,6 +4,7 @@ import com.zxzinn.novelai.component.PromptArea;
 import com.zxzinn.novelai.component.PromptControls;
 import com.zxzinn.novelai.component.PromptPreviewArea;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,7 +24,7 @@ public class PromptManager {
         setupPromptControl(negativePromptControls, negativePromptArea, negativePromptPreviewArea, isNegativePromptLocked, false);
     }
 
-    private void setupPromptControl(PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
+    private void setupPromptControl(@NotNull PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
         controls.setOnRefreshAction(() -> forceRefreshPromptPreview(promptArea, previewArea));
 
         controls.setOnLockAction(() -> {
@@ -33,26 +34,26 @@ public class PromptManager {
     }
 
     public void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea, boolean isPositive) {
-        if (!isPromptLocked(isPositive)) {
+        if (isPromptLocked(isPositive)) {
             String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
             previewArea.setPreviewText(processedPrompt);
         }
     }
 
-    public void forceRefreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea) {
+    public void forceRefreshPromptPreview(@NotNull PromptArea promptArea, @NotNull PromptPreviewArea previewArea) {
         String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
         previewArea.setPreviewText(processedPrompt);
     }
 
     public void updatePromptPreview(String newValue, PromptPreviewArea previewArea, boolean isPositive) {
-        if (!isPromptLocked(isPositive)) {
+        if (isPromptLocked(isPositive)) {
             String processedPrompt = embedProcessor.processPrompt(newValue);
             previewArea.setPreviewText(processedPrompt);
         }
     }
 
     public boolean isPromptLocked(boolean isPositive) {
-        return isPositive ? isPositivePromptLocked.get() : isNegativePromptLocked.get();
+        return isPositive ? !isPositivePromptLocked.get() : !isNegativePromptLocked.get();
     }
 
     public boolean isPositivePromptLocked() {

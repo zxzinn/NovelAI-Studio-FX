@@ -4,6 +4,7 @@ public final class ResourcePaths {
     public static final String FXML_ROOT = "/com/zxzinn/novelai/fxml/";
     public static final String CSS_ROOT = "/com/zxzinn/novelai/css/";
     public static final String TOKENIZER_ROOT = "/com/zxzinn/novelai/tokenizers/";
+    public static final String EXECUTABLE_ROOT = "/com/zxzinn/novelai/executable/";
 
     public static final String MAIN_VIEW_FXML = FXML_ROOT + "MainView.fxml";
     public static final String FILE_MANAGER_FXML = FXML_ROOT + "filemanager/FileManager.fxml";
@@ -13,6 +14,8 @@ public final class ResourcePaths {
     public static final String PROMPT_CONTROLS = FXML_ROOT + "generator/PromptControls.fxml";
     public static final String PROMPT_AREA = FXML_ROOT + "generator/PromptArea.fxml";
     public static final String PROMPT_PREVIEW_AREA = FXML_ROOT + "generator/PromptPreviewArea.fxml";
+
+    public static final String META_READER_PATH = EXECUTABLE_ROOT + "meta_reader.exe";
 
     public static final String STYLES_CSS = CSS_ROOT + "style-purple.css";
 

@@ -10,6 +10,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -189,7 +190,8 @@ public class FileTreeController {
         }
     }
 
-    private TreeItem<String> createTreeItem(File file) {
+    @NotNull
+    private TreeItem<String> createTreeItem(@NotNull File file) {
         TreeItem<String> item = new TreeItem<>(file.getName(), getFileIcon(file));
         if (file.isDirectory()) {
             item.setExpanded(fileManagerService.isDirectoryExpanded(file.getAbsolutePath()));
@@ -197,7 +199,7 @@ public class FileTreeController {
         return item;
     }
 
-    private void loadChildrenInBatches(TreeItem<String> parentItem, File parentFile) {
+    private void loadChildrenInBatches(TreeItem<String> parentItem, @NotNull File parentFile) {
         File[] children = parentFile.listFiles();
         if (children != null) {
             List<File> childList = Arrays.asList(children);
@@ -214,7 +216,8 @@ public class FileTreeController {
         }
     }
 
-    private FontIcon getFileIcon(File file) {
+    @NotNull
+    private FontIcon getFileIcon(@NotNull File file) {
         if (file.isDirectory()) {
             return new FontIcon(FontAwesomeSolid.FOLDER);
         } else {
@@ -227,7 +230,8 @@ public class FileTreeController {
         }
     }
 
-    private String getFileExtension(File file) {
+    @NotNull
+    private String getFileExtension(@NotNull File file) {
         String name = file.getName();
         int lastIndexOf = name.lastIndexOf(".");
         if (lastIndexOf == -1) {

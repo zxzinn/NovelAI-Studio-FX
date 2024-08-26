@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.utils.common;
 
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.HashSet;
@@ -10,7 +11,7 @@ import java.util.Set;
 @Log4j2
 public class TxtProcessor {
 
-    public static void mergeAndProcessTxtFiles(List<File> files, File outputFile) throws IOException {
+    public static void mergeAndProcessTxtFiles(@NotNull List<File> files, File outputFile) throws IOException {
         Set<String> uniqueTags = new HashSet<>();
 
         for (File file : files) {

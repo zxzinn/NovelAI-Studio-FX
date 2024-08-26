@@ -1,15 +1,18 @@
 package com.zxzinn.novelai.utils.embed;
 
-import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.zxzinn.novelai.utils.common.CommonPaths;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class EmbedFileManager {
-    private static final String EMBEDS_DIRECTORY = "embeds";
+    private static final String EMBEDS_DIRECTORY = CommonPaths.EMBEDS_DIRECTORY;
     private List<EmbedFile> allEmbeds;
 
     public EmbedFileManager() {
@@ -21,15 +24,16 @@ public class EmbedFileManager {
                 });
     }
 
+    @SneakyThrows
     public void scanEmbedFiles() {
-        try {
-            Path embedsPath = Paths.get(EMBEDS_DIRECTORY);
-            if (!Files.exists(embedsPath)) {
-                log.warn("Embeds directory does not exist: {}", EMBEDS_DIRECTORY);
-                return;
-            }
+        Path embedsPath = Paths.get(EMBEDS_DIRECTORY);
+        if (!Files.exists(embedsPath)) {
+            log.warn("嵌入目錄不存在: {}", EMBEDS_DIRECTORY);
+            return;
+        }
 
-            allEmbeds = Files.walk(embedsPath)
+        try (Stream<Path> pathStream = Files.walk(embedsPath)) {
+            allEmbeds = pathStream
                     .filter(Files::isRegularFile)
                     .map(path -> {
                         String relativePath = embedsPath.relativize(path).toString().replaceAll("\\\\", "/");
@@ -39,11 +43,9 @@ public class EmbedFileManager {
                                 : "";
                         return new EmbedFile(fileName, folder, relativePath);
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
-            log.info("Scanned and indexed {} embed files", allEmbeds.size());
-        } catch (IOException e) {
-            log.error("Error scanning embed files", e);
+            log.info("掃描並索引了 {} 個嵌入文件", allEmbeds.size());
         }
     }
 
