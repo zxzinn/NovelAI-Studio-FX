@@ -2,32 +2,30 @@ package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.utils.image.ImageUtils;
 import lombok.extern.log4j.Log4j2;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Log4j2
 public class ImageGenerationService {
     private final APIClient apiClient;
-    private final ImageUtils imageUtils;
 
-    public ImageGenerationService(APIClient apiClient, ImageUtils imageUtils) {
+    public ImageGenerationService(APIClient apiClient) {
         this.apiClient = apiClient;
-        this.imageUtils = imageUtils;
     }
 
-    public BufferedImage generateImage(GenerationPayload payload, String apiKey) throws IOException {
+    public byte[] generateImage(GenerationPayload payload, String apiKey) throws IOException {
         int maxRetries = 3;
         int retryDelay = 5000;
 
         for (int i = 0; i < maxRetries; i++) {
             try {
-                byte[] responseData = apiClient.generateImage(payload, apiKey);
-                return processResponseData(responseData);
+                byte[] zipData = apiClient.generateImage(payload, apiKey);
+                return extractImageFromZip(zipData);
             } catch (IOException e) {
                 if (i == maxRetries - 1) {
                     throw e;
@@ -44,18 +42,19 @@ public class ImageGenerationService {
         throw new IOException("超過最大重試次數");
     }
 
-    private BufferedImage processResponseData(byte[] responseData) throws IOException {
-        if (responseData == null || responseData.length == 0) {
-            return null;
+    private byte[] extractImageFromZip(byte[] zipData) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
+            ZipEntry entry = zis.getNextEntry();
+            if (entry == null) {
+                throw new IOException("ZIP文件為空");
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                baos.write(buffer, 0, len);
+            }
+            return baos.toByteArray();
         }
-
-        BufferedImage image;
-        try {
-            image = imageUtils.extractImageFromZip(responseData);
-        } catch (IOException e) {
-            image = ImageIO.read(new ByteArrayInputStream(responseData));
-        }
-
-        return image;
     }
 }

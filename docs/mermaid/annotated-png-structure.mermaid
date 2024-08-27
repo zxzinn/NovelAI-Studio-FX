@@ -1,0 +1,116 @@
+graph TD
+    A[PNG文件] --> B[文件頭簽名]
+    A --> C[IHDR 區塊 - 圖像頭信息]
+    A --> D[其他可選區塊]
+    A --> E[IDAT 區塊]
+    A --> F[IEND 區塊 - 文件結束標記]
+
+    C -->|包含| G[寬度]
+    C -->|包含| H[高度]
+    C -->|包含| I[位深度]
+    C -->|包含| J[色彩類型]
+    C -->|包含| K[壓縮方法]
+    C -->|包含| L[過濾方法]
+    C -->|包含| M[隔行掃描]
+
+    D --> N[tEXt 區塊]
+    D --> O[zTXt 區塊]
+    D --> P[iTXt 區塊]
+    D --> Q[pHYs 區塊]
+    D --> R[gAMA 區塊]
+    D --> S[cHRM 區塊]
+    D --> T[sRGB 區塊]
+    D --> U[iCCP 區塊]
+    D --> V[tRNS 區塊]
+
+    E -->|包含| W[壓縮的像素數據]
+    W -->|解壓後| X[ARGB 數據]
+    X --> Y[R1 G1 B1 A1]
+    X --> Z[R2 G2 B2 A2]
+    X --> AA[...]
+
+    N -->|可能包含| AB[EXIF類數據]
+    O -->|可能包含| AB
+    P -->|可能包含| AB
+
+    N -->|包含| AC[未壓縮文本]
+    O -->|包含| AD[壓縮文本]
+    P -->|包含| AE[國際文本]
+    Q -->|包含| AF[物理像素尺寸]
+    R -->|包含| AG[Gamma值]
+    S -->|包含| AH[色度信息]
+    T -->|包含| AI[sRGB色彩空間]
+    U -->|包含| AJ[ICC配置文件]
+    V -->|包含| AK[透明度信息]
+
+    classDef preserved fill:#90EE90,stroke:#333,stroke-width:2px;
+    class B,C,E,F,G,H,I,J,K,L,M,W,X,Y,Z,AA preserved;
+
+    classDef lost fill:#FF6347,stroke:#333,stroke-width:2px;
+    class N,O,P,Q,R,S,T,U,V,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK lost;
+
+    classDef important fill:#FFD700,stroke:#333,stroke-width:4px;
+    class C,E,F,J,W,X important;
+
+    classDef exif fill:#1E90FF,stroke:#333,stroke-width:2px;
+    class AB exif;
+
+    %% 額外註釋
+    AN1[/"
+        顏色說明:
+        綠色 - BufferedImage保留
+        紅色 - BufferedImage丟失
+        金色 - 關鍵結構
+        藍色 - EXIF相關
+    "/]
+
+    AN2[/"
+        IHDR (圖像頭):
+        包含解析圖像所需的
+        基本信息，如尺寸和
+        色彩類型
+    "/]
+
+    AN3[/"
+        IDAT (圖像數據):
+        包含壓縮的像素信息，
+        這是圖像的核心視覺數據
+    "/]
+
+    AN4[/"
+        其他可選區塊:
+        包含元數據和輔助信息，
+        大部分在BufferedImage
+        轉換中丟失
+    "/]
+
+    AN5[/"
+        ARGB數據:
+        解壓後的像素信息，
+        定義每個像素的顏色和透明度
+    "/]
+
+    AN6[/"
+        EXIF相關:
+        PNG不直接支持EXIF，
+        但可在文本區塊中
+        存儲類似信息
+    "/]
+
+    AN7[/"
+        BufferedImage轉換:
+        保留核心圖像數據和結構，
+        但丟失大多數元數據
+    "/]
+
+    classDef annotation fill:#FFFAFA,stroke:#000,stroke-width:1px,stroke-dasharray: 5 5;
+    class AN1,AN2,AN3,AN4,AN5,AN6,AN7 annotation;
+
+    AN1 ~~~ A
+    C ~~~ AN2
+    E ~~~ AN3
+    D ~~~ AN4
+    X ~~~ AN5
+    AB ~~~ AN6
+    F ~~~ AN7
+

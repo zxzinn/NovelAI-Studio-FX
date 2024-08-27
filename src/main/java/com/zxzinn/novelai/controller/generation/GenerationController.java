@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -256,11 +257,11 @@ public class GenerationController {
                     }
 
                     GenerationPayload payload = createGenerationPayload();
-                    Optional<BufferedImage> generatedImage = generateImageWithRetry(payload);
+                    Optional<byte[]> generatedImageData = generateImageWithRetry(payload);
 
-                    generatedImage.ifPresentOrElse(
-                            image -> {
-                                handleGeneratedImage(image);
+                    generatedImageData.ifPresentOrElse(
+                            imageData -> {
+                                handleGeneratedImage(imageData);
                                 currentGeneratedCount++;
                             },
                             () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)))
@@ -279,12 +280,35 @@ public class GenerationController {
         });
     }
 
-    private Optional<BufferedImage> generateImageWithRetry(GenerationPayload payload) {
+    private Optional<byte[]> generateImageWithRetry(GenerationPayload payload) {
         return generationHandler.generateImageWithRetry(payload, apiKeyField.getText());
     }
 
-    private Optional<File> saveImageToFile(BufferedImage image, String timeStamp) {
-        return generationHandler.saveImageToFile(image, outputDirectoryField.getText(), timeStamp, currentGeneratedCount);
+    private void handleGeneratedImage(byte[] imageData) {
+        Platform.runLater(() -> {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String timeStamp = now.format(formatter);
+
+            javafx.scene.image.Image fxImage = new javafx.scene.image.Image(new ByteArrayInputStream(imageData));
+            saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
+                previewPane.updatePreview(imageFile);
+                addImageToHistory(fxImage, imageFile);
+                NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
+            });
+
+            // 根據鎖定狀態更新提示詞預覽
+            if (!promptManager.isPositivePromptLocked()) {
+                promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+            }
+            if (!promptManager.isNegativePromptLocked()) {
+                promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+            }
+        });
+    }
+
+    private Optional<File> saveImageToFile(byte[] imageData, String timeStamp) {
+        return generationHandler.saveImageToFile(imageData, outputDirectoryField.getText(), timeStamp, currentGeneratedCount);
     }
 
     private int getMaxCount() {
@@ -318,29 +342,6 @@ public class GenerationController {
                 .extraNoiseSeed(Long.parseLong(extraNoiseSeedField.getText()))
                 .build()
                 .createPayload();
-    }
-
-    private void handleGeneratedImage(BufferedImage originalImage) {
-        Platform.runLater(() -> {
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            String timeStamp = now.format(formatter);
-
-            javafx.scene.image.Image fxImage = imageUtils.convertToFxImage(originalImage);
-            saveImageToFile(originalImage, timeStamp).ifPresent(imageFile -> {
-                previewPane.updatePreview(imageFile);
-                addImageToHistory(fxImage, imageFile);
-                NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
-            });
-
-            // 根據鎖定狀態更新提示詞預覽
-            if (!promptManager.isPositivePromptLocked()) {
-                promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
-            }
-            if (!promptManager.isNegativePromptLocked()) {
-                promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
-            }
-        });
     }
 
     private void addImageToHistory(Image image, File imageFile) {

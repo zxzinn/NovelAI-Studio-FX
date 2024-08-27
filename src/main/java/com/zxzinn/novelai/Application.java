@@ -72,7 +72,7 @@ public class Application extends javafx.application.Application {
 
             loadingScreen.setProgress(0.4);
             loadingScreen.setMessage("正在設置圖像生成服務...");
-            ImageGenerationService imageGenerationService = new ImageGenerationService(apiClient, imageUtils);
+            ImageGenerationService imageGenerationService = new ImageGenerationService(apiClient);
             WindowService windowService = new WindowService(settingsManager);
 
             loadingScreen.setProgress(0.6);

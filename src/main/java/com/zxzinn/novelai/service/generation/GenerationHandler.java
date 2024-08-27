@@ -1,10 +1,8 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.utils.image.ImageUtils;
 import lombok.extern.log4j.Log4j2;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +21,7 @@ public class GenerationHandler {
         this.imageGenerationService = imageGenerationService;
     }
 
-    public Optional<BufferedImage> generateImageWithRetry(GenerationPayload payload, String apiKey) {
+    public Optional<byte[]> generateImageWithRetry(GenerationPayload payload, String apiKey) {
         for (int retry = 0; retry < MAX_RETRIES; retry++) {
             try {
                 return Optional.of(imageGenerationService.generateImage(payload, apiKey));
@@ -44,7 +42,7 @@ public class GenerationHandler {
         return Optional.empty();
     }
 
-    public Optional<File> saveImageToFile(BufferedImage image, String outputDir, String timeStamp, int currentGeneratedCount) {
+    public Optional<File> saveImageToFile(byte[] imageData, String outputDir, String timeStamp, int currentGeneratedCount) {
         try {
             Path outputPath = Paths.get(outputDir);
             if (!Files.exists(outputPath)) {
@@ -53,7 +51,7 @@ public class GenerationHandler {
 
             String fileName = String.format("generated_image_%s_%d.png", timeStamp.replace(":", "-"), currentGeneratedCount);
             File outputFile = outputPath.resolve(fileName).toFile();
-            ImageUtils.saveImage(image, outputFile);
+            Files.write(outputFile.toPath(), imageData);
             return Optional.of(outputFile);
         } catch (IOException e) {
             log.error("保存圖像時發生錯誤：{}", e.getMessage(), e);
