@@ -9,8 +9,8 @@ import java.io.IOException;
 public class ImageComparator {
 
     public static void main(String[] args) {
-        String image1Path = "C:\\Users\\User\\Downloads\\4E2749324E3B5C93214E1B0B94631212.png";
-        String image2Path = "C:\\Users\\User\\Downloads\\FC52300CC729147BC911302A841DC878.png";
+        String image1Path = "C:\\Users\\User\\Downloads\\1girl, loli, Gawr Gura(Hololive), gawr_gura, white thighhighs, feet focus, sitti s-2521227642.png";
+        String image2Path = "C:\\Users\\User\\Downloads\\2521227642_None_None.png";
         String outputDir = "C:\\Users\\User\\Downloads\\difference_maps\\";
 
         try {
