@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.filemanager;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
@@ -37,6 +38,7 @@ public class FileManagerService {
     private final ScheduledExecutorService scheduledExecutorService;
     @Setter private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
 
+    @Inject
     public FileManagerService(SettingsManager settingsManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();
         this.watchKeyToPath = new ConcurrentHashMap<>();

@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.utils.common;
 
-import com.zxzinn.novelai.api.APIClient;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.GenerationController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
@@ -18,11 +19,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
 
+@Singleton
 public class TabFactory {
-    private static TabFactory instance;
 
     private final SettingsManager settingsManager;
-    private final APIClient apiClient;
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
@@ -31,12 +31,12 @@ public class TabFactory {
     private final MetadataService metadataService;
     private final AlertService alertService;
 
-    private TabFactory(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
-                       ImageGenerationService imageGenerationService, ImageUtils imageUtils,
-                       FilePreviewService filePreviewService, FileManagerService fileManagerService,
-                       MetadataService metadataService, AlertService alertService) {
+    @Inject
+    public TabFactory(SettingsManager settingsManager, EmbedProcessor embedProcessor,
+                      ImageGenerationService imageGenerationService, ImageUtils imageUtils,
+                      FilePreviewService filePreviewService, FileManagerService fileManagerService,
+                      MetadataService metadataService, AlertService alertService) {
         this.settingsManager = settingsManager;
-        this.apiClient = apiClient;
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
@@ -44,17 +44,6 @@ public class TabFactory {
         this.fileManagerService = fileManagerService;
         this.metadataService = metadataService;
         this.alertService = alertService;
-    }
-
-    public static TabFactory getInstance(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
-                                         ImageGenerationService imageGenerationService, ImageUtils imageUtils,
-                                         FilePreviewService filePreviewService, FileManagerService fileManagerService,
-                                         MetadataService metadataService, AlertService alertService) {
-        if (instance == null) {
-            instance = new TabFactory(settingsManager, apiClient, embedProcessor, imageGenerationService, imageUtils,
-                    filePreviewService, fileManagerService, metadataService, alertService);
-        }
-        return instance;
     }
 
     public Tab createUnifiedGeneratorTab() throws IOException {

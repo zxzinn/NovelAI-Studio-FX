@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.ui;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
@@ -23,8 +24,15 @@ public class WindowService {
     private Rectangle2D restoreBounds;
     private boolean isMaximized = false;
 
+    @Inject
     public WindowService(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
+    }
+
+    public void setupStage(Stage stage) {
+        this.stage = stage;
+        loadWindowSettings();
+        setupResizeableWindow();
     }
 
     public void setupDraggableWindow(@NotNull VBox titleBar) {
@@ -111,26 +119,57 @@ public class WindowService {
         stage.setIconified(true);
     }
 
+    private void loadWindowSettings() {
+        double width = settingsManager.getDouble("window.width", 1024);
+        double height = settingsManager.getDouble("window.height", 768);
+        double x = settingsManager.getDouble("window.x", -1);
+        double y = settingsManager.getDouble("window.y", -1);
+        boolean maximized = settingsManager.getBoolean("window.maximized", false);
+
+        if (x >= 0 && y >= 0) {
+            stage.setX(x);
+            stage.setY(y);
+        } else {
+            stage.centerOnScreen();
+        }
+
+        stage.setWidth(width);
+        stage.setHeight(height);
+
+        if (maximized) {
+            toggleMaximize();
+        }
+    }
+
+    public void saveWindowSettings() {
+        if (!isMaximized) {
+            settingsManager.setDouble("window.width", stage.getWidth());
+            settingsManager.setDouble("window.height", stage.getHeight());
+            settingsManager.setDouble("window.x", stage.getX());
+            settingsManager.setDouble("window.y", stage.getY());
+        }
+        settingsManager.setBoolean("window.maximized", isMaximized);
+    }
+
     public void toggleMaximize() {
         if (!isMaximized) {
             restoreBounds = new Rectangle2D(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-
-            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-            stage.setX(screenBounds.getMinX());
-            stage.setY(screenBounds.getMinY());
-            stage.setWidth(screenBounds.getWidth());
-            stage.setHeight(screenBounds.getHeight());
+            Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1).get(0);
+            Rectangle2D bounds = screen.getVisualBounds();
+            stage.setX(bounds.getMinX());
+            stage.setY(bounds.getMinY());
+            stage.setWidth(bounds.getWidth());
+            stage.setHeight(bounds.getHeight());
             isMaximized = true;
         } else {
-            if (restoreBounds != null) {
-                stage.setX(restoreBounds.getMinX());
-                stage.setY(restoreBounds.getMinY());
-                stage.setWidth(restoreBounds.getWidth());
-                stage.setHeight(restoreBounds.getHeight());
-            }
+            stage.setX(restoreBounds.getMinX());
+            stage.setY(restoreBounds.getMinY());
+            stage.setWidth(restoreBounds.getWidth());
+            stage.setHeight(restoreBounds.getHeight());
             isMaximized = false;
         }
     }
+
 
     public void closeWindow() {
         settingsManager.shutdown();

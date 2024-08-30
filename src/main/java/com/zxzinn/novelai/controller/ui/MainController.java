@@ -1,16 +1,8 @@
 package com.zxzinn.novelai.controller.ui;
 
-import com.zxzinn.novelai.api.APIClient;
-import com.zxzinn.novelai.service.filemanager.FileManagerService;
-import com.zxzinn.novelai.service.filemanager.FilePreviewService;
-import com.zxzinn.novelai.service.filemanager.MetadataService;
-import com.zxzinn.novelai.service.generation.ImageGenerationService;
-import com.zxzinn.novelai.service.ui.AlertService;
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.ui.WindowService;
-import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.common.TabFactory;
-import com.zxzinn.novelai.utils.embed.EmbedProcessor;
-import com.zxzinn.novelai.utils.image.ImageUtils;
 import com.zxzinn.novelai.utils.ui.UIManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -27,15 +19,13 @@ public class MainController {
 
     private final UIManager uiManager;
     private final TabFactory tabFactory;
+    private final WindowService windowService;
 
-    public MainController(SettingsManager settingsManager, APIClient apiClient, EmbedProcessor embedProcessor,
-                          ImageGenerationService imageGenerationService, ImageUtils imageUtils,
-                          WindowService windowService, FilePreviewService filePreviewService,
-                          FileManagerService fileManagerService, MetadataService metadataService,
-                          AlertService alertService) {
+    @Inject
+    public MainController(WindowService windowService, TabFactory tabFactory) {
+        this.windowService = windowService;
         this.uiManager = new UIManager(windowService);
-        this.tabFactory = TabFactory.getInstance(settingsManager, apiClient, embedProcessor, imageGenerationService,
-                imageUtils, filePreviewService, fileManagerService, metadataService, alertService);
+        this.tabFactory = tabFactory;
     }
 
     @FXML
@@ -45,6 +35,7 @@ public class MainController {
     }
 
     public void setStage(Stage stage) {
+        windowService.setupStage(stage);
         uiManager.setupStage(stage);
     }
 }
