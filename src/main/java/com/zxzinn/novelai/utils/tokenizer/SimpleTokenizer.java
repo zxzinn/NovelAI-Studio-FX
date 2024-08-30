@@ -1,5 +1,7 @@
 package com.zxzinn.novelai.utils.tokenizer;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -38,6 +40,7 @@ public class SimpleTokenizer {
         pat = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
     }
 
+    @NotNull
     private Map<Integer, String> bytesToUnicode() {
         List<Integer> bs = new ArrayList<>();
         for (int i = '!'; i <= '~'; i++) bs.add(i);
@@ -61,6 +64,7 @@ public class SimpleTokenizer {
         return byteEncoder;
     }
 
+    @NotNull
     private List<String[]> readMerges(String path) throws IOException {
         List<String[]> merges = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path)), StandardCharsets.UTF_8))) {

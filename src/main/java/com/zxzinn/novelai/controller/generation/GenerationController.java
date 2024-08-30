@@ -290,7 +290,7 @@ public class GenerationController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            javafx.scene.image.Image fxImage = new javafx.scene.image.Image(new ByteArrayInputStream(imageData));
+            Image fxImage = new Image(new ByteArrayInputStream(imageData));
             saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
                 previewPane.updatePreview(imageFile);
                 addImageToHistory(fxImage, imageFile);

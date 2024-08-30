@@ -7,6 +7,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 @Log4j2
 public class UIManager {
@@ -16,7 +17,7 @@ public class UIManager {
         this.windowService = windowService;
     }
 
-    public void setupWindowControls(Button minimizeButton, Button maximizeButton, Button closeButton, VBox titleBar) {
+    public void setupWindowControls(@NotNull Button minimizeButton, @NotNull Button maximizeButton, @NotNull Button closeButton, VBox titleBar) {
         minimizeButton.setOnAction(event -> windowService.minimizeWindow());
         maximizeButton.setOnAction(event -> windowService.toggleMaximize());
         closeButton.setOnAction(event -> windowService.closeWindow());

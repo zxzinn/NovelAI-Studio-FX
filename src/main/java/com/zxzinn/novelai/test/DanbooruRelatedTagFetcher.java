@@ -8,6 +8,8 @@ import lombok.Setter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -112,17 +114,19 @@ public class DanbooruRelatedTagFetcher {
         }
     }
 
-    private String getStringFromJson(JsonObject jsonObject) {
+    @Nullable
+    private String getStringFromJson(@NotNull JsonObject jsonObject) {
         JsonElement element = jsonObject.get("name");
         return element != null && !element.isJsonNull() ? element.getAsString() : null;
     }
 
-    private int getIntFromJson(JsonObject jsonObject) {
+    private int getIntFromJson(@NotNull JsonObject jsonObject) {
         JsonElement element = jsonObject.get("category");
         return element != null && !element.isJsonNull() ? element.getAsInt() : 0;
     }
 
-    private String buildRelatedTagApiUrl(TagQuery query) {
+    @NotNull
+    private String buildRelatedTagApiUrl(@NotNull TagQuery query) {
         return String.format("%s?query=%s&category=%s&limit=%d",
                 RELATED_TAG_API_URL,
                 URLEncoder.encode(query.query(), StandardCharsets.UTF_8),
@@ -134,7 +138,7 @@ public class DanbooruRelatedTagFetcher {
         return !excludedTags.contains(tag) && tagFilter.test(tag);
     }
 
-    private void writeTxtSection(List<String> tags) throws IOException {
+    private void writeTxtSection(@NotNull List<String> tags) throws IOException {
         for (String tag : tags) {
             txtWriter.write(tag);
             txtWriter.newLine();

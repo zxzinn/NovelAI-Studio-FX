@@ -12,12 +12,12 @@ import java.util.function.BiConsumer;
 public class GenerationSettingsManager {
     private final SettingsManager settingsManager;
 
-    public void loadSettings(TextField apiKeyField, ComboBox<String> modelComboBox, TextField widthField,
-                             TextField heightField, ComboBox<String> samplerComboBox, TextField stepsField,
-                             TextField seedField, ComboBox<String> generateCountComboBox, PromptArea positivePromptArea,
-                             PromptArea negativePromptArea, TextField outputDirectoryField,
-                             ComboBox<String> generationModeComboBox, CheckBox smeaCheckBox, CheckBox smeaDynCheckBox,
-                             Slider strengthSlider, TextField extraNoiseSeedField, TextField ratioField, TextField countField) {
+    public void loadSettings(@NotNull TextField apiKeyField, @NotNull ComboBox<String> modelComboBox, @NotNull TextField widthField,
+                             @NotNull TextField heightField, @NotNull ComboBox<String> samplerComboBox, @NotNull TextField stepsField,
+                             @NotNull TextField seedField, @NotNull ComboBox<String> generateCountComboBox, @NotNull PromptArea positivePromptArea,
+                             @NotNull PromptArea negativePromptArea, @NotNull TextField outputDirectoryField,
+                             @NotNull ComboBox<String> generationModeComboBox, @NotNull CheckBox smeaCheckBox, @NotNull CheckBox smeaDynCheckBox,
+                             @NotNull Slider strengthSlider, @NotNull TextField extraNoiseSeedField, @NotNull TextField ratioField, @NotNull TextField countField) {
         apiKeyField.setText(settingsManager.getString("apiKey", ""));
         modelComboBox.setValue(settingsManager.getString("model", "nai-diffusion-3"));
         widthField.setText(String.valueOf(settingsManager.getInt("width", 832)));

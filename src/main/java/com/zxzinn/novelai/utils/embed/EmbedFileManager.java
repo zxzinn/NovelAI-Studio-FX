@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import com.zxzinn.novelai.utils.common.CommonPaths;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 @Log4j2
 public class EmbedFileManager {
@@ -53,7 +54,7 @@ public class EmbedFileManager {
         return CompletableFuture.supplyAsync(() -> getMatchingEmbeds(query));
     }
 
-    private List<EmbedFile> getMatchingEmbeds(String query) {
+    private List<EmbedFile> getMatchingEmbeds(@NotNull String query) {
         String lowercaseQuery = query.toLowerCase();
         return allEmbeds.stream()
                 .filter(embed -> fuzzyMatch(embed.fullPath().toLowerCase(), lowercaseQuery))
@@ -66,7 +67,7 @@ public class EmbedFileManager {
                 .collect(Collectors.toList());
     }
 
-    private boolean fuzzyMatch(String embed, String query) {
+    private boolean fuzzyMatch(@NotNull String embed, String query) {
         int embedIndex = 0;
         int queryIndex = 0;
         while (embedIndex < embed.length() && queryIndex < query.length()) {
@@ -78,7 +79,7 @@ public class EmbedFileManager {
         return queryIndex == query.length();
     }
 
-    private int calculateMatchScore(String embed, String query) {
+    private int calculateMatchScore(@NotNull String embed, String query) {
         int score = 0;
         int embedIndex = 0;
         int queryIndex = 0;

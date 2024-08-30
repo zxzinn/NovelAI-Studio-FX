@@ -6,12 +6,13 @@ import com.zxzinn.novelai.utils.common.NAIConstants;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import org.jetbrains.annotations.NotNull;
 
 public class UIInitializer {
-    public static void initializeFields(ComboBox<String> modelComboBox, ComboBox<String> samplerComboBox,
-                                        ComboBox<String> generateCountComboBox, PromptArea positivePromptArea,
-                                        PromptArea negativePromptArea, PromptPreviewArea positivePromptPreviewArea,
-                                        PromptPreviewArea negativePromptPreviewArea, Slider strengthSlider) {
+    public static void initializeFields(@NotNull ComboBox<String> modelComboBox, @NotNull ComboBox<String> samplerComboBox,
+                                        @NotNull ComboBox<String> generateCountComboBox, @NotNull PromptArea positivePromptArea,
+                                        @NotNull PromptArea negativePromptArea, @NotNull PromptPreviewArea positivePromptPreviewArea,
+                                        @NotNull PromptPreviewArea negativePromptPreviewArea, Slider strengthSlider) {
         modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
         modelComboBox.setValue(NAIConstants.MODELS[0]);
         samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
@@ -25,14 +26,14 @@ public class UIInitializer {
         setupStrengthSlider(strengthSlider);
     }
 
-    private static void setupStrengthSlider(Slider strengthSlider) {
+    private static void setupStrengthSlider(@NotNull Slider strengthSlider) {
         strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
             strengthSlider.setValue(roundedValue);
         });
     }
 
-    public static void setupVerticalLayout(ComboBox<?>... comboBoxes) {
+    public static void setupVerticalLayout(@NotNull ComboBox<?>... comboBoxes) {
         for (ComboBox<?> comboBox : comboBoxes) {
             comboBox.setMaxWidth(Double.MAX_VALUE);
         }

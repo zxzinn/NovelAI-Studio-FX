@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.generation;
 import com.zxzinn.novelai.component.PromptArea;
 import javafx.scene.control.*;
 import lombok.Builder;
+import org.jetbrains.annotations.NotNull;
 
 @Builder
 public class ListenersBuilder {
@@ -25,7 +26,7 @@ public class ListenersBuilder {
     private TextField ratioField;
     private TextField countField;
 
-    public void setupListeners(GenerationSettingsManager settingsManager) {
+    public void setupListeners(@NotNull GenerationSettingsManager settingsManager) {
         settingsManager.setupListeners(
                 apiKeyField, modelComboBox, widthField, heightField, samplerComboBox,
                 stepsField, seedField, generateCountComboBox, positivePromptArea, negativePromptArea,

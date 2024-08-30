@@ -2,6 +2,7 @@ package com.zxzinn.novelai.utils.embed;
 
 import com.zxzinn.novelai.utils.common.CommonPaths;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -30,6 +31,7 @@ public class EmbedProcessor {
         return finalResult;
     }
 
+    @NotNull
     private String processEmbeds(String input) {
         List<EmbedDetector.EmbedTag> embeds = embedDetector.detectEmbeds(input);
         StringBuilder result = new StringBuilder(input);
@@ -56,7 +58,7 @@ public class EmbedProcessor {
         return result.toString();
     }
 
-    private List<String> processEmbedFile(String tagName, String sampling, String bracketing) throws IOException {
+    private List<String> processEmbedFile(@NotNull String tagName, String sampling, String bracketing) throws IOException {
         String filePath = EMBEDS_DIRECTORY + File.separator + tagName.replace("/", File.separator) + ".txt";
         File file = new File(filePath);
 
@@ -100,15 +102,15 @@ public class EmbedProcessor {
         return openBracket.repeat(Math.abs(bracketCount)) + tag + closeBracket.repeat(Math.abs(bracketCount));
     }
 
-    private boolean isValidSampling(String sampling) {
+    private boolean isValidSampling(@NotNull String sampling) {
         return sampling.matches("\\d+") || sampling.matches("\\d+~\\d+");
     }
 
-    private boolean isValidBracketing(String bracketing) {
+    private boolean isValidBracketing(@NotNull String bracketing) {
         return bracketing.matches("-?\\d+") || bracketing.matches("-?\\d+~-?\\d+");
     }
 
-    private int getSampleSize(String sampling, int totalTags) {
+    private int getSampleSize(@NotNull String sampling, int totalTags) {
         try {
             if (sampling.contains("~")) {
                 String[] range = sampling.split("~");
@@ -128,7 +130,7 @@ public class EmbedProcessor {
         }
     }
 
-    private int getBracketCount(String bracketing) {
+    private int getBracketCount(@NotNull String bracketing) {
         try {
             if (bracketing.contains("~")) {
                 String[] range = bracketing.split("~");
@@ -148,12 +150,14 @@ public class EmbedProcessor {
         }
     }
 
+    @NotNull
     private List<String> selectRandomTags(List<String> tags, int count) {
         List<String> shuffled = new ArrayList<>(tags);
         Collections.shuffle(shuffled);
         return shuffled.subList(0, Math.min(count, shuffled.size()));
     }
 
+    @NotNull
     private String processStringPatterns(String input) {
         Pattern bracketPattern = Pattern.compile("\\{(\\w+)(?:=null)?}");
         Matcher bracketMatcher = bracketPattern.matcher(input);

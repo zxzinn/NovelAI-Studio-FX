@@ -2,6 +2,8 @@ package com.zxzinn.novelai.utils.common;
 
 import javafx.fxml.FXMLLoader;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 
@@ -11,6 +13,8 @@ public final class FXMLLoaderFactory {
     private FXMLLoaderFactory() {
     }
 
+    @NotNull
+    @Contract("_ -> new")
     public static FXMLLoader createLoader(String fxmlPath) {
         URL resource = FXMLLoaderFactory.class.getResource(fxmlPath);
         if (resource == null) {

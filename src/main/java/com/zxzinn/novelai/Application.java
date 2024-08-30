@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +42,7 @@ public class Application extends javafx.application.Application {
     private LoadingScreen loadingScreen;
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(@NotNull Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.settingsManager = SettingsManager.getInstance();
         this.filePreviewService = new FilePreviewService();

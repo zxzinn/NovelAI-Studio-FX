@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.generation;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.ImageGenerationPayload;
 import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
+import org.jetbrains.annotations.NotNull;
 
 public class GenerationPayloadFactory {
     public static GenerationPayload createPayload(String generationMode, String processedPositivePrompt,
@@ -19,6 +20,7 @@ public class GenerationPayloadFactory {
         }
     }
 
+    @NotNull
     private static ImageGenerationPayload createText2ImagePayload(String processedPositivePrompt, String processedNegativePrompt,
                                                                   String model, int width, int height, int scale, String sampler,
                                                                   int steps, int nSamples, long seed, boolean smea, boolean smeaDyn) {
@@ -45,6 +47,7 @@ public class GenerationPayloadFactory {
         return payload;
     }
 
+    @NotNull
     private static Img2ImgGenerationPayload createImage2ImagePayload(String processedPositivePrompt, String processedNegativePrompt,
                                                                      String model, int width, int height, int scale, String sampler,
                                                                      int steps, int nSamples, long seed, String base64Image,

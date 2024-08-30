@@ -3,6 +3,7 @@ package com.zxzinn.novelai.service.generation;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.APIClient;
 import lombok.extern.log4j.Log4j2;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,6 +43,7 @@ public class ImageGenerationService {
         throw new IOException("超過最大重試次數");
     }
 
+    @NotNull
     private byte[] extractImageFromZip(byte[] zipData) throws IOException {
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
             ZipEntry entry = zis.getNextEntry();

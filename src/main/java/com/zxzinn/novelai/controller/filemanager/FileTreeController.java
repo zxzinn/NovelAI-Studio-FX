@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -82,6 +83,8 @@ public class FileTreeController {
         }
     }
 
+    @NotNull
+    @Contract(pure = true)
     private Predicate<TreeItem<String>> createFilterPredicate(String searchText) {
         return treeItem -> {
             if (searchText == null || searchText.isEmpty()) {
@@ -91,12 +94,12 @@ public class FileTreeController {
         };
     }
 
-    public void handleBranchExpanded(TreeItem.TreeModificationEvent<String> event) {
+    public void handleBranchExpanded(@NotNull TreeItem.TreeModificationEvent<String> event) {
         TreeItem<String> source = event.getTreeItem();
         fileManagerService.setDirectoryExpanded(buildFullPath(source), true);
     }
 
-    public void handleBranchCollapsed(TreeItem.TreeModificationEvent<String> event) {
+    public void handleBranchCollapsed(@NotNull TreeItem.TreeModificationEvent<String> event) {
         TreeItem<String> source = event.getTreeItem();
         fileManagerService.setDirectoryExpanded(buildFullPath(source), false);
     }
