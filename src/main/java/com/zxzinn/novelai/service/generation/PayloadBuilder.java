@@ -23,10 +23,24 @@ public class PayloadBuilder {
     private long extraNoiseSeed;
 
     public GenerationPayload createPayload() {
-        return GenerationPayloadFactory.createPayload(
-                generationMode, processedPositivePrompt, processedNegativePrompt,
-                model, width, height, scale, sampler, steps, nSamples, seed,
-                smea, smeaDyn, base64Image, strength, extraNoiseSeed
-        );
+        GenerationParameters params = GenerationParameters.builder()
+                .processedPositivePrompt(processedPositivePrompt)
+                .processedNegativePrompt(processedNegativePrompt)
+                .model(model)
+                .width(width)
+                .height(height)
+                .scale(scale)
+                .sampler(sampler)
+                .steps(steps)
+                .nSamples(nSamples)
+                .seed(seed)
+                .smea(smea)
+                .smeaDyn(smeaDyn)
+                .base64Image(base64Image)
+                .strength(strength)
+                .extraNoiseSeed(extraNoiseSeed)
+                .build();
+
+        return GenerationPayloadFactory.createPayload(generationMode, params);
     }
 }
