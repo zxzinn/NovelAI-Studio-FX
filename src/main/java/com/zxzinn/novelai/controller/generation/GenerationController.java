@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.controller.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
@@ -30,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
-@RequiredArgsConstructor
 public class GenerationController {
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 20000;
@@ -41,10 +41,9 @@ public class GenerationController {
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
-
-    private UIInitializer uiInitializer;
-    private GenerationHandler generationHandler;
-    private PromptManager promptManager;
+    private final UIInitializer uiInitializer;
+    private final GenerationHandler generationHandler;
+    private final PromptManager promptManager;
 
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
@@ -82,21 +81,31 @@ public class GenerationController {
     private volatile boolean isGenerating = false;
     private volatile boolean stopRequested = false;
     private volatile boolean isStopping = false;
-    private boolean isPositivePromptLocked = false;
-    private boolean isNegativePromptLocked = false;
     private String base64Image;
+
+    @Inject
+    public GenerationController(EmbedProcessor embedProcessor,
+                                ImageGenerationService imageGenerationService,
+                                ImageUtils imageUtils,
+                                FilePreviewService filePreviewService,
+                                GenerationSettingsManager generationSettingsManager) {
+        this.embedProcessor = embedProcessor;
+        this.imageGenerationService = imageGenerationService;
+        this.imageUtils = imageUtils;
+        this.filePreviewService = filePreviewService;
+        this.generationSettingsManager = generationSettingsManager;
+        this.uiInitializer = new UIInitializer();
+        this.generationHandler = new GenerationHandler(imageGenerationService);
+        this.promptManager = new PromptManager(embedProcessor);
+    }
 
     @FXML
     public void initialize() {
-        uiInitializer = new UIInitializer();
-        generationHandler = new GenerationHandler(imageGenerationService);
-        promptManager = new PromptManager(embedProcessor);
         EmbedFileManager embedFileManager = new EmbedFileManager();
         embedFileManager.scanEmbedFiles();
 
         positivePromptArea.setEmbedFileManager(embedFileManager);
         negativePromptArea.setEmbedFileManager(embedFileManager);
-
 
         previewPane = new PreviewPane(filePreviewService);
         previewContainer.getChildren().add(previewPane);

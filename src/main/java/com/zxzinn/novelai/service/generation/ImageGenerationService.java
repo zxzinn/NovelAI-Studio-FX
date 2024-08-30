@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.api.APIClient;
 import lombok.extern.log4j.Log4j2;
@@ -15,6 +16,7 @@ import java.util.zip.ZipInputStream;
 public class ImageGenerationService {
     private final APIClient apiClient;
 
+    @Inject
     public ImageGenerationService(APIClient apiClient) {
         this.apiClient = apiClient;
     }

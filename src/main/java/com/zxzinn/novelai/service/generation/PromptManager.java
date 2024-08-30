@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.component.PromptArea;
 import com.zxzinn.novelai.component.PromptControls;
 import com.zxzinn.novelai.component.PromptPreviewArea;
@@ -13,6 +14,7 @@ public class PromptManager {
     private final AtomicBoolean isPositivePromptLocked = new AtomicBoolean(false);
     private final AtomicBoolean isNegativePromptLocked = new AtomicBoolean(false);
 
+    @Inject
     public PromptManager(EmbedProcessor embedProcessor) {
         this.embedProcessor = embedProcessor;
     }

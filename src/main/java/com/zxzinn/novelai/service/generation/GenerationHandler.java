@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.api.GenerationPayload;
 import lombok.extern.log4j.Log4j2;
 
@@ -17,6 +18,7 @@ public class GenerationHandler {
 
     private final ImageGenerationService imageGenerationService;
 
+    @Inject
     public GenerationHandler(ImageGenerationService imageGenerationService) {
         this.imageGenerationService = imageGenerationService;
     }
