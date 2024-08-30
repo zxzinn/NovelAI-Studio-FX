@@ -66,7 +66,8 @@ public class TabFactory {
                 fileManagerService,
                 filePreviewService,
                 metadataService,
-                alertService
+                alertService,
+                imageUtils  // 添加 imageUtils 參數
         );
         loader.setController(controller);
         BorderPane content = loader.load();

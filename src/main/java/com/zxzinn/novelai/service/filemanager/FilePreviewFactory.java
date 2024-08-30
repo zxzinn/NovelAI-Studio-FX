@@ -1,5 +1,7 @@
 package com.zxzinn.novelai.service.filemanager;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.web.WebView;
@@ -14,13 +16,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 @Log4j2
+@Singleton
 public class FilePreviewFactory {
     private final Tika tika;
     private final ImagePreviewCreator imagePreviewCreator;
 
-    public FilePreviewFactory() {
+    @Inject
+    public FilePreviewFactory(ImagePreviewCreator imagePreviewCreator) {
         this.tika = new Tika();
-        this.imagePreviewCreator = new ImagePreviewCreator();
+        this.imagePreviewCreator = imagePreviewCreator;
     }
 
     public Node createPreview(@NotNull File file) {

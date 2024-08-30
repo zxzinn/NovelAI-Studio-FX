@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.service.filemanager;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.zxzinn.novelai.utils.common.SettingsManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
@@ -24,6 +25,7 @@ import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 
 @Log4j2
+@Singleton
 public class FileManagerService {
     private static final String WATCHED_DIRECTORIES_KEY = "watchedDirectories";
     private static final String EXPANDED_PREFIX = "expanded_";

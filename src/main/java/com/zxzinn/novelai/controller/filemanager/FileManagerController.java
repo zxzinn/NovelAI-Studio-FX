@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.controller.filemanager;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
@@ -48,17 +49,21 @@ public class FileManagerController {
     private final MetadataService metadataService;
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
+    private final ImageUtils imageUtils;
     protected PreviewPane previewPane;
     private final ExecutorService executorService;
 
+    @Inject
     public FileManagerController(FileManagerService fileManagerService,
                                  FilePreviewService filePreviewService,
                                  MetadataService metadataService,
-                                 AlertService alertService) {
+                                 AlertService alertService,
+                                 ImageUtils imageUtils) {
         this.fileManagerService = fileManagerService;
         this.filePreviewService = filePreviewService;
         this.metadataService = metadataService;
         this.alertService = alertService;
+        this.imageUtils = imageUtils;
         this.fileTreeController = new FileTreeController(fileManagerService);
         this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }

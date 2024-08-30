@@ -3,6 +3,8 @@ package com.zxzinn.novelai.service.filemanager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import lombok.extern.log4j.Log4j2;
 
@@ -24,6 +26,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
 @Log4j2
+@Singleton
 public class MetadataService {
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
@@ -31,6 +34,7 @@ public class MetadataService {
     private final Path executablePath;
     private final ExecutorService executorService;
 
+    @Inject
     public MetadataService() {
         this.executablePath = extractExecutable();
         this.executorService = Executors.newCachedThreadPool();

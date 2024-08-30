@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.filemanager;
 
+import com.google.inject.Singleton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
+@Singleton
 public class ImagePreviewCreator {
     public Pane createImagePreview(@NotNull File file) {
         Image image = new Image(file.toURI().toString());
