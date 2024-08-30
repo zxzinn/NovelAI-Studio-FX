@@ -4,14 +4,14 @@ import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
@@ -45,12 +45,9 @@ public class FileTreeBuilder {
     }
 
     private void loadChildrenInBatches(TreeItem<String> parentItem, @NotNull File parentFile) {
-        File[] children = parentFile.listFiles(file -> fileFilter.test(file));
-        if (children == null) {
-            return;
-        }
-
-        List<File> childList = Arrays.asList(children);
+        Collection<File> children = FileUtils.listFiles(parentFile, null, false);
+        List<File> childList = new ArrayList<>(children);
+        childList.removeIf(file -> !fileFilter.test(file));
         childList.sort(fileComparator);
 
         for (int i = 0; i < childList.size(); i += BATCH_SIZE) {
@@ -65,28 +62,17 @@ public class FileTreeBuilder {
         }
     }
 
-
     @NotNull
     private FontIcon getFileIcon(@NotNull File file) {
         if (file.isDirectory()) {
             return new FontIcon(FontAwesomeSolid.FOLDER);
         } else {
-            String extension = getFileExtension(file);
+            String extension = FilenameUtils.getExtension(file.getName());
             return switch (extension.toLowerCase()) {
                 case "png", "jpg", "jpeg", "gif" -> new FontIcon(FontAwesomeSolid.IMAGE);
                 case "txt" -> new FontIcon(FontAwesomeSolid.FILE_ALT);
                 default -> new FontIcon(FontAwesomeSolid.FILE);
             };
         }
-    }
-
-    @NotNull
-    private String getFileExtension(@NotNull File file) {
-        String name = file.getName();
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return "";
-        }
-        return name.substring(lastIndexOf + 1);
     }
 }

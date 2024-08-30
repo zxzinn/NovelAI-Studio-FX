@@ -10,6 +10,8 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -200,18 +202,16 @@ public class FileTreeController {
     }
 
     private void loadChildrenInBatches(TreeItem<String> parentItem, @NotNull File parentFile) {
-        File[] children = parentFile.listFiles();
-        if (children != null) {
-            List<File> childList = Arrays.asList(children);
-            Collections.sort(childList);
-            for (File child : childList) {
-                TreeItem<String> childItem = createTreeItem(child);
-                parentItem.getChildren().add(childItem);
-                String childPath = child.getAbsolutePath();
-                pathToItemMap.put(childPath, childItem);
-                if (child.isDirectory()) {
-                    loadChildrenInBatches(childItem, child);
-                }
+        Collection<File> children = FileUtils.listFiles(parentFile, null, false);
+        List<File> childList = new ArrayList<>(children);
+        Collections.sort(childList);
+        for (File child : childList) {
+            TreeItem<String> childItem = createTreeItem(child);
+            parentItem.getChildren().add(childItem);
+            String childPath = child.getAbsolutePath();
+            pathToItemMap.put(childPath, childItem);
+            if (child.isDirectory()) {
+                loadChildrenInBatches(childItem, child);
             }
         }
     }
@@ -221,22 +221,12 @@ public class FileTreeController {
         if (file.isDirectory()) {
             return new FontIcon(FontAwesomeSolid.FOLDER);
         } else {
-            String extension = getFileExtension(file);
+            String extension = FilenameUtils.getExtension(file.getName());
             return switch (extension.toLowerCase()) {
                 case "png", "jpg", "jpeg", "gif" -> new FontIcon(FontAwesomeSolid.IMAGE);
                 case "txt" -> new FontIcon(FontAwesomeSolid.FILE_ALT);
                 default -> new FontIcon(FontAwesomeSolid.FILE);
             };
         }
-    }
-
-    @NotNull
-    private String getFileExtension(@NotNull File file) {
-        String name = file.getName();
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return "";
-        }
-        return name.substring(lastIndexOf + 1);
     }
 }
