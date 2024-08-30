@@ -150,6 +150,13 @@ public class FileManagerController {
             return;
         }
 
+        // 創建 cleaned 資料夾
+        File cleanedDir = new File("cleaned");
+        if (!cleanedDir.exists() && !cleanedDir.mkdir()) {
+            alertService.showAlert("錯誤", "無法創建 cleaned 目錄");
+            return;
+        }
+
         AtomicInteger processedCount = new AtomicInteger(0);
         int totalFiles = selectedFiles.size();
 
@@ -159,7 +166,7 @@ public class FileManagerController {
             }
             executorService.submit(() -> {
                 try {
-                    processFile(file);
+                    processFile(file, cleanedDir);
                     int completed = processedCount.incrementAndGet();
                     updateProgressOnUI(completed, totalFiles);
                     if (completed == totalFiles) {
@@ -173,18 +180,13 @@ public class FileManagerController {
         }
     }
 
-    private void processFile(File file) throws IOException {
+    private void processFile(File file, File cleanedDir) throws IOException {
         BufferedImage image = ImageIO.read(file);
         if (image == null) {
             throw new IOException("無法讀取圖像文件: " + file.getName());
         }
 
         ImageUtils.clearMetadata(image);
-
-        File cleanedDir = new File(file.getParentFile(), "cleaned");
-        if (!cleanedDir.exists() && !cleanedDir.mkdir()) {
-            throw new IOException("無法創建 cleaned 目錄");
-        }
 
         File outputFile = new File(cleanedDir, file.getName());
         ImageUtils.saveImage(image, outputFile);
@@ -208,16 +210,13 @@ public class FileManagerController {
         });
     }
 
-    private void refreshProcessedDirectories(@NotNull List<File> processedFiles) {
-        for (File file : processedFiles) {
-            Path parentDir = file.getParentFile().toPath();
-            Path cleanedDir = parentDir.resolve("cleaned");
-            if (Files.exists(cleanedDir)) {
-                try {
-                    fileManagerService.addWatchedDirectory(cleanedDir.toString());
-                } catch (IOException e) {
-                    log.error("無法添加 cleaned 目錄到監視列表", e);
-                }
+    private void refreshProcessedDirectories(List<File> processedFiles) {
+        File cleanedDir = new File("cleaned");
+        if (cleanedDir.exists()) {
+            try {
+                fileManagerService.addWatchedDirectory(cleanedDir.getAbsolutePath());
+            } catch (IOException e) {
+                log.error("無法添加 cleaned 目錄到監視列表", e);
             }
         }
     }
