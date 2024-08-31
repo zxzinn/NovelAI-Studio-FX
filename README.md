@@ -65,10 +65,19 @@ NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提
 NovelAI-Studio-FX 採用 [MIT 許可證](LICENSE)。
 
 ## 📞 聯繫
-- 📣 GitHub Discussions: [參與項目討論](https://github.com/zxzinn/NovelAI-Studio-FX/discussions)
-- Discord: zxzinn
-- QQ: 732058430
--  [Telegram](https://t.me/zxzinn)
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/zxzinn">
+        <img src="https://github.com/zxzinn.png" width="100px;" alt="User"/><br />
+        <sub><b>zxzinn</b></sub>
+      </a><br />
+      <sub>Discord: zxzinn</sub><br>
+      <sub>QQ: 732058430</sub><br>
+      <sub>Telegram: zxzinn </sub>
+    </td>
+  </tr>
+</table>
 ## 🙌 支持我們
 
 如果你喜歡 NovelAI-Studio-FX，請給我們一個 ⭐️！你的支持是我們持續改進的最大動力。
