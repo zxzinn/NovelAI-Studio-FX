@@ -1,6 +1,8 @@
 package com.zxzinn.novelai.controller.ui;
 
 import com.google.inject.Inject;
+import com.zxzinn.novelai.component.NotificationPane;
+import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.TabFactory;
 import com.zxzinn.novelai.utils.ui.UIManager;
@@ -46,18 +48,21 @@ public class MainController {
         windowService.setupStage(stage);
         uiManager.setupStage(stage);
 
-        // 创建StackPane并设置为根节点
-        StackPane root = new StackPane(rootPane);
+        StackPane root = new StackPane();
+
+        root.getChildren().add(rootPane);
+
+        NotificationPane notificationPane = new NotificationPane();
+        root.getChildren().add(notificationPane);
+        NotificationService.initialize(notificationPane);
+
         stage.getScene().setRoot(root);
 
-        // 启用拖放功能
         dragAndDropHandler.enableDragAndDrop(root);
     }
 
     private void handleFileDrop(File file) {
-        // 处理拖放的文件
         System.out.println("File dropped: " + file.getAbsolutePath());
-        // 这里可以添加更多的逻辑来处理拖放的文件
-        // 例如,检查文件类型,更新UI,或者触发其他操作
+        NotificationService.showNotification("文件已拖放: " + file.getName(), javafx.util.Duration.seconds(3));
     }
 }
