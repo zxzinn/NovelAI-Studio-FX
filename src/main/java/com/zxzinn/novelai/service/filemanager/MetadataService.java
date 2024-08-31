@@ -6,6 +6,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
+import javafx.application.Platform;
+import javafx.scene.control.TextArea;
 import lombok.extern.log4j.Log4j2;
 
 import javax.imageio.ImageIO;
@@ -197,6 +199,29 @@ public class MetadataService {
         } catch (IOException e) {
             log.error("無法解析YAML輸出", e);
             return "無法解析YAML輸出：" + e.getMessage();
+        }
+    }
+
+    public void updateMetadataList(File file, TextArea metadataTextArea) {
+        if (file != null && file.isFile() && file.getName().toLowerCase().endsWith(".png")) {
+            metadataTextArea.setText("正在讀取元數據...");
+
+            CompletableFuture<String> futureMetadata = getFormattedMetadataAsync(file);
+            futureMetadata.thenAcceptAsync(metadata -> {
+                Platform.runLater(() -> {
+                    metadataTextArea.setText(metadata);
+                });
+            }, executorService).exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    metadataTextArea.setText("讀取元數據時發生錯誤: " + ex.getMessage());
+                });
+                return null;
+            });
+        } else {
+            metadataTextArea.clear();
+            if (file != null && file.isFile() && !file.getName().toLowerCase().endsWith(".png")) {
+                metadataTextArea.setText("不支持的文件類型：僅支持 PNG 文件");
+            }
         }
     }
 

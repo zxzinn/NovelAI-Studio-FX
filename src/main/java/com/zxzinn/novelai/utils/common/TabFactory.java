@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.GenerationController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
+import com.zxzinn.novelai.service.filemanager.FileOperationService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
@@ -30,12 +31,13 @@ public class TabFactory {
     private final FileManagerService fileManagerService;
     private final MetadataService metadataService;
     private final AlertService alertService;
+    private final FileOperationService fileOperationService;
 
     @Inject
     public TabFactory(SettingsManager settingsManager, EmbedProcessor embedProcessor,
                       ImageGenerationService imageGenerationService, ImageUtils imageUtils,
                       FilePreviewService filePreviewService, FileManagerService fileManagerService,
-                      MetadataService metadataService, AlertService alertService) {
+                      MetadataService metadataService, AlertService alertService,FileOperationService fileOperationService) {
         this.settingsManager = settingsManager;
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
@@ -44,6 +46,7 @@ public class TabFactory {
         this.fileManagerService = fileManagerService;
         this.metadataService = metadataService;
         this.alertService = alertService;
+        this.fileOperationService = fileOperationService;
     }
 
     public Tab createUnifiedGeneratorTab() throws IOException {
@@ -67,7 +70,7 @@ public class TabFactory {
                 filePreviewService,
                 metadataService,
                 alertService,
-                imageUtils  // 添加 imageUtils 參數
+                fileOperationService  // 使用 FileOperationService 而不是 ImageUtils
         );
         loader.setController(controller);
         BorderPane content = loader.load();

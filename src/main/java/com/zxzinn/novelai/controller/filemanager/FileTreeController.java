@@ -11,11 +11,6 @@ import javafx.scene.control.TreeView;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -32,13 +27,11 @@ public class FileTreeController {
     private FilteredList<TreeItem<String>> filteredTreeItems;
     private final AtomicBoolean isRefreshing = new AtomicBoolean(false);
     private final Map<String, TreeItem<String>> pathToItemMap = new HashMap<>();
+    private final TreeItemFactory treeItemFactory;
 
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
-    }
-
-    public void initialize() {
-        refreshTreeView();
+        this.treeItemFactory = new TreeItemFactory(fileManagerService);
     }
 
     public void refreshTreeView() {
@@ -83,8 +76,6 @@ public class FileTreeController {
         }
     }
 
-    @NotNull
-    @Contract(pure = true)
     private Predicate<TreeItem<String>> createFilterPredicate(String searchText) {
         return treeItem -> {
             if (searchText == null || searchText.isEmpty()) {
@@ -92,16 +83,6 @@ public class FileTreeController {
             }
             return treeItem.getValue().toLowerCase().contains(searchText.toLowerCase());
         };
-    }
-
-    public void handleBranchExpanded(@NotNull TreeItem.TreeModificationEvent<String> event) {
-        TreeItem<String> source = event.getTreeItem();
-        fileManagerService.setDirectoryExpanded(buildFullPath(source), true);
-    }
-
-    public void handleBranchCollapsed(@NotNull TreeItem.TreeModificationEvent<String> event) {
-        TreeItem<String> source = event.getTreeItem();
-        fileManagerService.setDirectoryExpanded(buildFullPath(source), false);
     }
 
     public String buildFullPath(TreeItem<String> item) {
@@ -183,11 +164,11 @@ public class FileTreeController {
         String parentPath = file.getParent();
         TreeItem<String> parentItem = pathToItemMap.get(parentPath);
         if (parentItem != null) {
-            TreeItem<String> newItem = createTreeItem(file);
+            TreeItem<String> newItem = treeItemFactory.createTreeItem(file);
             parentItem.getChildren().add(newItem);
             pathToItemMap.put(path, newItem);
             if (file.isDirectory()) {
-                newItem.setExpanded(true);  // 確保新建的資料夾會展開
+                newItem.setExpanded(true);
                 loadChildrenInBatches(newItem, file);
             }
         } else {
@@ -195,41 +176,18 @@ public class FileTreeController {
         }
     }
 
-    @NotNull
-    private TreeItem<String> createTreeItem(@NotNull File file) {
-        TreeItem<String> item = new TreeItem<>(file.getName(), getFileIcon(file));
-        if (file.isDirectory()) {
-            item.setExpanded(fileManagerService.isDirectoryExpanded(file.getAbsolutePath()));
-        }
-        return item;
-    }
-
-    private void loadChildrenInBatches(TreeItem<String> parentItem, @NotNull File parentFile) {
+    private void loadChildrenInBatches(TreeItem<String> parentItem, File parentFile) {
         Collection<File> children = FileUtils.listFiles(parentFile, null, false);
         List<File> childList = new ArrayList<>(children);
         Collections.sort(childList);
         for (File child : childList) {
-            TreeItem<String> childItem = createTreeItem(child);
+            TreeItem<String> childItem = treeItemFactory.createTreeItem(child);
             parentItem.getChildren().add(childItem);
             String childPath = child.getAbsolutePath();
             pathToItemMap.put(childPath, childItem);
             if (child.isDirectory()) {
                 loadChildrenInBatches(childItem, child);
             }
-        }
-    }
-
-    @NotNull
-    private FontIcon getFileIcon(@NotNull File file) {
-        if (file.isDirectory()) {
-            return new FontIcon(FontAwesomeSolid.FOLDER);
-        } else {
-            String extension = FilenameUtils.getExtension(file.getName());
-            return switch (extension.toLowerCase()) {
-                case "png", "jpg", "jpeg", "gif" -> new FontIcon(FontAwesomeSolid.IMAGE);
-                case "txt" -> new FontIcon(FontAwesomeSolid.FILE_ALT);
-                default -> new FontIcon(FontAwesomeSolid.FILE);
-            };
         }
     }
 }
