@@ -1,41 +1,43 @@
-package com.zxzinn.novelai.component;
+package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Popup;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class AutoCompleteHandler {
     private final TextArea promptTextArea;
     private final ListView<EmbedFileManager.EmbedFile> autoCompleteList;
     private final Popup autoCompletePopup;
+    private final Popup previewPopup;
+    @Setter
     private EmbedFileManager embedFileManager;
-    private boolean isAutoCompleteActive = false;
-    private String lastQuery = "";
     private int autoCompleteStartIndex = -1;
 
-    private static final Pattern EMBED_PATTERN = Pattern.compile(",?<([^>]+)>(?=,|$)");
+    private static final Pattern EMBED_PATTERN = Pattern.compile("<([^>:]+)(?::([^>]+))?>", Pattern.DOTALL);
+    private static final int MAX_LEVENSHTEIN_DISTANCE = 2;
 
     public AutoCompleteHandler(TextArea promptTextArea) {
         this.promptTextArea = promptTextArea;
         this.autoCompleteList = setupAutoCompleteList();
         this.autoCompletePopup = setupAutoCompletePopup();
+        this.previewPopup = setupPreviewPopup();
         setupListeners();
     }
 
@@ -80,89 +82,80 @@ public class AutoCompleteHandler {
         return popup;
     }
 
+    private Popup setupPreviewPopup() {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        return popup;
+    }
+
     private void setupListeners() {
         autoCompleteList.setOnMouseClicked(event -> selectAutoComplete());
         autoCompletePopup.addEventFilter(KeyEvent.KEY_PRESSED, this::handlePopupKeyPress);
-    }
-
-    public void setEmbedFileManager(EmbedFileManager embedFileManager) {
-        this.embedFileManager = embedFileManager;
+        autoCompleteList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                showPreview(newValue);
+            }
+        });
     }
 
     public void handleTextChange(String oldValue, String newValue) {
         int caretPosition = promptTextArea.getCaretPosition();
-        if (newValue.length() > oldValue.length() && caretPosition > 0 && caretPosition <= newValue.length()) {
-            char lastChar = newValue.charAt(caretPosition - 1);
-            if (lastChar == '<') {
-                updateAutoComplete(caretPosition, oldValue, newValue);
-            }
-        } else {
-            if (!isValidAutoCompletePosition(caretPosition)) {
+        if (caretPosition > 0 && caretPosition <= newValue.length()) {
+            if (shouldTriggerAutoComplete(newValue, caretPosition)) {
+                updateAutoComplete(caretPosition, newValue);
+            } else {
                 hideAutoComplete();
             }
         }
     }
 
     public void handleCaretChange(int newPosition) {
-        if (isValidAutoCompletePosition(newPosition)) {
-            updateAutoComplete(newPosition, promptTextArea.getText(), promptTextArea.getText());
+        String text = promptTextArea.getText();
+        if (shouldTriggerAutoComplete(text, newPosition)) {
+            updateAutoComplete(newPosition, text);
         } else {
             hideAutoComplete();
         }
     }
 
-    private void updateAutoComplete(int caretPosition, String oldValue, String newValue) {
-        String currentWord = getCurrentWord(newValue, caretPosition);
-        if (!currentWord.isEmpty() && !currentWord.equals(lastQuery)) {
+    private boolean shouldTriggerAutoComplete(String text, int caretPosition) {
+        if (caretPosition <= 0 || caretPosition > text.length()) {
+            return false;
+        }
+
+        // 檢查是否在未完成的標籤內
+        int lastOpenBracket = text.lastIndexOf('<', caretPosition - 1);
+        int lastCloseBracket = text.lastIndexOf('>', caretPosition - 1);
+
+        if (lastOpenBracket == -1 || lastOpenBracket < lastCloseBracket) {
+            return false;
+        }
+
+        String currentTag = text.substring(lastOpenBracket, caretPosition);
+        return !currentTag.contains(":");
+    }
+
+    private void updateAutoComplete(int caretPosition, String text) {
+        String currentWord = getCurrentWord(text, caretPosition);
+        if (!currentWord.isEmpty()) {
             showAutoComplete(currentWord);
-            lastQuery = currentWord;
             autoCompleteStartIndex = caretPosition - currentWord.length();
-            isAutoCompleteActive = true;
+        } else {
+            hideAutoComplete();
         }
     }
 
     private String getCurrentWord(String text, int caretPosition) {
-        if (caretPosition <= 0 || caretPosition > text.length()) {
-            return "";
-        }
         int start = text.lastIndexOf('<', caretPosition - 1);
         if (start == -1 || start >= caretPosition) {
             return "";
         }
-        return text.substring(start + 1, caretPosition);
-    }
-
-    private boolean isValidAutoCompletePosition(int caretPosition) {
-        String text = promptTextArea.getText();
-        if (text.isEmpty() || caretPosition <= 0 || caretPosition > text.length()) {
-            return false;
+        String currentTag = text.substring(start, caretPosition);
+        int colonIndex = currentTag.indexOf(':');
+        if (colonIndex != -1) {
+            return "";
         }
-
-        int lastOpenBracket = text.lastIndexOf('<', caretPosition - 1);
-        if (lastOpenBracket == -1) {
-            return false;
-        }
-
-        int nextCloseBracket = text.indexOf('>', lastOpenBracket);
-        if (nextCloseBracket != -1 && nextCloseBracket < caretPosition) {
-            return false;
-        }
-
-        Matcher matcher = EMBED_PATTERN.matcher(text);
-        while (matcher.find()) {
-            if (matcher.start() < caretPosition && matcher.end() > caretPosition) {
-                return false;
-            }
-        }
-
-        matcher = Pattern.compile("<([^>]*)").matcher(text);
-        while (matcher.find()) {
-            if (matcher.start() < caretPosition && matcher.end() >= caretPosition) {
-                return true;
-            }
-        }
-
-        return text.charAt(caretPosition - 1) == '<';
+        return currentTag.substring(1); // 去掉開頭的 '<'
     }
 
     public void handleKeyPress(KeyEvent event) {
@@ -220,14 +213,16 @@ public class AutoCompleteHandler {
         }
         CompletableFuture<List<EmbedFileManager.EmbedFile>> futureMatches = embedFileManager.getMatchingEmbedsAsync(query);
         futureMatches.thenAcceptAsync(matches -> {
-            if (!matches.isEmpty()) {
+            List<EmbedFileManager.EmbedFile> filteredMatches = filterAndSortMatches(query, matches);
+            if (!filteredMatches.isEmpty()) {
                 Platform.runLater(() -> {
-                    autoCompleteList.getItems().setAll(matches);
+                    autoCompleteList.getItems().setAll(filteredMatches);
                     autoCompleteList.getSelectionModel().selectFirst();
                     positionAutoCompletePopup();
                     autoCompletePopup.show(promptTextArea, autoCompletePopup.getX(), autoCompletePopup.getY());
+                    showPreview(filteredMatches.getFirst());
                 });
-                log.info("Showing autocomplete popup with " + matches.size() + " matches");
+                log.info("Showing autocomplete popup with " + filteredMatches.size() + " matches");
             } else {
                 hideAutoComplete();
             }
@@ -235,6 +230,14 @@ public class AutoCompleteHandler {
             log.error("Error fetching autocomplete matches: {}", ex.getMessage());
             return null;
         });
+    }
+
+    private List<EmbedFileManager.EmbedFile> filterAndSortMatches(String query, List<EmbedFileManager.EmbedFile> matches) {
+        LevenshteinDistance levenshteinDistance = new LevenshteinDistance(MAX_LEVENSHTEIN_DISTANCE);
+        return matches.stream()
+                .filter(file -> levenshteinDistance.apply(query, file.fileName()) <= MAX_LEVENSHTEIN_DISTANCE)
+                .sorted(Comparator.comparingInt(file -> levenshteinDistance.apply(query, file.fileName())))
+                .collect(Collectors.toList());
     }
 
     private void positionAutoCompletePopup() {
@@ -246,10 +249,9 @@ public class AutoCompleteHandler {
     public void hideAutoComplete() {
         Platform.runLater(() -> {
             autoCompletePopup.hide();
+            previewPopup.hide();
             promptTextArea.requestFocus();
         });
-        isAutoCompleteActive = false;
-        lastQuery = "";
     }
 
     private void selectAutoComplete() {
@@ -274,5 +276,21 @@ public class AutoCompleteHandler {
             }
             autoCompleteStartIndex = -1;
         }
+    }
+
+    private void showPreview(EmbedFileManager.EmbedFile file) {
+        Platform.runLater(() -> {
+            Label previewLabel = new Label(file.fullPath());
+            previewLabel.setStyle("-fx-background-color: white; -fx-padding: 5px; -fx-border-color: gray; -fx-border-width: 1px;");
+
+            previewPopup.getContent().clear();
+            previewPopup.getContent().add(previewLabel);
+
+            Bounds bounds = autoCompleteList.localToScreen(autoCompleteList.getBoundsInLocal());
+            previewPopup.setX(bounds.getMaxX() + 10);
+            previewPopup.setY(bounds.getMinY());
+
+            previewPopup.show(autoCompleteList.getScene().getWindow());
+        });
     }
 }

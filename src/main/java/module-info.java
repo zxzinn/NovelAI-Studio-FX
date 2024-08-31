@@ -22,6 +22,7 @@ module com.zxzinn.novelai {
     requires annotations;
     requires com.google.guice;
     requires javafx.media;
+    requires org.apache.commons.text;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
@@ -47,4 +48,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.utils.image;
     exports com.zxzinn.novelai.utils.embed;
     exports com.zxzinn.novelai.test;
+    opens com.zxzinn.novelai.service.generation to javafx.fxml;
 }

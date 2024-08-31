@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.zxzinn.novelai.service.generation.AutoCompleteHandler;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import javafx.fxml.FXML;
