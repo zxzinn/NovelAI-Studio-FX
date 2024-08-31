@@ -69,6 +69,9 @@ public class Application extends javafx.application.Application {
             // 設置窗口位置為屏幕中央
             primaryStage.centerOnScreen();
 
+            // 將 Stage 傳遞給 MainController
+            mainController.setStage(primaryStage);
+
             loadingScreen.setProgress(1.0);
             loadingScreen.setMessage("載入完成");
 
@@ -78,9 +81,6 @@ public class Application extends javafx.application.Application {
                     primaryStage.show();
                 });
             });
-
-            // 將 Stage 傳遞給 MainController
-            mainController.setStage(primaryStage);
 
         } catch (Exception e) {
             log.error("初始化組件時發生錯誤", e);

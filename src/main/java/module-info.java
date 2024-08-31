@@ -21,6 +21,7 @@ module com.zxzinn.novelai {
     requires com.fasterxml.jackson.dataformat.yaml;
     requires annotations;
     requires com.google.guice;
+    requires javafx.media;
 
     opens com.zxzinn.novelai to javafx.fxml;
     opens com.zxzinn.novelai.api to com.google.gson;
