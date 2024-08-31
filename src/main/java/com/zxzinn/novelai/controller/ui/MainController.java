@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
 
@@ -63,6 +64,6 @@ public class MainController {
 
     private void handleFileDrop(File file) {
         System.out.println("File dropped: " + file.getAbsolutePath());
-        NotificationService.showNotification("文件已拖放: " + file.getName(), javafx.util.Duration.seconds(3));
+        NotificationService.showNotification("文件已拖放: " + file.getName(), Duration.seconds(3));
     }
 }

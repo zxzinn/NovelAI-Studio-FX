@@ -34,7 +34,7 @@ public class LoadingScreen implements LoadingManager.LoadingObserver {
             Platform.runLater(this::createAndShowStage);
         }
         try {
-            showLatch.await(); // 等待 loading screen 顯示
+            showLatch.await();
         } catch (InterruptedException e) {
             log.error("等待 loading screen 顯示時被中斷", e);
             Thread.currentThread().interrupt();

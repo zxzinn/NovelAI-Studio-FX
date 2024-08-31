@@ -43,7 +43,7 @@ public class AppModule extends AbstractModule {
 
     @Provides
     @Singleton
-    FileManagerService provideFileManagerService(SettingsManager settingsManager) throws IOException, IOException {
+    FileManagerService provideFileManagerService(SettingsManager settingsManager) throws IOException {
         return new FileManagerService(settingsManager);
     }
 

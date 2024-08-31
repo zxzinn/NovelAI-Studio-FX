@@ -14,7 +14,7 @@ public class SimpleTokenizer {
     private final Map<String, Integer> encoder;
     private final Map<String, Integer> bpeRanks;
     private final Map<String, String> cache;
-    private final Pattern pat;
+    private final Pattern pattern;
 
     public SimpleTokenizer(String bpePath) throws IOException {
         byteEncoder = bytesToUnicode();
@@ -37,7 +37,7 @@ public class SimpleTokenizer {
 
         cache = new HashMap<>();
         // 修改正則表達式，排除 { } [ ] 和換行符
-        pat = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
+        pattern = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
     }
 
     @NotNull
@@ -67,10 +67,10 @@ public class SimpleTokenizer {
     @NotNull
     private List<String[]> readMerges(String path) throws IOException {
         List<String[]> merges = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path)), StandardCharsets.UTF_8))) {
-            br.readLine(); // Skip first line
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path)), StandardCharsets.UTF_8))) {
+            bufferedReader.readLine(); // Skip first line
             String line;
-            while ((line = br.readLine()) != null && merges.size() < 49152 - 256 - 2 + 1) {
+            while ((line = bufferedReader.readLine()) != null && merges.size() < 49152 - 256 - 2 + 1) {
                 merges.add(line.split(" "));
             }
         }
@@ -121,7 +121,7 @@ public class SimpleTokenizer {
     public List<Integer> encode(String text) {
         List<Integer> bpeTokens = new ArrayList<>();
         text = text.replaceAll("\\s+", " ").trim().toLowerCase();
-        Matcher matcher = pat.matcher(text);
+        Matcher matcher = pattern.matcher(text);
 
         StringBuilder currentToken = new StringBuilder();
         while (matcher.find()) {

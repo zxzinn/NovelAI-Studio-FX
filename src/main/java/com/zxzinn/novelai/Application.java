@@ -8,6 +8,7 @@ import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.ui.LoadingManager;
 import com.zxzinn.novelai.utils.ui.LoadingScreen;
 import com.zxzinn.novelai.utils.ui.LoadingTask;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -42,7 +43,7 @@ public class Application extends javafx.application.Application {
 
         primaryStage.setOnCloseRequest(event -> {
             injector.getInstance(SettingsManager.class).shutdown();
-            javafx.application.Platform.exit();
+            Platform.exit();
             System.exit(0);
         });
     }
@@ -51,7 +52,6 @@ public class Application extends javafx.application.Application {
         loadingManager.addTask(new LoadingTask() {
             @Override
             public void execute() {
-                // 初始化服务
             }
 
             @Override
@@ -73,7 +73,7 @@ public class Application extends javafx.application.Application {
                     scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(ResourcePaths.STYLES_CSS)).toExternalForm());
 
                     primaryStage.setScene(scene);
-                    primaryStage.setTitle("NovelAI Desktop FX");
+                    primaryStage.setTitle("NovelAI Studio FX");
 
                     primaryStage.setWidth(1024);
                     primaryStage.setHeight(768);
@@ -81,7 +81,7 @@ public class Application extends javafx.application.Application {
 
                     mainController.setStage(primaryStage);
                 } catch (Exception e) {
-                    log.error("初始化组件时发生错误", e);
+                    log.error("初始化組件時發生錯誤", e);
                 }
             }
 
@@ -94,13 +94,8 @@ public class Application extends javafx.application.Application {
         loadingManager.addTask(new LoadingTask() {
             @Override
             public void execute() {
-                try {
-                    Thread.sleep(1000); // 模拟一些额外的加载时间
-                    loadingScreen.hide();
-                    primaryStage.show();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                loadingScreen.hide();
+                primaryStage.show();
             }
 
             @Override

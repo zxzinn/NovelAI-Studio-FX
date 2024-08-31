@@ -3,7 +3,6 @@ package com.zxzinn.novelai.utils.ui;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;

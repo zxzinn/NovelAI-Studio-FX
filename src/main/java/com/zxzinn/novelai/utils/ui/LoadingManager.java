@@ -52,7 +52,7 @@ public class LoadingManager {
             }
         });
         try {
-            future.get(); // 等待任务完成
+            future.get();
         } catch (Exception e) {
             e.printStackTrace();
         }
