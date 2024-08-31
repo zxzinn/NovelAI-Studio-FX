@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 
 @Log4j2
-public class LoadingScreen {
+public class LoadingScreen implements LoadingManager.LoadingObserver {
     private Stage loadingStage;
     private ProgressBar progressBar;
     private Label messageLabel;
@@ -39,6 +39,14 @@ public class LoadingScreen {
             log.error("等待 loading screen 顯示時被中斷", e);
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Override
+    public void onProgressUpdate(double progress, String message) {
+        Platform.runLater(() -> {
+            setProgress(progress);
+            setMessage(message);
+        });
     }
 
     private void createAndShowStage() {
