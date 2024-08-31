@@ -23,7 +23,7 @@ import java.io.IOException;
 @Singleton
 public class TabFactory {
 
-    private final SettingsManager settingsManager;
+    private final PropertiesManager propertiesManager;
     private final EmbedProcessor embedProcessor;
     private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
@@ -34,11 +34,11 @@ public class TabFactory {
     private final FileOperationService fileOperationService;
 
     @Inject
-    public TabFactory(SettingsManager settingsManager, EmbedProcessor embedProcessor,
+    public TabFactory(PropertiesManager propertiesManager, EmbedProcessor embedProcessor,
                       ImageGenerationService imageGenerationService, ImageUtils imageUtils,
                       FilePreviewService filePreviewService, FileManagerService fileManagerService,
-                      MetadataService metadataService, AlertService alertService,FileOperationService fileOperationService) {
-        this.settingsManager = settingsManager;
+                      MetadataService metadataService, AlertService alertService, FileOperationService fileOperationService) {
+        this.propertiesManager = propertiesManager;
         this.embedProcessor = embedProcessor;
         this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
@@ -51,7 +51,7 @@ public class TabFactory {
 
     public Tab createUnifiedGeneratorTab() throws IOException {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
-        GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(settingsManager);
+        GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(propertiesManager);
         loader.setControllerFactory(param -> new GenerationController(embedProcessor,
                 imageGenerationService, imageUtils, filePreviewService, generationSettingsManager));
         BorderPane content = loader.load();

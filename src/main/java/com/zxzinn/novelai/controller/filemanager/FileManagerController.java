@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.zxzinn.novelai.component.PreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
-import com.zxzinn.novelai.utils.common.TxtProcessor;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
@@ -12,7 +11,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.nio.file.WatchEvent;
-import java.util.List;
 
 @Log4j2
 public class FileManagerController {

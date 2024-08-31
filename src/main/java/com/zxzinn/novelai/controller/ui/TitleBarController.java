@@ -13,13 +13,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Setter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Optional;
 
+@Log4j2
 public class TitleBarController extends HBox {
-    private static final Logger logger = LogManager.getLogger(TitleBarController.class);
     private double xOffset = 0;
     private double yOffset = 0;
     @Setter private Stage stage;
@@ -96,7 +95,7 @@ public class TitleBarController extends HBox {
                     stage.setHeight(toHeight);
                     stage.setMaximized(maximize);
                     this.stop();
-                    logger.info("Animation completed in {} ms", Optional.of(elapsedTime / 1_000_000.0));
+                    log.info("Animation completed in {} ms", Optional.of(elapsedTime / 1_000_000.0));
                 } else {
                     double fraction = (double) elapsedTime / ANIMATION_DURATION;
                     stage.setX(startX + (toX - startX) * fraction);

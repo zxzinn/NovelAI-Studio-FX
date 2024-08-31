@@ -52,13 +52,13 @@ public class ImageGenerationService {
             if (entry == null) {
                 throw new IOException("ZIP文件為空");
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int len;
             while ((len = zis.read(buffer)) > 0) {
-                baos.write(buffer, 0, len);
+                byteArrayOutputStream.write(buffer, 0, len);
             }
-            return baos.toByteArray();
+            return byteArrayOutputStream.toByteArray();
         }
     }
 }

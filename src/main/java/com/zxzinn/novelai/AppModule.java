@@ -8,7 +8,7 @@ import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.WindowService;
-import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 
@@ -20,7 +20,7 @@ public class AppModule extends AbstractModule {
     protected void configure() {
         bind(EmbedProcessor.class).in(Singleton.class);
         bind(ImageUtils.class).in(Singleton.class);
-        bind(SettingsManager.class).toInstance(SettingsManager.getInstance());
+        bind(PropertiesManager.class).toInstance(PropertiesManager.getInstance());
     }
 
     @Provides
@@ -43,13 +43,13 @@ public class AppModule extends AbstractModule {
 
     @Provides
     @Singleton
-    FileManagerService provideFileManagerService(SettingsManager settingsManager) throws IOException {
-        return new FileManagerService(settingsManager);
+    FileManagerService provideFileManagerService(PropertiesManager propertiesManager) throws IOException {
+        return new FileManagerService(propertiesManager);
     }
 
     @Provides
     @Singleton
-    WindowService provideWindowService(SettingsManager settingsManager) {
-        return new WindowService(settingsManager);
+    WindowService provideWindowService(PropertiesManager propertiesManager) {
+        return new WindowService(propertiesManager);
     }
 }

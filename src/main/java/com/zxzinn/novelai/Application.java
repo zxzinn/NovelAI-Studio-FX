@@ -3,8 +3,8 @@ package com.zxzinn.novelai;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.zxzinn.novelai.controller.ui.MainController;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
-import com.zxzinn.novelai.utils.common.SettingsManager;
 import com.zxzinn.novelai.utils.ui.LoadingManager;
 import com.zxzinn.novelai.utils.ui.LoadingScreen;
 import com.zxzinn.novelai.utils.ui.LoadingTask;
@@ -42,7 +42,7 @@ public class Application extends javafx.application.Application {
         loadingManager.start();
 
         primaryStage.setOnCloseRequest(event -> {
-            injector.getInstance(SettingsManager.class).shutdown();
+            injector.getInstance(PropertiesManager.class).shutdown();
             Platform.exit();
             System.exit(0);
         });

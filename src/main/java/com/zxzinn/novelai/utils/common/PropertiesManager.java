@@ -14,23 +14,23 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Log4j2
-public class SettingsManager {
-    private static final String SETTINGS_FILE = CommonPaths.SETTINGS_FILE;
-    private final Map<String, String> settingsCache;
+public class PropertiesManager {
+    private static final String PROPERTIES_FILE = CommonPaths.PROPERTIES_FILE;
+    private final Map<String, String> propertiesCache;
     private final ReadWriteLock lock;
     private boolean isDirty = false;
     private final ScheduledExecutorService scheduler;
 
     private static class LazyHolder {
-        static final SettingsManager INSTANCE = new SettingsManager();
+        static final PropertiesManager INSTANCE = new PropertiesManager();
     }
 
-    public static SettingsManager getInstance() {
+    public static PropertiesManager getInstance() {
         return LazyHolder.INSTANCE;
     }
 
-    private SettingsManager() {
-        this.settingsCache = new ConcurrentHashMap<>();
+    private PropertiesManager() {
+        this.propertiesCache = new ConcurrentHashMap<>();
         this.lock = new ReentrantReadWriteLock();
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         loadSettings();
@@ -40,20 +40,20 @@ public class SettingsManager {
     private void loadSettings() {
         lock.writeLock().lock();
         try {
-            File file = new File(SETTINGS_FILE);
+            File file = new File(PROPERTIES_FILE);
             if (file.exists()) {
                 try (InputStream input = new FileInputStream(file)) {
                     Properties props = new Properties();
                     props.load(input);
                     for (String key : props.stringPropertyNames()) {
-                        settingsCache.put(key, props.getProperty(key));
+                        propertiesCache.put(key, props.getProperty(key));
                     }
-                    log.info("設定已從 {} 載入", SETTINGS_FILE);
+                    log.info("設定已從 {} 載入", PROPERTIES_FILE);
                 } catch (IOException e) {
-                    log.error("無法載入設定檔：{}", SETTINGS_FILE, e);
+                    log.error("無法載入設定檔：{}", PROPERTIES_FILE, e);
                 }
             } else {
-                log.info("設定檔 {} 不存在，將使用預設值", SETTINGS_FILE);
+                log.info("設定檔 {} 不存在，將使用預設值", PROPERTIES_FILE);
             }
         } finally {
             lock.writeLock().unlock();
@@ -65,13 +65,13 @@ public class SettingsManager {
         try {
             if (isDirty) {
                 Properties props = new Properties();
-                props.putAll(settingsCache);
-                try (OutputStream output = new FileOutputStream(SETTINGS_FILE)) {
+                props.putAll(propertiesCache);
+                try (OutputStream output = new FileOutputStream(PROPERTIES_FILE)) {
                     props.store(output, "NovelAI Generator Settings");
                     isDirty = false;
-                    log.info("設定已保存到 {}", SETTINGS_FILE);
+                    log.info("設定已保存到 {}", PROPERTIES_FILE);
                 } catch (IOException e) {
-                    log.error("無法保存設定檔：{}", SETTINGS_FILE, e);
+                    log.error("無法保存設定檔：{}", PROPERTIES_FILE, e);
                 }
             }
         } finally {
@@ -91,7 +91,7 @@ public class SettingsManager {
     public void setString(String key, String value) {
         lock.writeLock().lock();
         try {
-            settingsCache.put(key, value);
+            propertiesCache.put(key, value);
             isDirty = true;
         } finally {
             lock.writeLock().unlock();
@@ -101,7 +101,7 @@ public class SettingsManager {
     public String getString(String key, String defaultValue) {
         lock.readLock().lock();
         try {
-            return settingsCache.getOrDefault(key, defaultValue);
+            return propertiesCache.getOrDefault(key, defaultValue);
         } finally {
             lock.readLock().unlock();
         }

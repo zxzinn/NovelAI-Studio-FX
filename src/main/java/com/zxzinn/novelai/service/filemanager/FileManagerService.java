@@ -2,7 +2,7 @@ package com.zxzinn.novelai.service.filemanager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import javafx.stage.DirectoryChooser;
@@ -18,7 +18,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -35,17 +34,17 @@ public class FileManagerService {
     private final Set<Path> watchedDirectories;
     private final Map<WatchKey, Path> watchKeyToPath;
     private final WatchService watchService;
-    private final SettingsManager settingsManager;
+    private final PropertiesManager propertiesManager;
     private final ExecutorService executorService;
     private final ScheduledExecutorService scheduledExecutorService;
     @Setter private BiConsumer<String, WatchEvent.Kind<?>> fileChangeListener;
 
     @Inject
-    public FileManagerService(SettingsManager settingsManager) throws IOException {
+    public FileManagerService(PropertiesManager propertiesManager) throws IOException {
         this.watchedDirectories = ConcurrentHashMap.newKeySet();
         this.watchKeyToPath = new ConcurrentHashMap<>();
         this.watchService = FileSystems.getDefault().newWatchService();
-        this.settingsManager = settingsManager;
+        this.propertiesManager = propertiesManager;
         this.executorService = new ThreadPoolExecutor(
                 THREAD_POOL_SIZE, THREAD_POOL_SIZE,
                 0L, TimeUnit.MILLISECONDS,
@@ -58,7 +57,7 @@ public class FileManagerService {
     }
 
     private void loadWatchedDirectories() {
-        List<String> savedDirectories = settingsManager.getStringList(WATCHED_DIRECTORIES_KEY, new ArrayList<>());
+        List<String> savedDirectories = propertiesManager.getStringList(WATCHED_DIRECTORIES_KEY, new ArrayList<>());
         for (String dir : savedDirectories) {
             try {
                 addWatchedDirectory(dir);
@@ -135,7 +134,7 @@ public class FileManagerService {
             watchKeyToPath.put(key, directory);
             log.info("已添加監視目錄: {}", directory);
 
-            settingsManager.addToStringList(WATCHED_DIRECTORIES_KEY, path);
+            propertiesManager.addToStringList(WATCHED_DIRECTORIES_KEY, path);
 
             if (fileChangeListener != null) {
                 fileChangeListener.accept(path, StandardWatchEventKinds.ENTRY_CREATE);
@@ -156,7 +155,7 @@ public class FileManagerService {
             watchedDirectories.remove(dirToRemove);
             removeWatchKey(dirToRemove);
             log.info("已移除監視目錄: {}", dirToRemove);
-            settingsManager.removeFromStringList(WATCHED_DIRECTORIES_KEY, dirToRemove.toString());
+            propertiesManager.removeFromStringList(WATCHED_DIRECTORIES_KEY, dirToRemove.toString());
         } else {
             log.warn("嘗試移除不存在的監視目錄: {}", directory);
         }
@@ -248,12 +247,8 @@ public class FileManagerService {
         }
     }
 
-    public void setDirectoryExpanded(String path, boolean expanded) {
-        settingsManager.setBoolean(EXPANDED_PREFIX + path, expanded);
-    }
-
     public boolean isDirectoryExpanded(String path) {
-        return settingsManager.getBoolean(EXPANDED_PREFIX + path, false);
+        return propertiesManager.getBoolean(EXPANDED_PREFIX + path, false);
     }
 
     public String getWatchedDirectoryFullPath(String dirName) {

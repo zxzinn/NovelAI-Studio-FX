@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.component.PromptArea;
-import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import javafx.scene.control.*;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 
 @RequiredArgsConstructor
 public class GenerationSettingsManager {
-    private final SettingsManager settingsManager;
+    private final PropertiesManager propertiesManager;
 
     public void loadSettings(@NotNull TextField apiKeyField, @NotNull ComboBox<String> modelComboBox, @NotNull TextField widthField,
                              @NotNull TextField heightField, @NotNull ComboBox<String> samplerComboBox, @NotNull TextField stepsField,
@@ -18,24 +18,24 @@ public class GenerationSettingsManager {
                              @NotNull PromptArea negativePromptArea, @NotNull TextField outputDirectoryField,
                              @NotNull ComboBox<String> generationModeComboBox, @NotNull CheckBox smeaCheckBox, @NotNull CheckBox smeaDynCheckBox,
                              @NotNull Slider strengthSlider, @NotNull TextField extraNoiseSeedField, @NotNull TextField ratioField, @NotNull TextField countField) {
-        apiKeyField.setText(settingsManager.getString("apiKey", ""));
-        modelComboBox.setValue(settingsManager.getString("model", "nai-diffusion-3"));
-        widthField.setText(String.valueOf(settingsManager.getInt("width", 832)));
-        heightField.setText(String.valueOf(settingsManager.getInt("height", 1216)));
-        samplerComboBox.setValue(settingsManager.getString("sampler", "k_euler"));
-        stepsField.setText(String.valueOf(settingsManager.getInt("steps", 28)));
-        seedField.setText(String.valueOf(settingsManager.getInt("seed", 0)));
-        generateCountComboBox.setValue(settingsManager.getString("generateCount", "1"));
-        positivePromptArea.setPromptText(settingsManager.getString("positivePrompt", ""));
-        negativePromptArea.setPromptText(settingsManager.getString("negativePrompt", ""));
-        outputDirectoryField.setText(settingsManager.getString("outputDirectory", "output"));
-        generationModeComboBox.setValue(settingsManager.getString("generationMode", "Text2Image"));
-        smeaCheckBox.setSelected(settingsManager.getBoolean("smea", true));
-        smeaDynCheckBox.setSelected(settingsManager.getBoolean("smeaDyn", false));
-        strengthSlider.setValue(settingsManager.getDouble("strength", 0.5));
-        extraNoiseSeedField.setText(String.valueOf(settingsManager.getLong("extraNoiseSeed", 0)));
-        ratioField.setText(String.valueOf(settingsManager.getInt("ratio", 7))); // 新增
-        countField.setText(String.valueOf(settingsManager.getInt("count", 1))); // 新增
+        apiKeyField.setText(propertiesManager.getString("apiKey", ""));
+        modelComboBox.setValue(propertiesManager.getString("model", "nai-diffusion-3"));
+        widthField.setText(String.valueOf(propertiesManager.getInt("width", 832)));
+        heightField.setText(String.valueOf(propertiesManager.getInt("height", 1216)));
+        samplerComboBox.setValue(propertiesManager.getString("sampler", "k_euler"));
+        stepsField.setText(String.valueOf(propertiesManager.getInt("steps", 28)));
+        seedField.setText(String.valueOf(propertiesManager.getInt("seed", 0)));
+        generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
+        positivePromptArea.setPromptText(propertiesManager.getString("positivePrompt", ""));
+        negativePromptArea.setPromptText(propertiesManager.getString("negativePrompt", ""));
+        outputDirectoryField.setText(propertiesManager.getString("outputDirectory", "output"));
+        generationModeComboBox.setValue(propertiesManager.getString("generationMode", "Text2Image"));
+        smeaCheckBox.setSelected(propertiesManager.getBoolean("smea", true));
+        smeaDynCheckBox.setSelected(propertiesManager.getBoolean("smeaDyn", false));
+        strengthSlider.setValue(propertiesManager.getDouble("strength", 0.5));
+        extraNoiseSeedField.setText(String.valueOf(propertiesManager.getLong("extraNoiseSeed", 0)));
+        ratioField.setText(String.valueOf(propertiesManager.getInt("ratio", 7))); // 新增
+        countField.setText(String.valueOf(propertiesManager.getInt("count", 1))); // 新增
     }
 
     public void setupListeners(TextField apiKeyField, ComboBox<String> modelComboBox, TextField widthField,
@@ -44,24 +44,24 @@ public class GenerationSettingsManager {
                                PromptArea negativePromptArea, TextField outputDirectoryField,
                                ComboBox<String> generationModeComboBox, CheckBox smeaCheckBox, CheckBox smeaDynCheckBox,
                                Slider strengthSlider, TextField extraNoiseSeedField, TextField ratioField, TextField countField) {
-        setupTextFieldListener(apiKeyField, "apiKey", settingsManager::setString);
-        setupComboBoxListener(modelComboBox, "model", settingsManager::setString);
-        setupTextFieldListener(widthField, "width", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupTextFieldListener(heightField, "height", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupComboBoxListener(samplerComboBox, "sampler", settingsManager::setString);
-        setupTextFieldListener(stepsField, "steps", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupTextFieldListener(seedField, "seed", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value)));
-        setupComboBoxListener(generateCountComboBox, "generateCount", settingsManager::setString);
-        setupPromptAreaListener(positivePromptArea, "positivePrompt", settingsManager::setString);
-        setupPromptAreaListener(negativePromptArea, "negativePrompt", settingsManager::setString);
-        setupTextFieldListener(outputDirectoryField, "outputDirectory", settingsManager::setString);
-        setupComboBoxListener(generationModeComboBox, "generationMode", settingsManager::setString);
-        setupCheckBoxListener(smeaCheckBox, "smea", settingsManager::setBoolean);
-        setupCheckBoxListener(smeaDynCheckBox, "smeaDyn", settingsManager::setBoolean);
-        setupSliderListener(strengthSlider, settingsManager::setDouble);
-        setupTextFieldListener(extraNoiseSeedField, "extraNoiseSeed", (key, value) -> settingsManager.setLong(key, Long.parseLong(value)));
-        setupTextFieldListener(ratioField, "ratio", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
-        setupTextFieldListener(countField, "count", (key, value) -> settingsManager.setInt(key, Integer.parseInt(value))); // 新增
+        setupTextFieldListener(apiKeyField, "apiKey", propertiesManager::setString);
+        setupComboBoxListener(modelComboBox, "model", propertiesManager::setString);
+        setupTextFieldListener(widthField, "width", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value)));
+        setupTextFieldListener(heightField, "height", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value)));
+        setupComboBoxListener(samplerComboBox, "sampler", propertiesManager::setString);
+        setupTextFieldListener(stepsField, "steps", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value)));
+        setupTextFieldListener(seedField, "seed", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value)));
+        setupComboBoxListener(generateCountComboBox, "generateCount", propertiesManager::setString);
+        setupPromptAreaListener(positivePromptArea, "positivePrompt", propertiesManager::setString);
+        setupPromptAreaListener(negativePromptArea, "negativePrompt", propertiesManager::setString);
+        setupTextFieldListener(outputDirectoryField, "outputDirectory", propertiesManager::setString);
+        setupComboBoxListener(generationModeComboBox, "generationMode", propertiesManager::setString);
+        setupCheckBoxListener(smeaCheckBox, "smea", propertiesManager::setBoolean);
+        setupCheckBoxListener(smeaDynCheckBox, "smeaDyn", propertiesManager::setBoolean);
+        setupSliderListener(strengthSlider, propertiesManager::setDouble);
+        setupTextFieldListener(extraNoiseSeedField, "extraNoiseSeed", (key, value) -> propertiesManager.setLong(key, Long.parseLong(value)));
+        setupTextFieldListener(ratioField, "ratio", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value))); // 新增
+        setupTextFieldListener(countField, "count", (key, value) -> propertiesManager.setInt(key, Integer.parseInt(value))); // 新增
     }
 
     private void setupTextFieldListener(@NotNull TextField textField, String key, java.util.function.BiConsumer<String, String> setter) {

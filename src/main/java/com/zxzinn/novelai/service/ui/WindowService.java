@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.service.ui;
 
 import com.google.inject.Inject;
-import com.zxzinn.novelai.utils.common.SettingsManager;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
@@ -18,15 +18,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class WindowService {
     @Setter
     private Stage stage;
-    private final SettingsManager settingsManager;
+    private final PropertiesManager propertiesManager;
     private double xOffset = 0;
     private double yOffset = 0;
     private Rectangle2D restoreBounds;
     private boolean isMaximized = false;
 
     @Inject
-    public WindowService(SettingsManager settingsManager) {
-        this.settingsManager = settingsManager;
+    public WindowService(PropertiesManager propertiesManager) {
+        this.propertiesManager = propertiesManager;
     }
 
     public void setupStage(Stage stage) {
@@ -120,11 +120,11 @@ public class WindowService {
     }
 
     private void loadWindowSettings() {
-        double width = settingsManager.getDouble("window.width", 1024);
-        double height = settingsManager.getDouble("window.height", 768);
-        double x = settingsManager.getDouble("window.x", -1);
-        double y = settingsManager.getDouble("window.y", -1);
-        boolean maximized = settingsManager.getBoolean("window.maximized", false);
+        double width = propertiesManager.getDouble("window.width", 1024);
+        double height = propertiesManager.getDouble("window.height", 768);
+        double x = propertiesManager.getDouble("window.x", -1);
+        double y = propertiesManager.getDouble("window.y", -1);
+        boolean maximized = propertiesManager.getBoolean("window.maximized", false);
 
         if (x >= 0 && y >= 0) {
             stage.setX(x);
@@ -143,12 +143,12 @@ public class WindowService {
 
     public void saveWindowSettings() {
         if (!isMaximized) {
-            settingsManager.setDouble("window.width", stage.getWidth());
-            settingsManager.setDouble("window.height", stage.getHeight());
-            settingsManager.setDouble("window.x", stage.getX());
-            settingsManager.setDouble("window.y", stage.getY());
+            propertiesManager.setDouble("window.width", stage.getWidth());
+            propertiesManager.setDouble("window.height", stage.getHeight());
+            propertiesManager.setDouble("window.x", stage.getX());
+            propertiesManager.setDouble("window.y", stage.getY());
         }
-        settingsManager.setBoolean("window.maximized", isMaximized);
+        propertiesManager.setBoolean("window.maximized", isMaximized);
     }
 
     public void toggleMaximize() {
@@ -172,7 +172,7 @@ public class WindowService {
 
 
     public void closeWindow() {
-        settingsManager.shutdown();
+        propertiesManager.shutdown();
         stage.close();
         Platform.exit();
         System.exit(0);
