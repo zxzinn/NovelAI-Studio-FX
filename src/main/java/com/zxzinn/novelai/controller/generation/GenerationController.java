@@ -41,7 +41,6 @@ public class GenerationController {
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
-    private final UIInitializer uiInitializer;
     private final GenerationHandler generationHandler;
     private final PromptManager promptManager;
 
@@ -94,7 +93,6 @@ public class GenerationController {
         this.imageUtils = imageUtils;
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
-        this.uiInitializer = new UIInitializer();
         this.generationHandler = new GenerationHandler(imageGenerationService);
         this.promptManager = new PromptManager(embedProcessor);
     }
@@ -112,8 +110,18 @@ public class GenerationController {
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
 
-        UIInitializer.initializeFields(modelComboBox, samplerComboBox, generateCountComboBox,
-                positivePromptArea, negativePromptArea, positivePromptPreviewArea, negativePromptPreviewArea, strengthSlider);
+        UIInitializer.builder()
+                .modelComboBox(modelComboBox)
+                .samplerComboBox(samplerComboBox)
+                .generateCountComboBox(generateCountComboBox)
+                .positivePromptArea(positivePromptArea)
+                .negativePromptArea(negativePromptArea)
+                .positivePromptPreviewArea(positivePromptPreviewArea)
+                .negativePromptPreviewArea(negativePromptPreviewArea)
+                .strengthSlider(strengthSlider)
+                .build()
+                .initializeFields();
+
         loadSettings();
         setupListeners();
         promptManager.setupPromptControls(positivePromptControls, negativePromptControls,
