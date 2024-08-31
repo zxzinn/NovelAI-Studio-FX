@@ -74,5 +74,16 @@ NovelAI-Studio-FX 採用 [MIT 許可證](LICENSE)。
 如果你喜歡 NovelAI-Studio-FX，請給我們一個 ⭐️！你的支持是我們持續改進的最大動力。
 
 ## 🙏 致謝
-
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/TwilitAtri">
+        <img src="https://github.com/TwilitAtri.png" width="100px;" alt="User"/><br />
+        <sub><b>TwilitAtri</b></sub>
+      </a><br />
+      <sub>Discord: culachino</sub>
+    </td>
+    <!-- 添加更多貢獻者、參考兩個td間的格式-->
+  </tr>
+</table>
 ---
