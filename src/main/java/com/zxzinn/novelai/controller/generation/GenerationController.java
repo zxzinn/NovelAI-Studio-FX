@@ -376,6 +376,7 @@ public class GenerationController {
             try {
                 BufferedImage image = imageUtils.loadImage(selectedFile);
                 base64Image = imageUtils.imageToBase64(image);
+                previewPane.updatePreview(selectedFile);
                 log.info("圖片已上傳: {}", selectedFile.getName());
                 NotificationService.showNotification("圖片上傳成功", Duration.seconds(3));
             } catch (IOException e) {
