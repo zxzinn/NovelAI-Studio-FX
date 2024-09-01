@@ -47,6 +47,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.service.ui;
     exports com.zxzinn.novelai.utils.image;
     exports com.zxzinn.novelai.utils.embed;
-    exports com.zxzinn.novelai.test;
     opens com.zxzinn.novelai.service.generation to javafx.fxml;
 }
