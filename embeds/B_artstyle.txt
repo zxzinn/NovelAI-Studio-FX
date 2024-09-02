@@ -1,0 +1,65 @@
+dark
+light
+guro
+realistic
+science fiction
+cityscape
+landscape/scenery
+real
+personification
+optical illusion
+traditional media
+fine art parody
+cover
+silhouette
+watercolor medium
+bust
+profile
+expressions
+dieselpunk
+synthwave
+lineart
+Studio Ghibli
+dreamlike
+faux traditional media
+Polaroid art
+zoom layer
+gradient background
+simple background
+style of Pixar
+monochrome
+Encaustic painting
+pixel art
+Ink wash painting
+Mezzotint
+posing sketch
+ monochrome
+abstract art
+ASCII art
+art nouveau
+Monet style
+alphonse mucha
+rim light
+Volumetric Lighting
+glowing neon lights
+lens flare
+metallic luster
+moody lighting
+Tyndall effect
+light leaks
+polaroid
+acrylic_paint_medium
+depth_of_field
+blurry_foreground
+sparkle_background
+halftone_background
+city_lights
+clock_background
+pillarboxed
+viewfinder
+windowboxed
+crop_top_overhang
+foral_background
+flashback
+floral_background
+abstract_background

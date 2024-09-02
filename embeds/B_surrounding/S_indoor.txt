@@ -1,0 +1,63 @@
+indoor
+toilet stall
+bathroom
+otaku room
+cafeteria
+classroom
+clubroom
+bedroom
+kitchen
+dormitory
+dungeon
+infirmary
+stage
+server room
+art room
+bathing
+stairs
+basement
+electrical room
+greenhouse
+floor
+tile_floor
+tatami
+invisible_chair
+folding_chair
+bed
+office_chair
+couch
+wheelchair
+kotatsu
+fireplace
+window_
+sash
+curtains
+door
+sliding_doors
+clothes_rack
+air_conditioner
+school_desk
+table
+chair
+armchair
+lounge_chair
+beach_chair
+bed_sheet
+mattress
+futon
+cushion
+carpet
+pillow
+dumpling_Hug_Pillow
+pillow_hug
+yes-no_pillow
+stuffed_animal
+stuffed_bunny
+koakuma
+bathtub
+rubber_duck
+shower_head
+toilet
+squat_toilet
+tiles
+soap
