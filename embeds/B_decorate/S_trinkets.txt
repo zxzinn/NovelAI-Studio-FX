@@ -1,0 +1,62 @@
+gem
+collar
+iron_cross
+garter_straps
+bandaid_on_knee
+leg_garter
+thigh_ribbon
+thigh_holster
+cross
+diffraction_spikes
+bandaid
+scarf
+crystal
+brooch
+jewelry
+stitches
+anchor_symbol
+thigh_strap
+knee_pads
+kneepits
+garters
+flag_print
+ribbon
+emblem
+heart_lock_(kantai_collection)
+joints
+lace
+stud_earrings
+necklace
+belly_chain_
+amulet
+arm_garter
+bandaged_leg
+ankle_lace-up
+bandaid_on_leg
+lace-trimmed_hairband
+latin_cross
+leg_ribbon
+belt
+chest_jewel
+ring
+forehead_jewel
+wedding_band
+bell
+tassel
+earrings
+single_earring
+steam
+sapphire brooch
+corsage
+puppet rings
+drop earrings
+pearl bracelet
+sunburst
+stud earrings
+bangle
+hoop earrings
+pendant
+wristband
+metal collar
+choker
+bracelet
