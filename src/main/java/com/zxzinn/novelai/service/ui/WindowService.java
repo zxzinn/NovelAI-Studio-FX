@@ -16,8 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WindowService {
-    @Setter
-    private Stage stage;
+    @Setter private Stage stage;
     private final PropertiesManager propertiesManager;
     private double xOffset = 0;
     private double yOffset = 0;

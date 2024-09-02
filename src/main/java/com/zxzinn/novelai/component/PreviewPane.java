@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.component;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
@@ -14,6 +15,7 @@ public class PreviewPane extends StackPane {
     private final ScrollPane scrollPane;
     private final FilePreviewService filePreviewService;
 
+    @Inject
     public PreviewPane(FilePreviewService filePreviewService) {
         this.filePreviewService = filePreviewService;
         this.scrollPane = new ScrollPane();

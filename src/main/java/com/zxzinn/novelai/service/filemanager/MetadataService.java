@@ -36,7 +36,6 @@ public class MetadataService {
     private final Path executablePath;
     private final ExecutorService executorService;
 
-    @Inject
     public MetadataService() {
         this.executablePath = extractExecutable();
         this.executorService = Executors.newCachedThreadPool();

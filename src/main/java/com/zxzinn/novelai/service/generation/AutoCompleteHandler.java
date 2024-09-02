@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
@@ -26,13 +27,13 @@ public class AutoCompleteHandler {
     private final ListView<EmbedFileManager.EmbedFile> autoCompleteList;
     private final Popup autoCompletePopup;
     private final Popup previewPopup;
-    @Setter
-    private EmbedFileManager embedFileManager;
+    @Setter private EmbedFileManager embedFileManager;
     private int autoCompleteStartIndex = -1;
 
     private static final Pattern EMBED_PATTERN = Pattern.compile("<([^>:]+)(?::([^>]+))?>", Pattern.DOTALL);
     private static final int MAX_LEVENSHTEIN_DISTANCE = 2;
 
+    @Inject
     public AutoCompleteHandler(TextArea promptTextArea) {
         this.promptTextArea = promptTextArea;
         this.autoCompleteList = setupAutoCompleteList();

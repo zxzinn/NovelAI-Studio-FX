@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.utils.ui;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -20,6 +21,7 @@ public class DragAndDropHandler {
     private final Consumer<File> onFileDrop;
     private StackPane overlay;
 
+    @Inject
     public DragAndDropHandler(Consumer<File> onFileDrop) {
         this.onFileDrop = onFileDrop;
     }

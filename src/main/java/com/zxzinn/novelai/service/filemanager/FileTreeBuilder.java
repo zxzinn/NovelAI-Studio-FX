@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.service.filemanager;
 
+import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.scene.control.TreeItem;
 import lombok.Setter;
@@ -26,6 +27,7 @@ public class FileTreeBuilder {
     @Setter private Predicate<File> fileFilter;
     @Setter private Comparator<File> fileComparator;
 
+    @Inject
     public FileTreeBuilder(ExecutorService executorService, Function<String, Boolean> isExpandedChecker,
                            Predicate<File> fileFilter, Comparator<File> fileComparator) {
         this.executorService = executorService;

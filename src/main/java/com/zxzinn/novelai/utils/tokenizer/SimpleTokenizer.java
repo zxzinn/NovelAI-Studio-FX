@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.utils.tokenizer;
 
+import com.google.inject.Inject;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -16,6 +17,7 @@ public class SimpleTokenizer {
     private final Map<String, String> cache;
     private final Pattern pattern;
 
+    @Inject
     public SimpleTokenizer(String bpePath) throws IOException {
         byteEncoder = bytesToUnicode();
         List<String[]> merges = readMerges(bpePath);

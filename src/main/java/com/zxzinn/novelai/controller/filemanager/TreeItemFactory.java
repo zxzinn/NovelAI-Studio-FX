@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.controller.filemanager;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import javafx.scene.control.TreeItem;
 import org.apache.commons.io.FilenameUtils;
@@ -11,6 +12,7 @@ import java.io.File;
 public class TreeItemFactory {
     private final FileManagerService fileManagerService;
 
+    @Inject
     public TreeItemFactory(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
     }

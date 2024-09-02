@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.utils.ui;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.TabFactory;
 import javafx.scene.control.Button;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class UIManager {
     private final WindowService windowService;
 
+    @Inject
     public UIManager(WindowService windowService) {
         this.windowService = windowService;
     }

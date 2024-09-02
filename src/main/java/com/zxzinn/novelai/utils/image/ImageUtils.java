@@ -12,7 +12,7 @@ import java.util.Base64;
 @Log4j2
 public class ImageUtils {
 
-    public String imageToBase64(BufferedImage image) throws IOException {
+    public static String imageToBase64(BufferedImage image) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "png", outputStream);
         byte[] imageBytes = outputStream.toByteArray();
@@ -40,7 +40,7 @@ public class ImageUtils {
         }
     }
 
-    public BufferedImage loadImage(File file) throws IOException {
+    public static BufferedImage loadImage(File file) throws IOException {
         return ImageIO.read(file);
     }
 }

@@ -1,5 +1,6 @@
 package com.zxzinn.novelai.controller.filemanager;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -29,6 +30,7 @@ public class FileTreeController {
     private final Map<String, TreeItem<String>> pathToItemMap = new HashMap<>();
     private final TreeItemFactory treeItemFactory;
 
+    @Inject
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
         this.treeItemFactory = new TreeItemFactory(fileManagerService);
