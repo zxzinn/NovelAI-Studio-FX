@@ -1,6 +1,0 @@
-lowres
-jpeg artifacts
-worst quality
-watermark
-blurry
-very displeasing
