@@ -8,6 +8,7 @@ import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.ui.LoadingManager;
 import com.zxzinn.novelai.utils.ui.LoadingScreen;
 import com.zxzinn.novelai.utils.ui.LoadingTask;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.Objects;
 
 @Log4j2
-public class Application extends javafx.application.Application {
+public class MainApplication extends Application {
 
     private Stage primaryStage;
     private LoadingScreen loadingScreen;
