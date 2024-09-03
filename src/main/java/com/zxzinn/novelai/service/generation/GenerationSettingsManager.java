@@ -1,16 +1,20 @@
 package com.zxzinn.novelai.service.generation;
 
+import com.google.inject.Inject;
 import com.zxzinn.novelai.component.PromptArea;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import javafx.scene.control.*;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 
-@RequiredArgsConstructor
 public class GenerationSettingsManager {
     private final PropertiesManager propertiesManager;
+
+    @Inject
+    public GenerationSettingsManager(PropertiesManager propertiesManager) {
+        this.propertiesManager = propertiesManager;
+    }
 
     public void loadSettings(@NotNull TextField apiKeyField, @NotNull ComboBox<String> modelComboBox, @NotNull TextField widthField,
                              @NotNull TextField heightField, @NotNull ComboBox<String> samplerComboBox, @NotNull TextField stepsField,
