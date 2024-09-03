@@ -46,18 +46,18 @@ jobs:
       - name: Display Maven version
         run: mvn --version
 
-      - name: Calculate SHA-256 checksum
+      - name: Calculate SHA-256 checksum (Linux)
+        if: runner.os == 'Linux'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            sha256sum target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            $hash = (Get-FileHash -Path target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar -Algorithm SHA256).Hash.ToLower()
-            $hash + " *NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar" | Out-File -Encoding ASCII target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
-          else
-            echo "Unsupported operating system"
-            exit 1
-          fi
+          sha256sum target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
         shell: bash
+
+      - name: Calculate SHA-256 checksum (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $hash = Get-FileHash -Path target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar -Algorithm SHA256
+          "$($hash.Hash.ToLower()) *NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar" | Out-File -Encoding ASCII target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+        shell: pwsh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
