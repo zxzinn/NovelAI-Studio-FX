@@ -8,15 +8,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.kohsuke.github.GHAsset;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.semver4j.Semver;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -68,10 +65,8 @@ public class VersionCheckService {
         }
     }
 
-    private String getCurrentVersion() throws Exception {
-        MavenXpp3Reader reader = new MavenXpp3Reader();
-        Model model = reader.read(new FileReader("pom.xml"));
-        return model.getProperties().getProperty("revision");
+    private String getCurrentVersion() {
+        return propertiesManager.getString("app.version", "0.0.0");
     }
 
     private String getLatestVersionWithRetry() throws IOException {
