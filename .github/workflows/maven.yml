@@ -51,7 +51,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
             sha256sum target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
           elif [ "$RUNNER_OS" == "Windows" ]; then
-            certutil -hashfile target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar SHA256 | findstr /v "hash" > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+            certutil -hashfile target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar SHA256 | findstr /v "CertUtil" | findstr /v "SHA256" > target\NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
           else
             echo "Unsupported operating system"
             exit 1
