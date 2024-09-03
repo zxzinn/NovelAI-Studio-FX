@@ -87,7 +87,7 @@ public class FileOperationService {
             }
             CompletableFuture.runAsync(() -> {
                 try {
-                    processFile(file, cleanedDir);
+                    processMetadataCleaner(file, cleanedDir);
                     int completed = processedCount.incrementAndGet();
                     updateProgressOnUI(completed, totalFiles, progressBar, progressLabel);
                     if (completed == totalFiles) {
@@ -101,7 +101,7 @@ public class FileOperationService {
         }
     }
 
-    private void processFile(File file, File cleanedDir) throws IOException {
+    private void processMetadataCleaner(File file, File cleanedDir) throws IOException {
         BufferedImage image = ImageIO.read(file);
         if (image == null) {
             throw new IOException("無法讀取圖像文件: " + file.getName());
@@ -125,12 +125,12 @@ public class FileOperationService {
     private void onProcessingComplete(List<File> processedFiles, AlertService alertService, FileTreeController fileTreeController) {
         Platform.runLater(() -> {
             alertService.showAlert("成功", String.format("已處理 %d 個文件的元數據清除。", processedFiles.size()));
-            refreshProcessedDirectories(processedFiles);
+            refreshProcessedDirectories();
             fileTreeController.refreshTreeView();
         });
     }
 
-    private void refreshProcessedDirectories(List<File> processedFiles) {
+    private void refreshProcessedDirectories() {
         File cleanedDir = new File("cleaned");
         if (cleanedDir.exists()) {
             try {

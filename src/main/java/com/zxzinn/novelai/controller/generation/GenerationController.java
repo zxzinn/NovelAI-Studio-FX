@@ -31,12 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class GenerationController {
-    private static final int MAX_RETRIES = 5;
-    private static final long RETRY_DELAY = 20000;
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
 
-    private final EmbedProcessor embedProcessor;
-    private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
@@ -63,14 +59,13 @@ public class GenerationController {
     @FXML private StackPane previewContainer;
     @FXML private HistoryImagesPane historyImagesPane;
     @FXML private TextField outputDirectoryField;
-    @FXML private PreviewPane previewPane;
+    @FXML private ImagePreviewPane imagePreviewPane;
     @FXML private Button generateButton;
     @FXML private TitledPane txt2imgSettingsPane;
     @FXML private TitledPane img2imgSettingsPane;
     @FXML private CheckBox smeaCheckBox;
     @FXML private CheckBox smeaDynCheckBox;
     @FXML private Slider strengthSlider;
-    @FXML private Label strengthLabel;
     @FXML private TextField extraNoiseSeedField;
     @FXML private Button uploadImageButton;
 
@@ -87,8 +82,6 @@ public class GenerationController {
                                 ImageUtils imageUtils,
                                 FilePreviewService filePreviewService,
                                 GenerationSettingsManager generationSettingsManager) {
-        this.embedProcessor = embedProcessor;
-        this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
@@ -104,8 +97,8 @@ public class GenerationController {
         positivePromptArea.setEmbedFileManager(embedFileManager);
         negativePromptArea.setEmbedFileManager(embedFileManager);
 
-        previewPane = new PreviewPane(filePreviewService);
-        previewContainer.getChildren().add(previewPane);
+        imagePreviewPane = new ImagePreviewPane(filePreviewService);
+        previewContainer.getChildren().add(imagePreviewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
         generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
 
@@ -170,7 +163,7 @@ public class GenerationController {
     }
 
     private void handleHistoryImageClick(File imageFile) {
-        previewPane.updatePreview(imageFile);
+        imagePreviewPane.updatePreview(imageFile);
     }
 
     private void updatePromptPreviewsAsync() {
@@ -308,7 +301,7 @@ public class GenerationController {
 
             Image fxImage = new Image(new ByteArrayInputStream(imageData));
             saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
-                previewPane.updatePreview(imageFile);
+                imagePreviewPane.updatePreview(imageFile);
                 addImageToHistory(fxImage, imageFile);
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
@@ -374,9 +367,9 @@ public class GenerationController {
         File selectedFile = fileChooser.showOpenDialog(uploadImageButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                BufferedImage image = imageUtils.loadImage(selectedFile);
-                base64Image = imageUtils.imageToBase64(image);
-                previewPane.updatePreview(selectedFile);
+                BufferedImage image = ImageUtils.loadImage(selectedFile);
+                base64Image = ImageUtils.imageToBase64(image);
+                imagePreviewPane.updatePreview(selectedFile);
                 log.info("圖片已上傳: {}", selectedFile.getName());
                 NotificationService.showNotification("圖片上傳成功", Duration.seconds(3));
             } catch (IOException e) {

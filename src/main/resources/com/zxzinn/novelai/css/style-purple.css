@@ -276,7 +276,7 @@
      -fx-padding: 0 6 0 6;
  }
 
-/* previewPane hover效果 */
+/* imagePreviewPane hover效果 */
 .preview-container {
     -fx-background-color: rgba(64, 69, 92, 0.6); /* 更亮的預覽容器背景 */
     -fx-background-radius: 6px;

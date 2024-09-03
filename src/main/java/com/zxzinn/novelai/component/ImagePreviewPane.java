@@ -11,12 +11,12 @@ import lombok.extern.log4j.Log4j2;
 import java.io.File;
 
 @Log4j2
-public class PreviewPane extends StackPane {
+public class ImagePreviewPane extends StackPane {
     private final ScrollPane scrollPane;
     private final FilePreviewService filePreviewService;
 
     @Inject
-    public PreviewPane(FilePreviewService filePreviewService) {
+    public ImagePreviewPane(FilePreviewService filePreviewService) {
         this.filePreviewService = filePreviewService;
         this.scrollPane = new ScrollPane();
         ImageView imageView = new ImageView();

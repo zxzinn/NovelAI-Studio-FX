@@ -36,10 +36,6 @@ import java.io.IOException;
 public class MainController {
     @FXML private BorderPane rootPane;
     @FXML private TabPane mainTabPane;
-    @FXML private Button minimizeButton;
-    @FXML private Button maximizeButton;
-    @FXML private Button closeButton;
-    @FXML private VBox titleBar;
 
     private final DragAndDropHandler dragAndDropHandler;
     private final PropertiesManager propertiesManager;

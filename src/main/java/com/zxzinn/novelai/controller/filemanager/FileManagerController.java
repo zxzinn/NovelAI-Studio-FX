@@ -1,7 +1,7 @@
 package com.zxzinn.novelai.controller.filemanager;
 
 import com.google.inject.Inject;
-import com.zxzinn.novelai.component.PreviewPane;
+import com.zxzinn.novelai.component.ImagePreviewPane;
 import com.zxzinn.novelai.service.filemanager.*;
 import com.zxzinn.novelai.service.ui.AlertService;
 import javafx.fxml.FXML;
@@ -31,7 +31,7 @@ public class FileManagerController {
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
     private final FileOperationService fileOperationService;
-    protected PreviewPane previewPane;
+    protected ImagePreviewPane imagePreviewPane;
 
     @Inject
     public FileManagerController(FileManagerService fileManagerService,
@@ -49,8 +49,8 @@ public class FileManagerController {
 
     @FXML
     public void initialize() {
-        previewPane = new PreviewPane(filePreviewService);
-        previewContainer.getChildren().add(previewPane);
+        imagePreviewPane = new ImagePreviewPane(filePreviewService);
+        previewContainer.getChildren().add(imagePreviewPane);
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);
         fileTreeController.refreshTreeView();
@@ -78,7 +78,7 @@ public class FileManagerController {
     private void updatePreview(TreeItem<String> item) {
         String fullPath = fileTreeController.buildFullPath(item);
         File file = new File(fullPath);
-        previewPane.updatePreview(file);
+        imagePreviewPane.updatePreview(file);
         metadataService.updateMetadataList(file, metadataTextArea);
     }
 
