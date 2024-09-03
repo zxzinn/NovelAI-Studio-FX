@@ -9,7 +9,7 @@
 
 ---
 
-NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提供了一個直觀、功能豐富的界面，讓您的 AI 繪畫工作變得更加簡單和有趣。無論你是經驗豐富的 AI 藝術家，還是剛開始探索 NovelAI 的新手，NovelAI-Studio-FX 都能夠滿足你的需求。
+NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提供了一個直觀、功能豐富的界面，讓你的 AI 繪畫工作變得更加簡單和有趣。無論你是經驗豐富的 AI 藝術家，還是剛開始探索 NovelAI 的新手，NovelAI-Studio-FX 都能夠滿足你的需求。
 
 ## 🚀 快速開始
 
@@ -37,9 +37,12 @@ NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提
 
 ## 💡 進階使用技巧
 
+- 你可以下載我們製作的 [Embed](https://github.com/zxzinn/NovelAI-Studio-FX/tree/dev-master/embeds) 庫文件來快速上手,將該文件夾放入根目錄下即可
 - 使用嵌入語法 `<keyword>` 來引用預定義的提示詞集合
 - 嘗試調整負面提示詞來排除不想要的元素
-- 使用 `<keyword1(使用的嵌入):keyword2(隨機取樣數):keyword3(隨機權重)>` 
+- 使用 `<keyword1(使用的嵌入文件名):keyword2(隨機取樣數):keyword3(隨機權重)>` 
+- 例如：`<artist:1~3:-2~2>` 即爲調用根目錄下的 artist.txt ，從中隨機抽取一至三個 Prompt ,並對每一個 Prompt 隨機賦予`{{}}`至`[[]]`的權重等級
+- 若需要調用子文件夾内的文件，需要加入`/`符號，例如`<B_action/S_basicaction>`
 <tr>
   <td><img src="docs/gif/Embed.gif" alt="嵌入過程" width="400"/></td>
 </tr>
