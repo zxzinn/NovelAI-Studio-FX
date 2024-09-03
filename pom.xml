@@ -9,7 +9,7 @@
     <name>NovelAI-Studio-FX</name>
 
     <properties>
-        <revision>0.1.10-SNAPSHOT</revision>
+        <revision>0.1.11-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>

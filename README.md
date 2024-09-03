@@ -1,7 +1,7 @@
 # 🎨 NovelAI-Studio-FX - 你的 AI 藝術創作夥伴
 
 <div align="center">
-  <img src="placeholder_for_logo.png" alt="NovelAI-Studio-FX Logo" width="200"/>
+  <img src="src/main/resources/com/zxzinn/novelai/icon/AppIcon.ico" alt="NovelAI-Studio-FX Logo" width="200"/>
   <img src="https://img.shields.io/github/stars/zxzinn/NovelAI-Studio-FX.svg?style=for-the-badge" alt="Stars">
   <img src="https://img.shields.io/github/issues/zxzinn/NovelAI-Studio-FX?style=for-the-badge" alt="Issues">
   <img src="https://img.shields.io/github/license/zxzinn/NovelAI-Studio-FX?style=for-the-badge" alt="License">
@@ -32,7 +32,7 @@ NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提
 ## 📸 應用界面預覽
 
 <tr>
-<td><img src="docs/img/Main.png" alt="主界面" width="480"/></td>
+<td><img src="docs/img/Main.png" alt="主界面" width="960"/></td>
 </tr>
 
 ## 💡 進階使用技巧
@@ -44,7 +44,7 @@ NovelAI-Studio-FX 是基於 JavaFX 開發的應用程序，為 NovelAI 用戶提
 - 例如：`<artist:1~3:-2~2>` 即爲調用根目錄下的 artist.txt ，從中隨機抽取一至三個 Prompt ,並對每一個 Prompt 隨機賦予`{{}}`至`[[]]`的權重等級
 - 若需要調用子文件夾内的文件，需要加入`/`符號，例如`<B_action/S_basicaction>`
 <tr>
-  <td><img src="docs/gif/Embed.gif" alt="嵌入過程" width="400"/></td>
+  <td><img src="docs/gif/Embed.gif" alt="嵌入過程" width="960"/></td>
 </tr>
 
 - 利用文件管理器的批量功能來同時處理多個文件
@@ -81,6 +81,7 @@ NovelAI-Studio-FX 採用 [MIT 許可證](LICENSE)。
     </td>
   </tr>
 </table>
+
 ## 🙌 支持我們
 
 如果你喜歡 NovelAI-Studio-FX，請給我們一個 ⭐️！你的支持是我們持續改進的最大動力。
