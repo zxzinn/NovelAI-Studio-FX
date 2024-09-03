@@ -27,7 +27,6 @@ import java.util.function.BiConsumer;
 @Singleton
 public class FileManagerService {
     private static final String WATCHED_DIRECTORIES_KEY = "watchedDirectories";
-    private static final String EXPANDED_PREFIX = "expanded_";
     private static final int BATCH_SIZE = 100;
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
@@ -211,7 +210,6 @@ public class FileManagerService {
     private TreeItem<String> createTreeItem(@NotNull File file) {
         TreeItem<String> item = new TreeItem<>(file.getName(), getFileIcon(file));
         if (file.isDirectory()) {
-            item.setExpanded(isDirectoryExpanded(file.getAbsolutePath()));
             CompletableFuture.runAsync(() -> loadChildrenInBatches(item, file), executorService);
         }
         return item;
@@ -245,10 +243,6 @@ public class FileManagerService {
                 default -> new FontIcon(FontAwesomeSolid.FILE);
             };
         }
-    }
-
-    public boolean isDirectoryExpanded(String path) {
-        return propertiesManager.getBoolean(EXPANDED_PREFIX + path, false);
     }
 
     public String getWatchedDirectoryFullPath(String dirName) {

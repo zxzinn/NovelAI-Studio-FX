@@ -33,7 +33,7 @@ public class FileTreeController {
     @Inject
     public FileTreeController(FileManagerService fileManagerService) {
         this.fileManagerService = fileManagerService;
-        this.treeItemFactory = new TreeItemFactory(fileManagerService);
+        this.treeItemFactory = new TreeItemFactory();
     }
 
     public void refreshTreeView() {
