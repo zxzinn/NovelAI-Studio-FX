@@ -34,8 +34,6 @@ public class MainApplication extends Application {
         this.injector = Guice.createInjector(new AppModule());
         this.loadingManager = new LoadingManager();
 
-        primaryStage.initStyle(StageStyle.UNDECORATED);
-
         loadingManager.addObserver(loadingScreen);
         setupLoadingTasks();
 

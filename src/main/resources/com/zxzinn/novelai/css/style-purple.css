@@ -1,9 +1,9 @@
  /* 全局樣式 */
-   .root {
-       -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
-       -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
-       -fx-font-size: 18px; /* 增加全局字體大小 */
-   }
+.root {
+   -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
+   -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+   -fx-font-size: 18px; /* 增加全局字體大小 */
+}
 
 /* 文本樣式 */
 .text {
@@ -37,69 +37,6 @@
     -fx-fill: #AEDE7A; /* 更亮的成功文本顏色 */
     -fx-font-weight: bold;
     -fx-font-size: 16px; /* 增加成功文本大小 */
-}
-
- /* 標題欄樣式 */
- .title-bar {
-     -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
-     -fx-padding: 5px 10px;
-     -fx-spacing: 10px;
- }
-
- .title-label {
-     -fx-text-fill: #FFB8CB;
-     -fx-font-size: 16px; /* 減小字體大小 */
-     -fx-font-weight: bold;
- }
-
- .window-buttons-container {
-     -fx-spacing: 20px; /* 增加按钮之间的间距 */
-     -fx-padding: 0 5px; /* 在容器两侧添加一些内边距 */
- }
-
- /* 窗口按钮样式 */
- .window-button {
-     -fx-background-color: rgba(255, 255, 255, 0.1);
-     -fx-background-radius: 50%;
-     -fx-min-width: 28px;
-     -fx-min-height: 28px;
-     -fx-max-width: 28px;
-     -fx-max-height: 28px;
-     -fx-padding: 0;
-     -fx-content-display: graphic-only;
-     -fx-transition: all 0.2s ease-in-out;
- }
-
- .window-button:hover {
-     -fx-background-color: rgba(255, 255, 255, 0.2);
-     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
- }
-
- .window-button .ikonli-font-icon {
-     -fx-icon-color: #E0E0F0;
-     -fx-icon-size: 12px;
- }
-
- #minimizeButton:hover {
-     -fx-background-color: #FFD700;
- }
-
- #maximizeButton:hover {
-     -fx-background-color: #32CD32;
- }
-
- #closeButton:hover {
-     -fx-background-color: #FF6347;
- }
-
- #minimizeButton:hover .ikonli-font-icon,
- #maximizeButton:hover .ikonli-font-icon,
- #closeButton:hover .ikonli-font-icon {
-     -fx-icon-color: #1A1B26;
- }
-
-.window-button#closeButton:hover {
-    -fx-background-color: #FF869E; /* 更亮的關閉按鈕懸停顏色 */
 }
 
  /* 標籤頁樣式 */

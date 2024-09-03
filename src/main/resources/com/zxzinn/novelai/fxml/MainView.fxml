@@ -3,45 +3,10 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import org.kordamp.ikonli.javafx.*?>
 
 <BorderPane fx:id="rootPane" stylesheets="@../css/style-purple.css"
             xmlns="http://javafx.com/javafx/11.0.14-internal"
             xmlns:fx="http://javafx.com/fxml/1">
-    <top>
-        <VBox>
-            <VBox fx:id="titleBar" styleClass="title-bar">
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <padding>
-                        <Insets bottom="5" left="10" right="10" top="5" />
-                    </padding>
-                    <Label fx:id="titleLabel" styleClass="title-label" text="NovelAI-Studio-FX" HBox.hgrow="ALWAYS">
-                        <graphic>
-                            <FontIcon iconLiteral="fas-image" />
-                        </graphic>
-                    </Label>
-                    <HBox alignment="CENTER_RIGHT" spacing="5" HBox.hgrow="ALWAYS">
-                        <Button fx:id="minimizeButton" styleClass="window-button">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-window-minimize" />
-                            </graphic>
-                        </Button>
-                        <Button fx:id="maximizeButton" styleClass="window-button">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-window-maximize" />
-                            </graphic>
-                        </Button>
-                        <Button fx:id="closeButton" styleClass="window-button">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-times" />
-                            </graphic>
-                        </Button>
-                    </HBox>
-                </HBox>
-            </VBox>
-        </VBox>
-    </top>
-
     <center>
         <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS">
         </TabPane>

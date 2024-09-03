@@ -12,14 +12,12 @@ import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
-import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
-import com.zxzinn.novelai.utils.ui.UIManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -43,8 +41,6 @@ public class MainController {
     @FXML private Button closeButton;
     @FXML private VBox titleBar;
 
-    private final UIManager uiManager;
-    private final WindowService windowService;
     private final DragAndDropHandler dragAndDropHandler;
     private final PropertiesManager propertiesManager;
     private final EmbedProcessor embedProcessor;
@@ -57,13 +53,11 @@ public class MainController {
     private final FileOperationService fileOperationService;
 
     @Inject
-    public MainController(WindowService windowService, PropertiesManager propertiesManager,
+    public MainController(PropertiesManager propertiesManager,
                           EmbedProcessor embedProcessor, ImageGenerationService imageGenerationService,
                           ImageUtils imageUtils, FilePreviewService filePreviewService,
                           FileManagerService fileManagerService, MetadataService metadataService,
                           AlertService alertService, FileOperationService fileOperationService) {
-        this.windowService = windowService;
-        this.uiManager = new UIManager(windowService);
         this.dragAndDropHandler = new DragAndDropHandler(this::handleFileDrop);
         this.propertiesManager = propertiesManager;
         this.embedProcessor = embedProcessor;
@@ -78,7 +72,6 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        uiManager.setupWindowControls(minimizeButton, maximizeButton, closeButton, titleBar);
         loadTabContent();
     }
 
@@ -123,8 +116,6 @@ public class MainController {
     }
 
     public void setStage(Stage stage) {
-        windowService.setupStage(stage);
-        uiManager.setupStage(stage);
 
         StackPane root = new StackPane();
         root.getChildren().add(rootPane);

@@ -7,7 +7,6 @@ import com.google.inject.Singleton;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
-import com.zxzinn.novelai.service.ui.WindowService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -47,9 +46,4 @@ public class AppModule extends AbstractModule {
         return new FileManagerService(propertiesManager);
     }
 
-    @Provides
-    @Singleton
-    WindowService provideWindowService(PropertiesManager propertiesManager) {
-        return new WindowService(propertiesManager);
-    }
 }
