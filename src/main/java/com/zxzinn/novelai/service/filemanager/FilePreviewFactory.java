@@ -7,7 +7,6 @@ import javafx.scene.control.Label;
 import javafx.scene.web.WebView;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.tika.Tika;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,19 +17,20 @@ import java.nio.file.Files;
 @Log4j2
 @Singleton
 public class FilePreviewFactory {
-    private final Tika tika;
     private final ImagePreviewCreator imagePreviewCreator;
 
     @Inject
     public FilePreviewFactory(ImagePreviewCreator imagePreviewCreator) {
-        this.tika = new Tika();
         this.imagePreviewCreator = imagePreviewCreator;
     }
 
     public Node createPreview(@NotNull File file) {
         if (file.isFile()) {
             try {
-                String mimeType = tika.detect(file);
+                String mimeType = Files.probeContentType(file.toPath());
+                if (mimeType == null) {
+                    mimeType = "application/octet-stream";
+                }
                 if (mimeType.startsWith("image/")) {
                     return imagePreviewCreator.createImagePreview(file);
                 } else if (mimeType.startsWith("text/") || mimeType.equals("application/pdf")) {

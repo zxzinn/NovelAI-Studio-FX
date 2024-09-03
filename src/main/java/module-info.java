@@ -10,7 +10,6 @@ module com.zxzinn.novelai {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.ikonli.core;
-    requires org.apache.tika.core;
     requires org.apache.commons.io;
     requires javafx.web;
     requires jdk.jsobject;
