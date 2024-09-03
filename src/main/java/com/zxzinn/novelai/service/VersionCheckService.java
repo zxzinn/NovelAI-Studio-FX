@@ -16,9 +16,11 @@ import org.semver4j.Semver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -29,17 +31,32 @@ public class VersionCheckService {
 
     private static final String REPO_OWNER = "zxzinn";
     private static final String REPO_NAME = "NovelAI-Studio-FX";
-    private static final String JAR_NAME = "NovelAI-Studio-FX.jar";
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_SECONDS = 5;
 
     private final PropertiesManager propertiesManager;
     private final ScheduledExecutorService executorService;
+    private final String currentJarName;
 
     @Inject
     public VersionCheckService(PropertiesManager propertiesManager) {
         this.propertiesManager = propertiesManager;
         this.executorService = Executors.newScheduledThreadPool(1);
+        this.currentJarName = getCurrentJarName();
+    }
+
+    private String getCurrentJarName() {
+        try {
+            String path = VersionCheckService.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            path = path.replace("/", "\\");
+            return Paths.get(path).getFileName().toString();
+        } catch (Exception e) {
+            log.error("無法獲取當前 JAR 文件名", e);
+            return "NovelAI-Studio-FX.jar"; // 默認名稱
+        }
     }
 
     public void checkForUpdates() {
@@ -153,7 +170,7 @@ public class VersionCheckService {
                 downloadFile(checksumUrl, checksumPath);
 
                 if (verifyChecksum(updatePath, checksumPath)) {
-                    Path currentJar = Path.of(JAR_NAME);
+                    Path currentJar = Path.of(currentJarName);
                     Files.move(updatePath, currentJar, StandardCopyOption.REPLACE_EXISTING);
                     log.info("更新成功下載並安裝。");
                     propertiesManager.setString("app.version", version);
@@ -202,7 +219,7 @@ public class VersionCheckService {
 
             Platform.exit();
             try {
-                Runtime.getRuntime().exec("java -jar " + JAR_NAME);
+                Runtime.getRuntime().exec("java -jar " + currentJarName);
             } catch (IOException e) {
                 log.error("重新啟動應用程序時發生錯誤", e);
             }
