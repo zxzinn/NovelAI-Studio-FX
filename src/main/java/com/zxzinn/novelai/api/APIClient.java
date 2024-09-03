@@ -53,11 +53,11 @@ public class APIClient {
 
     public byte[] generateImage(GenerationPayload payload, String apiKey) throws IOException {
         Request request = createRequest(payload, apiKey);
-        return sendRequest(request);
+        return getResponse(request);
     }
 
     @NotNull
-    private Request createRequest(Object payload, String apiKey) {
+    private Request createRequest(GenerationPayload payload, String apiKey) {
         RequestBody body = RequestBody.create(gson.toJson(payload), JSON);
         return new Request.Builder()
                 .url(API_URL)
@@ -67,7 +67,7 @@ public class APIClient {
     }
 
     @NotNull
-    private byte[] sendRequest(Request request) throws IOException {
+    private byte[] getResponse(Request request) throws IOException {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 

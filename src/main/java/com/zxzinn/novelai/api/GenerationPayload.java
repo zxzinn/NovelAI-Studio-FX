@@ -22,6 +22,13 @@ public abstract class GenerationPayload {
         public boolean qualityToggle;
         public boolean sm;
         public boolean sm_dyn;
+        public boolean dynamic_thresholding;
+        public double controlnet_strength = 1;
+        public boolean legacy;
+        public boolean add_original_image = true;
+        public int cfg_rescale;
+        public String noise_schedule;
+        public boolean legacy_v3_extend;
         public long seed;
         public String negative_prompt;
     }
