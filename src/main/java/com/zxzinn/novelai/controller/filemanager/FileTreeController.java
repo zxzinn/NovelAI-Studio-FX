@@ -19,7 +19,6 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 @Log4j2
 public class FileTreeController {
@@ -70,21 +69,6 @@ public class FileTreeController {
         for (TreeItem<String> child : item.getChildren()) {
             updatePathToItemMap(child);
         }
-    }
-
-    public void setSearchFilter(String searchText) {
-        if (filteredTreeItems != null) {
-            filteredTreeItems.setPredicate(createFilterPredicate(searchText));
-        }
-    }
-
-    private Predicate<TreeItem<String>> createFilterPredicate(String searchText) {
-        return treeItem -> {
-            if (searchText == null || searchText.isEmpty()) {
-                return true;
-            }
-            return treeItem.getValue().toLowerCase().contains(searchText.toLowerCase());
-        };
     }
 
     public String buildFullPath(TreeItem<String> item) {

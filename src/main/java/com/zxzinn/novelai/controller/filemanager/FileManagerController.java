@@ -18,7 +18,6 @@ public class FileManagerController {
     @FXML private Button selectAllButton;
     @FXML protected StackPane previewContainer;
     @FXML private TextArea metadataTextArea;
-    @FXML private TextField searchField;
     @FXML private Button addButton;
     @FXML private Button removeButton;
     @FXML private Button clearMetadataButton;
@@ -71,8 +70,6 @@ public class FileManagerController {
                 updatePreview(newValue);
             }
         });
-        searchField.textProperty().addListener((observable, oldValue, newValue) ->
-                fileTreeController.setSearchFilter(newValue));
         selectAllButton.setOnAction(event -> fileTreeController.selectAllInDirectory(fileTreeView.getSelectionModel().getSelectedItem()));
         clearMetadataButton.setOnAction(event -> fileOperationService.clearMetadataForSelectedFiles(fileTreeView, fileTreeController, alertService, progressBar, progressLabel));
         mergeTxtButton.setOnAction(event -> fileOperationService.mergeSelectedTxtFiles(fileTreeView, fileTreeController, alertService));

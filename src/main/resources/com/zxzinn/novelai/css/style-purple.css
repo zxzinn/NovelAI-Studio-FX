@@ -744,13 +744,6 @@
      -fx-background-color: #E0E0F0;
  }
 
- /* 搜索欄樣式 */
- #searchField {
-     -fx-background-color: rgba(75, 82, 114, 0.95);
-     -fx-text-fill: #E0E0F0;
-     -fx-prompt-text-fill: #666F99;
- }
-
  /* 添加和刪除按鈕樣式 */
  .icon-button {
      -fx-background-color: rgba(138, 162, 255, 0.8);

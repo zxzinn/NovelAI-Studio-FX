@@ -17,7 +17,6 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <HBox spacing="5" alignment="CENTER_LEFT">
-                <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="搜尋..."/>
                 <Button fx:id="addButton" styleClass="icon-button">
                     <graphic>
                         <FontIcon iconLiteral="fas-plus" iconSize="12"/>
