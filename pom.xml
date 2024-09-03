@@ -9,7 +9,7 @@
     <name>NovelAI-Studio-FX</name>
 
     <properties>
-        <revision>0.1.8-SNAPSHOT</revision>
+        <revision>0.1.9-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
@@ -143,7 +143,28 @@
             <artifactId>commons-text</artifactId>
             <version>1.10.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.315</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>3.9.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.semver4j/semver4j -->
+        <dependency>
+            <groupId>org.semver4j</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>5.2.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.15</version>
+        </dependency>
 
     </dependencies>
 

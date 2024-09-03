@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.service.VersionCheckService;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
@@ -20,6 +21,7 @@ public class AppModule extends AbstractModule {
         bind(EmbedProcessor.class).in(Singleton.class);
         bind(ImageUtils.class).in(Singleton.class);
         bind(PropertiesManager.class).toInstance(PropertiesManager.getInstance());
+        bind(VersionCheckService.class).in(Singleton.class);
     }
 
     @Provides

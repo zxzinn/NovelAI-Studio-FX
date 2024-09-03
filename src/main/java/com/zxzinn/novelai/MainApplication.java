@@ -3,6 +3,7 @@ package com.zxzinn.novelai;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.zxzinn.novelai.controller.ui.MainController;
+import com.zxzinn.novelai.service.VersionCheckService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.ui.LoadingManager;
@@ -51,11 +52,12 @@ public class MainApplication extends Application {
         loadingManager.addTask(new LoadingTask() {
             @Override
             public void execute() {
+                injector.getInstance(VersionCheckService.class).checkForUpdates();
             }
 
             @Override
             public String getDescription() {
-                return "正在初始化服務...";
+                return "正在檢查更新...";
             }
         });
 

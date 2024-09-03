@@ -46,11 +46,25 @@ jobs:
       - name: Display Maven version
         run: mvn --version
 
+      - name: Calculate SHA-256 checksum
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sha256sum target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            certutil -hashfile target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar SHA256 | findstr /v "hash" > target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+          else
+            echo "Unsupported operating system"
+            exit 1
+          fi
+        shell: bash
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: NovelAI-Studio-FX-${{ matrix.os }}-${{ env.PROJECT_VERSION }}
-          path: target/NovelAI-Studio-FX-*.jar
+          path: |
+            target/NovelAI-Studio-FX-*.jar
+            target/NovelAI-Studio-FX-*.jar.sha256
 
       - name: Run tests
         run: mvn test
@@ -81,7 +95,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
+      - name: Upload Release Asset (JAR)
         if: success() && matrix.os == 'ubuntu-latest'
         uses: actions/upload-release-asset@v1
         env:
@@ -91,3 +105,14 @@ jobs:
           asset_path: ./target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar
           asset_name: NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar
           asset_content_type: application/java-archive
+
+      - name: Upload Release Asset (SHA-256)
+        if: success() && matrix.os == 'ubuntu-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+          asset_name: NovelAI-Studio-FX-${{ env.PROJECT_VERSION }}.jar.sha256
+          asset_content_type: text/plain

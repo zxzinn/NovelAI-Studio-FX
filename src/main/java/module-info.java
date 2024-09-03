@@ -22,19 +22,29 @@ module com.zxzinn.novelai {
     requires com.google.guice;
     requires javafx.media;
     requires org.apache.commons.text;
+    requires maven.model;
+    requires java.net.http;
+    requires org.kohsuke.github.api;
+    requires org.apache.commons.codec;
+    requires org.semver4j;
 
-    opens com.zxzinn.novelai to javafx.fxml;
-    opens com.zxzinn.novelai.api to com.google.gson;
-    opens com.zxzinn.novelai.controller.generation to javafx.fxml;
-    opens com.zxzinn.novelai.controller.filemanager to javafx.fxml;
-    opens com.zxzinn.novelai.controller.ui to javafx.fxml;
-    opens com.zxzinn.novelai.utils.common to javafx.fxml;
-    opens com.zxzinn.novelai.component to javafx.fxml;
-    opens com.zxzinn.novelai.service.filemanager to javafx.fxml;
-    opens com.zxzinn.novelai.utils.tokenizer to javafx.fxml;
+    opens com.zxzinn.novelai to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.api to com.google.gson, com.google.guice;
+    opens com.zxzinn.novelai.controller.generation to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.controller.filemanager to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.controller.ui to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.utils.common to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.component to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.service.filemanager to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.utils.tokenizer to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.service.generation to javafx.fxml, com.google.guice;
+    opens com.zxzinn.novelai.service to com.google.guice;
+    opens com.zxzinn.novelai.service.ui to com.google.guice;
+    opens com.zxzinn.novelai.utils.image to com.google.guice;
+    opens com.zxzinn.novelai.utils.embed to com.google.guice;
 
     exports com.zxzinn.novelai;
-    exports com.zxzinn.novelai.api to com.google.gson;
+    exports com.zxzinn.novelai.api;
     exports com.zxzinn.novelai.controller.generation;
     exports com.zxzinn.novelai.controller.filemanager;
     exports com.zxzinn.novelai.controller.ui;
@@ -46,5 +56,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.service.ui;
     exports com.zxzinn.novelai.utils.image;
     exports com.zxzinn.novelai.utils.embed;
-    opens com.zxzinn.novelai.service.generation to javafx.fxml;
+    exports com.zxzinn.novelai.service;
 }
