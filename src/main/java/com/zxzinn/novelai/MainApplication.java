@@ -2,7 +2,7 @@ package com.zxzinn.novelai;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.zxzinn.novelai.controller.ui.MainController;
+import com.zxzinn.novelai.controller.MainController;
 import com.zxzinn.novelai.service.VersionCheckService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;

@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.controller.ui;
+package com.zxzinn.novelai.controller;
 
 import com.google.inject.Inject;
 import com.zxzinn.novelai.component.NotificationPane;
@@ -20,12 +20,10 @@ import com.zxzinn.novelai.utils.image.ImageUtils;
 import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
