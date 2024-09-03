@@ -94,7 +94,6 @@
                     <PromptPreviewArea fx:id="negativePromptPreviewArea" HBox.hgrow="ALWAYS"/>
                 </HBox>
                 <StackPane fx:id="previewContainer" VBox.vgrow="ALWAYS" styleClass="preview-container"/>
-                <ImageControlBar fx:id="imageControlBar" />
             </VBox>
             <HistoryImagesPane fx:id="historyImagesPane" prefWidth="100" HBox.hgrow="NEVER"/>
         </HBox>
