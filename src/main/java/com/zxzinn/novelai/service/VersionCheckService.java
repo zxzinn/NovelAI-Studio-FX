@@ -16,7 +16,6 @@ import org.semver4j.Semver;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,7 +86,7 @@ public class VersionCheckService {
     }
 
     private String getLatestVersionWithRetry() throws IOException {
-        for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        for (int attempt = 0; true; attempt++) {
             try {
                 return getLatestVersion();
             } catch (IOException e) {
@@ -103,7 +102,6 @@ public class VersionCheckService {
                 }
             }
         }
-        throw new IOException("無法獲取最新版本");
     }
 
     private String getLatestVersion() throws IOException {
@@ -142,7 +140,7 @@ public class VersionCheckService {
 
                 if (release == null) {
                     log.error("找不到版本 {} 的發布", version);
-                    showErrorAlert("更新錯誤", "找不到指定版本的發布。");
+                    showErrorAlert("找不到指定版本的發布。");
                     return;
                 }
 
@@ -156,7 +154,7 @@ public class VersionCheckService {
 
                 if (jarAsset.isEmpty() || checksumAsset.isEmpty()) {
                     log.error("在發布 {} 中找不到 JAR 文件或校驗和文件", version);
-                    showErrorAlert("更新錯誤", "在發布中找不到 JAR 文件或校驗和文件。");
+                    showErrorAlert("在發布中找不到 JAR 文件或校驗和文件。");
                     return;
                 }
 
@@ -178,11 +176,11 @@ public class VersionCheckService {
                     restartApplication();
                 } else {
                     log.error("更新文件校驗和驗證失敗");
-                    showErrorAlert("更新錯誤", "更新文件校驗和驗證失敗，請重試。");
+                    showErrorAlert("更新文件校驗和驗證失敗，請重試。");
                 }
             } catch (Exception e) {
                 log.error("下載或安裝更新時發生錯誤", e);
-                showErrorAlert("更新錯誤", "下載或安裝更新時發生錯誤：" + e.getMessage());
+                showErrorAlert("下載或安裝更新時發生錯誤：" + e.getMessage());
             }
         }, executorService);
     }
@@ -199,10 +197,10 @@ public class VersionCheckService {
         return actualChecksum.equalsIgnoreCase(expectedChecksum);
     }
 
-    private void showErrorAlert(String title, String content) {
+    private void showErrorAlert(String content) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(title);
+            alert.setTitle("更新錯誤");
             alert.setHeaderText(null);
             alert.setContentText(content);
             alert.showAndWait();

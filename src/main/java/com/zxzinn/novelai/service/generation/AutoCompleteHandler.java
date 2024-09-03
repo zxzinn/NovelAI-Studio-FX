@@ -18,7 +18,6 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -30,7 +29,6 @@ public class AutoCompleteHandler {
     @Setter private EmbedFileManager embedFileManager;
     private int autoCompleteStartIndex = -1;
 
-    private static final Pattern EMBED_PATTERN = Pattern.compile("<([^>:]+)(?::([^>]+))?>", Pattern.DOTALL);
     private static final int MAX_LEVENSHTEIN_DISTANCE = 2;
 
     @Inject
@@ -92,11 +90,6 @@ public class AutoCompleteHandler {
     private void setupListeners() {
         autoCompleteList.setOnMouseClicked(event -> selectAutoComplete());
         autoCompletePopup.addEventFilter(KeyEvent.KEY_PRESSED, this::handlePopupKeyPress);
-        autoCompleteList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                showPreview(newValue);
-            }
-        });
     }
 
     public void handleTextChange(String oldValue, String newValue) {
@@ -221,9 +214,8 @@ public class AutoCompleteHandler {
                     autoCompleteList.getSelectionModel().selectFirst();
                     positionAutoCompletePopup();
                     autoCompletePopup.show(promptTextArea, autoCompletePopup.getX(), autoCompletePopup.getY());
-                    showPreview(filteredMatches.getFirst());
                 });
-                log.info("Showing autocomplete popup with " + filteredMatches.size() + " matches");
+                log.info("Showing autocomplete popup with {} matches", filteredMatches.size());
             } else {
                 hideAutoComplete();
             }
@@ -279,19 +271,4 @@ public class AutoCompleteHandler {
         }
     }
 
-    private void showPreview(EmbedFileManager.EmbedFile file) {
-        Platform.runLater(() -> {
-            Label previewLabel = new Label(file.fullPath());
-            previewLabel.setStyle("-fx-background-color: white; -fx-padding: 5px; -fx-border-color: gray; -fx-border-width: 1px;");
-
-            previewPopup.getContent().clear();
-            previewPopup.getContent().add(previewLabel);
-
-            Bounds bounds = autoCompleteList.localToScreen(autoCompleteList.getBoundsInLocal());
-            previewPopup.setX(bounds.getMaxX() + 10);
-            previewPopup.setY(bounds.getMinY());
-
-            previewPopup.show(autoCompleteList.getScene().getWindow());
-        });
-    }
 }

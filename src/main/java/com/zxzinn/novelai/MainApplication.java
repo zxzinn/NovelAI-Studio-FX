@@ -16,7 +16,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Objects;
@@ -80,8 +79,8 @@ public class MainApplication extends Application {
                     );
                     primaryStage.setTitle("NovelAI Studio FX");
 
-                    primaryStage.setWidth(1024);
-                    primaryStage.setHeight(768);
+                    primaryStage.setWidth(1200);
+                    primaryStage.setHeight(720);
                     primaryStage.centerOnScreen();
 
                     mainController.setStage(primaryStage);

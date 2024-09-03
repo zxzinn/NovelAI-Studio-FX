@@ -3,7 +3,6 @@ package com.zxzinn.novelai.service.filemanager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import javafx.application.Platform;
@@ -37,12 +36,12 @@ public class MetadataService {
     private final ExecutorService executorService;
 
     public MetadataService() {
-        this.executablePath = extractExecutable();
+        this.executablePath = getExecutablePath();
         this.executorService = Executors.newCachedThreadPool();
     }
 
     @NotNull
-    private Path extractExecutable() {
+    private Path getExecutablePath() {
         String resourcePath = ResourcePaths.META_READER_PATH;
         try {
             URL resource = getClass().getResource(resourcePath);
@@ -68,7 +67,7 @@ public class MetadataService {
         }
     }
 
-    private Optional<String> extractMetadataJava(@NotNull File file) {
+    private Optional<String> javaExtractor(@NotNull File file) {
         log.debug("Extracting metadata from file using Java: {}", file.getAbsolutePath());
         StringBuilder metadata = new StringBuilder();
 
@@ -96,25 +95,8 @@ public class MetadataService {
         return Optional.of(metadata.toString());
     }
 
-    private void processNode(@NotNull Node node, String indent, @NotNull StringBuilder metadata) {
-        metadata.append(indent).append(node.getNodeName());
-        NamedNodeMap attributes = node.getAttributes();
-        if (attributes != null) {
-            for (int i = 0; i < attributes.getLength(); i++) {
-                Node attr = attributes.item(i);
-                metadata.append(" ").append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append("\"");
-            }
-        }
-        metadata.append("\n");
-
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            processNode(children.item(i), indent + "  ", metadata);
-        }
-    }
-
     @NotNull
-    private String extractMetadataExe(@NotNull File file) throws IOException, InterruptedException {
+    private String executableExtractor(@NotNull File file) throws IOException, InterruptedException {
         log.debug("Extracting metadata from file using exe: {}", file.getAbsolutePath());
         ProcessBuilder processBuilder = new ProcessBuilder(executablePath.toString(), file.getAbsolutePath());
         processBuilder.redirectErrorStream(true);
@@ -135,6 +117,23 @@ public class MetadataService {
         }
 
         return output.toString();
+    }
+
+    private void processNode(@NotNull Node node, String indent, @NotNull StringBuilder metadata) {
+        metadata.append(indent).append(node.getNodeName());
+        NamedNodeMap attributes = node.getAttributes();
+        if (attributes != null) {
+            for (int i = 0; i < attributes.getLength(); i++) {
+                Node attr = attributes.item(i);
+                metadata.append(" ").append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append("\"");
+            }
+        }
+        metadata.append("\n");
+
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            processNode(children.item(i), indent + "  ", metadata);
+        }
     }
 
     private Optional<String> formatCommentJson(@NotNull String metadata) {
@@ -170,7 +169,7 @@ public class MetadataService {
         }
 
         try {
-            Optional<String> javaMetadata = extractMetadataJava(file);
+            Optional<String> javaMetadata = javaExtractor(file);
             if (javaMetadata.isPresent()) {
                 Optional<String> formattedComment = formatCommentJson(javaMetadata.get());
                 if (formattedComment.isPresent()) {
@@ -179,7 +178,7 @@ public class MetadataService {
             }
 
             // 如果Java方法無法提取到有效的元數據，嘗試使用exe方法
-            String exeMetadata = extractMetadataExe(file);
+            String exeMetadata = executableExtractor(file);
             if (!exeMetadata.isEmpty()) {
                 return formatYamlOutput(exeMetadata);
             }
