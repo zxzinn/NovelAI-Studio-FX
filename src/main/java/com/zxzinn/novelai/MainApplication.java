@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
@@ -74,6 +75,9 @@ public class MainApplication extends Application {
                     scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(ResourcePaths.STYLES_CSS)).toExternalForm());
 
                     primaryStage.setScene(scene);
+                    primaryStage.getIcons().add(
+                            new Image(String.valueOf(getClass().getResource(ResourcePaths.ICON_PATH + "AppIcon.ico")))
+                    );
                     primaryStage.setTitle("NovelAI Studio FX");
 
                     primaryStage.setWidth(1024);
