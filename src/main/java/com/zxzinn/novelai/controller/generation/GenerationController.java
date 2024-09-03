@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class GenerationController {
@@ -261,12 +260,10 @@ public class GenerationController {
             try {
                 int maxCount = getMaxCount();
                 while (isGenerating && !stopRequested && currentGeneratedCount < maxCount) {
-                    if (!promptUpdateLatch.await(5, TimeUnit.SECONDS)) {
-                        log.warn("等待提示詞更新超時");
-                    }
 
                     GenerationPayload payload = createGenerationPayload();
-                    Optional<byte[]> generatedImageData = generateImageWithRetry(payload);
+                    Optional<byte[]> generatedImageData =
+                            generationHandler.generateImageWithRetry(payload, apiKeyField.getText());
 
                     generatedImageData.ifPresentOrElse(
                             imageData -> {
@@ -280,17 +277,10 @@ public class GenerationController {
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
                 }
-            } catch (InterruptedException e) {
-                log.warn("圖像生成過程被中斷");
-                Thread.currentThread().interrupt();
             } finally {
                 finishGeneration();
             }
         });
-    }
-
-    private Optional<byte[]> generateImageWithRetry(GenerationPayload payload) {
-        return generationHandler.generateImageWithRetry(payload, apiKeyField.getText());
     }
 
     private void handleGeneratedImage(byte[] imageData) {
@@ -299,10 +289,10 @@ public class GenerationController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             String timeStamp = now.format(formatter);
 
-            Image fxImage = new Image(new ByteArrayInputStream(imageData));
+            Image image = new Image(new ByteArrayInputStream(imageData));
             saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
                 imagePreviewPane.updatePreview(imageFile);
-                addImageToHistory(fxImage, imageFile);
+                historyImagesPane.addImage(image, imageFile);
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
             });
 
@@ -351,10 +341,6 @@ public class GenerationController {
                 .extraNoiseSeed(Long.parseLong(extraNoiseSeedField.getText()))
                 .build()
                 .createPayload();
-    }
-
-    private void addImageToHistory(Image image, File imageFile) {
-        historyImagesPane.addImage(image, imageFile);
     }
 
     @FXML
