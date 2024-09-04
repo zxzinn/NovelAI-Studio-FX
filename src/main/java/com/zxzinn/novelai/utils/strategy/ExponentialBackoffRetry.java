@@ -7,25 +7,23 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 public class ExponentialBackoffRetry implements RetryStrategy {
-    private final int maxRetries;
-    private final long initialDelayMs;
+    private static final int MAX_RETRIES = 5;
+    private static final long INITIAL_RETRY_DELAY_MS = 20000;
 
-    public ExponentialBackoffRetry(int maxRetries, long initialDelayMs) {
-        this.maxRetries = maxRetries;
-        this.initialDelayMs = initialDelayMs;
+    public ExponentialBackoffRetry() {
     }
 
     @Override
     public <T> Optional<T> execute(ThrowingSupplier<T> supplier) {
-        for (int retry = 0; retry < maxRetries; retry++) {
+        for (int retry = 0; retry < MAX_RETRIES; retry++) {
             try {
                 return Optional.of(supplier.get());
             } catch (Exception e) {
-                if (retry == maxRetries - 1) {
+                if (retry == MAX_RETRIES - 1) {
                     log.error("操作失敗，已達到最大重試次數", e);
                     return Optional.empty();
                 }
-                long delayMs = initialDelayMs * (long) Math.pow(2, retry);
+                long delayMs = INITIAL_RETRY_DELAY_MS * (long) Math.pow(2, retry);
                 log.warn("操作失敗，將在{}毫秒後重試. 錯誤: {}", delayMs, e.getMessage());
                 try {
                     TimeUnit.MILLISECONDS.sleep(delayMs);

@@ -34,8 +34,6 @@ import java.util.zip.ZipInputStream;
 @Log4j2
 public class GenerationController {
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
-    private static final int MAX_RETRIES = 5;
-    private static final long INITIAL_RETRY_DELAY_MS = 20000;
 
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
@@ -88,7 +86,7 @@ public class GenerationController {
         this.generationSettingsManager = generationSettingsManager;
         this.promptManager = new PromptManager(new EmbedProcessor());
         this.apiClient = apiClient;
-        this.retryStrategy = new ExponentialBackoffRetry(MAX_RETRIES, INITIAL_RETRY_DELAY_MS);
+        this.retryStrategy = new ExponentialBackoffRetry();
     }
 
     @FXML
