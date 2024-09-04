@@ -52,7 +52,7 @@ public class MainApplication extends Application {
         loadingManager.addTask(new LoadingTask() {
             @Override
             public void execute() {
-                injector.getInstance(VersionCheckService.class).checkForUpdates();
+                // injector.getInstance(VersionCheckService.class).checkForUpdates();
             }
 
             @Override
