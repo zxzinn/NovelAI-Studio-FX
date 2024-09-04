@@ -26,8 +26,8 @@ public class AppModule extends AbstractModule {
 
     @Provides
     @Singleton
-    APIClient provideAPIClient(Gson gson) {
-        return new APIClient(gson);
+    APIClient provideAPIClient() {
+        return new APIClient();
     }
 
     @Provides

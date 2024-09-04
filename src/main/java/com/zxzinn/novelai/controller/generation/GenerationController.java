@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.controller.generation;
 
 import com.google.inject.Inject;
+import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
@@ -74,14 +75,12 @@ public class GenerationController {
     private String base64Image;
 
     @Inject
-    public GenerationController(EmbedProcessor embedProcessor,
-                                ImageGenerationService imageGenerationService,
-                                FilePreviewService filePreviewService,
+    public GenerationController(FilePreviewService filePreviewService,
                                 GenerationSettingsManager generationSettingsManager) {
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
-        this.generationHandler = new GenerationHandler(imageGenerationService);
-        this.promptManager = new PromptManager(embedProcessor);
+        this.generationHandler = new GenerationHandler(new ImageGenerationService(new APIClient()));
+        this.promptManager = new PromptManager(new EmbedProcessor());
     }
 
     @FXML

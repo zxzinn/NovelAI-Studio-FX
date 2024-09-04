@@ -83,8 +83,8 @@ public class MainController {
     private Tab createUnifiedGeneratorTab() throws IOException {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
         GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(propertiesManager);
-        loader.setControllerFactory(param -> new GenerationController(embedProcessor,
-                imageGenerationService, filePreviewService, generationSettingsManager));
+        loader.setControllerFactory(param -> new GenerationController(
+                filePreviewService, generationSettingsManager));
         BorderPane content = loader.load();
         return new Tab("圖像生成", content) {{
             setClosable(false);

@@ -16,10 +16,8 @@ public class APIClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     private final OkHttpClient httpClient;
-    private final Gson gson;
 
-    public APIClient(Gson gson) {
-        this.gson = gson;
+    public APIClient() {
         this.httpClient = createHttpClient();
     }
 
@@ -58,6 +56,7 @@ public class APIClient {
 
     @NotNull
     private Request createRequest(GenerationPayload payload, String apiKey) {
+        Gson gson = new Gson();
         RequestBody body = RequestBody.create(gson.toJson(payload), JSON);
         return new Request.Builder()
                 .url(API_URL)
