@@ -15,8 +15,6 @@ import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
-import com.zxzinn.novelai.utils.embed.EmbedProcessor;
-import com.zxzinn.novelai.utils.image.ImageUtils;
 import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +23,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
@@ -37,8 +34,6 @@ public class MainController {
 
     private final DragAndDropHandler dragAndDropHandler;
     private final PropertiesManager propertiesManager;
-    private final EmbedProcessor embedProcessor;
-    private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final FileManagerService fileManagerService;
     private final MetadataService metadataService;
@@ -47,14 +42,11 @@ public class MainController {
 
     @Inject
     public MainController(PropertiesManager propertiesManager,
-                          EmbedProcessor embedProcessor,
-                          ImageUtils imageUtils, FilePreviewService filePreviewService,
+                          FilePreviewService filePreviewService,
                           FileManagerService fileManagerService, MetadataService metadataService,
                           AlertService alertService, FileOperationService fileOperationService) {
         this.dragAndDropHandler = new DragAndDropHandler(this::handleFileDrop);
         this.propertiesManager = propertiesManager;
-        this.embedProcessor = embedProcessor;
-        this.imageUtils = imageUtils;
         this.filePreviewService = filePreviewService;
         this.fileManagerService = fileManagerService;
         this.metadataService = metadataService;
@@ -123,6 +115,6 @@ public class MainController {
 
     private void handleFileDrop(File file) {
         System.out.println("File dropped: " + file.getAbsolutePath());
-        NotificationService.showNotification("文件已拖放: " + file.getName(), Duration.seconds(3));
+        NotificationService.showNotification("文件已拖放: " + file.getName());
     }
 }

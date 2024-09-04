@@ -18,10 +18,8 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
-import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -224,7 +222,7 @@ public class GenerationController {
 
     private void startGeneration() {
         if ("Image2Image".equals(generationModeComboBox.getValue()) && base64Image == null) {
-            NotificationService.showNotification("請先上傳一張圖片", Duration.seconds(3));
+            NotificationService.showNotification("請先上傳一張圖片");
             return;
         }
 
@@ -274,7 +272,7 @@ public class GenerationController {
                                 handleGeneratedImage(imageData);
                                 currentGeneratedCount++;
                             },
-                            () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)))
+                            () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試"))
                     );
 
                     promptUpdateLatch = new CountDownLatch(1);
@@ -322,7 +320,7 @@ public class GenerationController {
             saveImageToFile(imageData).ifPresent(imageFile -> {
                 imagePreviewPane.updatePreview(imageFile);
                 historyImagesPane.addImage(image, imageFile);
-                NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
+                NotificationService.showNotification("圖像生成成功！");
             });
 
             // 根據鎖定狀態更新提示詞預覽
@@ -386,10 +384,10 @@ public class GenerationController {
                 base64Image = ImageUtils.imageToBase64(image);
                 imagePreviewPane.updatePreview(selectedFile);
                 log.info("圖片已上傳: {}", selectedFile.getName());
-                NotificationService.showNotification("圖片上傳成功", Duration.seconds(3));
+                NotificationService.showNotification("圖片上傳成功");
             } catch (IOException e) {
                 log.error("上傳圖片時發生錯誤", e);
-                NotificationService.showNotification("圖片上傳失敗", Duration.seconds(3));
+                NotificationService.showNotification("圖片上傳失敗");
             }
         }
     }

@@ -80,7 +80,7 @@ public class DragAndDropHandler {
         Dragboard db = event.getDragboard();
         boolean success = false;
         if (db.hasFiles()) {
-            File file = db.getFiles().get(0);
+            File file = db.getFiles().getFirst();
             onFileDrop.accept(file);
             success = true;
             showNotification("文件已成功拖放: " + file.getName());
@@ -100,6 +100,6 @@ public class DragAndDropHandler {
     }
 
     private void showNotification(String message) {
-        Platform.runLater(() -> NotificationService.showNotification(message, Duration.seconds(3)));
+        Platform.runLater(() -> NotificationService.showNotification(message));
     }
 }

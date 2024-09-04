@@ -11,10 +11,10 @@ public class NotificationService {
         notificationPane = pane;
     }
 
-    public static void showNotification(String message, Duration duration) {
+    public static void showNotification(String message) {
         Platform.runLater(() -> {
             if (notificationPane != null) {
-                notificationPane.showNotification(message, duration);
+                notificationPane.showNotification(message, Duration.seconds(3));
             }
         });
     }
