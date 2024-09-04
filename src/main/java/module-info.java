@@ -27,6 +27,7 @@ module com.zxzinn.novelai {
     requires org.kohsuke.github.api;
     requires org.apache.commons.codec;
     requires org.semver4j;
+    requires org.apache.commons.lang3;
 
     opens com.zxzinn.novelai to javafx.fxml, com.google.guice;
     opens com.zxzinn.novelai.api to com.google.gson, com.google.guice;

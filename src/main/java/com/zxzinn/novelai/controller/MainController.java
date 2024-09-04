@@ -84,7 +84,7 @@ public class MainController {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
         GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(propertiesManager);
         loader.setControllerFactory(param -> new GenerationController(embedProcessor,
-                imageGenerationService, imageUtils, filePreviewService, generationSettingsManager));
+                imageGenerationService, filePreviewService, generationSettingsManager));
         BorderPane content = loader.load();
         return new Tab("圖像生成", content) {{
             setClosable(false);

@@ -17,13 +17,12 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -32,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 public class GenerationController {
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
 
-    private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
     private final GenerationHandler generationHandler;
@@ -78,10 +76,8 @@ public class GenerationController {
     @Inject
     public GenerationController(EmbedProcessor embedProcessor,
                                 ImageGenerationService imageGenerationService,
-                                ImageUtils imageUtils,
                                 FilePreviewService filePreviewService,
                                 GenerationSettingsManager generationSettingsManager) {
-        this.imageUtils = imageUtils;
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
         this.generationHandler = new GenerationHandler(imageGenerationService);
@@ -285,9 +281,7 @@ public class GenerationController {
 
     private void handleGeneratedImage(byte[] imageData) {
         Platform.runLater(() -> {
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            String timeStamp = now.format(formatter);
+            String timeStamp = DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm");
 
             Image image = new Image(new ByteArrayInputStream(imageData));
             saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
@@ -307,7 +301,7 @@ public class GenerationController {
     }
 
     private Optional<File> saveImageToFile(byte[] imageData, String timeStamp) {
-        return generationHandler.saveImageToFile(imageData, outputDirectoryField.getText(), timeStamp, currentGeneratedCount);
+        return generationHandler.saveImage(imageData, outputDirectoryField.getText());
     }
 
     private int getMaxCount() {
