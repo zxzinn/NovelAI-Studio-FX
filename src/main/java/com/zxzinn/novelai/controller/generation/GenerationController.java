@@ -10,6 +10,8 @@ import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
+import com.zxzinn.novelai.utils.strategy.ExponentialBackoffRetry;
+import com.zxzinn.novelai.utils.strategy.RetryStrategy;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -18,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.awt.image.BufferedImage;
@@ -27,15 +30,20 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Log4j2
 public class GenerationController {
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
+    private static final int MAX_RETRIES = 5;
+    private static final long INITIAL_RETRY_DELAY_MS = 20000;
 
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
-    private final GenerationHandler generationHandler;
     private final PromptManager promptManager;
+    private final APIClient apiClient;
+    private final RetryStrategy retryStrategy;
 
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
@@ -76,11 +84,13 @@ public class GenerationController {
 
     @Inject
     public GenerationController(FilePreviewService filePreviewService,
-                                GenerationSettingsManager generationSettingsManager) {
+                                GenerationSettingsManager generationSettingsManager,
+                                APIClient apiClient) {
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
-        this.generationHandler = new GenerationHandler(new ImageGenerationService(new APIClient()));
         this.promptManager = new PromptManager(new EmbedProcessor());
+        this.apiClient = apiClient;
+        this.retryStrategy = new ExponentialBackoffRetry(MAX_RETRIES, INITIAL_RETRY_DELAY_MS);
     }
 
     @FXML
@@ -255,10 +265,9 @@ public class GenerationController {
             try {
                 int maxCount = getMaxCount();
                 while (isGenerating && !stopRequested && currentGeneratedCount < maxCount) {
-
                     GenerationPayload payload = createGenerationPayload();
-                    Optional<byte[]> generatedImageData =
-                            generationHandler.generateImageWithRetry(payload, apiKeyField.getText());
+
+                    Optional<byte[]> generatedImageData = generateImageWithRetry(payload, apiKeyField.getText());
 
                     generatedImageData.ifPresentOrElse(
                             imageData -> {
@@ -268,7 +277,6 @@ public class GenerationController {
                             () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試", Duration.seconds(5)))
                     );
 
-                    // 更新提示詞預覽，即使是最後一次生成
                     promptUpdateLatch = new CountDownLatch(1);
                     updatePromptPreviewsAsync();
                 }
@@ -278,12 +286,40 @@ public class GenerationController {
         });
     }
 
+    private Optional<byte[]> generateImageWithRetry(GenerationPayload payload, String apiKey) {
+        return retryStrategy.execute(() -> {
+            Optional<byte[]> result = generateImage(payload, apiKey);
+            return result.orElseThrow(() -> new RuntimeException("Image generation failed"));
+        });
+    }
+
+    private Optional<byte[]> generateImage(GenerationPayload payload, String apiKey) {
+        try {
+            byte[] zipData = apiClient.generateImage(payload, apiKey);
+            return Optional.of(extractImageFromZip(zipData));
+        } catch (IOException e) {
+            log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    private byte[] extractImageFromZip(byte[] zipData) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
+            ZipEntry entry = zis.getNextEntry();
+            if (entry == null) {
+                throw new IOException("ZIP文件為空");
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            zis.transferTo(outputStream);
+            return outputStream.toByteArray();
+        }
+    }
+
     private void handleGeneratedImage(byte[] imageData) {
         Platform.runLater(() -> {
-            String timeStamp = DateFormatUtils.format(System.currentTimeMillis(), "yyyy-MM-dd HH:mm");
 
             Image image = new Image(new ByteArrayInputStream(imageData));
-            saveImageToFile(imageData, timeStamp).ifPresent(imageFile -> {
+            saveImageToFile(imageData).ifPresent(imageFile -> {
                 imagePreviewPane.updatePreview(imageFile);
                 historyImagesPane.addImage(image, imageFile);
                 NotificationService.showNotification("圖像生成成功！", Duration.seconds(3));
@@ -299,8 +335,8 @@ public class GenerationController {
         });
     }
 
-    private Optional<File> saveImageToFile(byte[] imageData, String timeStamp) {
-        return generationHandler.saveImage(imageData, outputDirectoryField.getText());
+    private Optional<File> saveImageToFile(byte[] imageData) {
+        return ImageUtils.saveImage(imageData, outputDirectoryField.getText());
     }
 
     private int getMaxCount() {

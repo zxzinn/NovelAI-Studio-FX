@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.controller;
 
 import com.google.inject.Inject;
+import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.component.NotificationPane;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.GenerationController;
@@ -9,7 +10,6 @@ import com.zxzinn.novelai.service.filemanager.FileOperationService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
-import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
@@ -38,7 +38,6 @@ public class MainController {
     private final DragAndDropHandler dragAndDropHandler;
     private final PropertiesManager propertiesManager;
     private final EmbedProcessor embedProcessor;
-    private final ImageGenerationService imageGenerationService;
     private final ImageUtils imageUtils;
     private final FilePreviewService filePreviewService;
     private final FileManagerService fileManagerService;
@@ -48,14 +47,13 @@ public class MainController {
 
     @Inject
     public MainController(PropertiesManager propertiesManager,
-                          EmbedProcessor embedProcessor, ImageGenerationService imageGenerationService,
+                          EmbedProcessor embedProcessor,
                           ImageUtils imageUtils, FilePreviewService filePreviewService,
                           FileManagerService fileManagerService, MetadataService metadataService,
                           AlertService alertService, FileOperationService fileOperationService) {
         this.dragAndDropHandler = new DragAndDropHandler(this::handleFileDrop);
         this.propertiesManager = propertiesManager;
         this.embedProcessor = embedProcessor;
-        this.imageGenerationService = imageGenerationService;
         this.imageUtils = imageUtils;
         this.filePreviewService = filePreviewService;
         this.fileManagerService = fileManagerService;
@@ -84,7 +82,7 @@ public class MainController {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
         GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(propertiesManager);
         loader.setControllerFactory(param -> new GenerationController(
-                filePreviewService, generationSettingsManager));
+                filePreviewService, generationSettingsManager,new APIClient()));
         BorderPane content = loader.load();
         return new Tab("圖像生成", content) {{
             setClosable(false);

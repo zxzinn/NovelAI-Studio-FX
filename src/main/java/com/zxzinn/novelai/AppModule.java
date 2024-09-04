@@ -7,7 +7,6 @@ import com.google.inject.Singleton;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.service.VersionCheckService;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
-import com.zxzinn.novelai.service.generation.ImageGenerationService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
@@ -34,12 +33,6 @@ public class AppModule extends AbstractModule {
     @Singleton
     Gson provideGson() {
         return new Gson();
-    }
-
-    @Provides
-    @Singleton
-    ImageGenerationService provideImageGenerationService(APIClient apiClient) {
-        return new ImageGenerationService(apiClient);
     }
 
     @Provides
