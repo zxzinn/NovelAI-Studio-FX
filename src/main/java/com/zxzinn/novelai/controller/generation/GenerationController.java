@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 public class GenerationController {
@@ -38,8 +39,6 @@ public class GenerationController {
     private final FilePreviewService filePreviewService;
     private final GenerationSettingsManager generationSettingsManager;
     private final PromptManager promptManager;
-    private final APIClient apiClient;
-    private final RetryStrategy retryStrategy;
 
     @FXML private TextField apiKeyField;
     @FXML private ComboBox<String> modelComboBox;
@@ -76,7 +75,7 @@ public class GenerationController {
     private volatile boolean stopRequested = false;
     private volatile boolean isStopping = false;
     private String base64Image;
-    private CountDownLatch generationLatch;
+    private AtomicInteger remainingGenerations;
     private AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
     private final GenerationTaskManager taskManager = GenerationTaskManager.getInstance();
 
@@ -86,8 +85,6 @@ public class GenerationController {
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
         this.promptManager = new PromptManager(new EmbedProcessor());
-        this.apiClient = new APIClient();
-        this.retryStrategy = new ExponentialBackoffRetry();
     }
 
     @FXML
@@ -228,13 +225,13 @@ public class GenerationController {
 
         int maxCount = getMaxCount();
         isInfiniteMode.set(maxCount == Integer.MAX_VALUE);
-        generationLatch = new CountDownLatch(isInfiniteMode.get() ? 1 : maxCount);
+        remainingGenerations = new AtomicInteger(isInfiniteMode.get() ? Integer.MAX_VALUE : maxCount);
 
         generateNextImage();
     }
 
     private void generateNextImage() {
-        if (stopRequested || (generationLatch.getCount() == 0 && !isInfiniteMode.get())) {
+        if (stopRequested || (!isInfiniteMode.get() && remainingGenerations.get() <= 0)) {
             finishGeneration();
             return;
         }
@@ -244,7 +241,8 @@ public class GenerationController {
                 GenerationPayload payload = createGenerationPayload();
                 GenerationTask task = new GenerationTask(payload, apiKeyField.getText());
 
-                taskManager.submitTask(task).thenAccept(this::handleGenerationResult);
+                taskManager.submitTask(task)
+                        .thenAccept(this::handleGenerationResult);
             } catch (Exception e) {
                 log.error("Error creating generation task: ", e);
                 finishGeneration();
@@ -254,14 +252,19 @@ public class GenerationController {
 
     private void handleGenerationResult(GenerationResult result) {
         if (result.isSuccess()) {
-            handleGeneratedImage(result.getImageData());
-            if (!isInfiniteMode.get()) {
-                generationLatch.countDown();
-            }
-            generateNextImage();
+            Platform.runLater(() -> {
+                handleGeneratedImage(result.getImageData());
+                updatePromptPreviews();
+                if (!isInfiniteMode.get()) {
+                    remainingGenerations.decrementAndGet();
+                }
+                generateNextImage();
+            });
         } else {
-            Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗: " + result.getErrorMessage()));
-            finishGeneration();
+            Platform.runLater(() -> {
+                NotificationService.showNotification("圖像生成失敗: " + result.getErrorMessage());
+                finishGeneration();
+            });
         }
     }
 
@@ -289,15 +292,11 @@ public class GenerationController {
     }
 
     private void handleGeneratedImage(byte[] imageData) {
-        Platform.runLater(() -> {
-            Image image = new Image(new ByteArrayInputStream(imageData));
-            saveImageToFile(imageData).ifPresent(imageFile -> {
-                imagePreviewPane.updatePreview(imageFile);
-                historyImagesPane.addImage(image, imageFile);
-                NotificationService.showNotification("圖像生成成功！");
-            });
-
-            updatePromptPreviews();
+        Image image = new Image(new ByteArrayInputStream(imageData));
+        saveImageToFile(imageData).ifPresent(imageFile -> {
+            imagePreviewPane.updatePreview(imageFile);
+            historyImagesPane.addImage(image, imageFile);
+            NotificationService.showNotification("圖像生成成功！");
         });
     }
 
