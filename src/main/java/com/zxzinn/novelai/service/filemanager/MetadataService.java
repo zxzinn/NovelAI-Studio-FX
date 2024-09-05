@@ -14,6 +14,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
@@ -173,20 +174,96 @@ public class MetadataService {
             if (javaMetadata.isPresent()) {
                 Optional<String> formattedComment = formatCommentJson(javaMetadata.get());
                 if (formattedComment.isPresent()) {
-                    return formattedComment.get();
+                    return formatWithReflection(formattedComment.get());
                 }
             }
 
             // 如果Java方法無法提取到有效的元數據，嘗試使用exe方法
             String exeMetadata = executableExtractor(file);
             if (!exeMetadata.isEmpty()) {
-                return formatYamlOutput(exeMetadata);
+                return formatWithReflection(formatYamlOutput(exeMetadata));
             }
 
             return "無法提取元數據";
         } catch (Exception e) {
             log.error("無法讀取檔案元數據", e);
             return "無法讀取元數據：" + e.getMessage();
+        }
+    }
+
+    private String formatWithReflection(String jsonString) throws IOException {
+        JsonNode jsonNode = jsonMapper.readTree(jsonString);
+        return new StructuredOutput(jsonNode).toString();
+    }
+
+    private static class StructuredOutput {
+        private final StringBuilder output = new StringBuilder();
+
+        public StructuredOutput(Object obj) {
+            processObject(obj, 0);
+        }
+
+        private void processObject(Object obj, int indent) {
+            if (obj == null) return;
+
+            if (obj instanceof JsonNode) {
+                processJsonNode((JsonNode) obj, indent);
+            } else {
+                for (Field field : obj.getClass().getDeclaredFields()) {
+                    field.setAccessible(true);
+                    try {
+                        Object value = field.get(obj);
+                        appendIndent(indent);
+                        output.append(field.getName()).append(": ");
+                        if (value == null) {
+                            output.append("null\n");
+                        } else if (value instanceof JsonNode) {
+                            output.append("\n");
+                            processJsonNode((JsonNode) value, indent + 2);
+                        } else if (value instanceof List) {
+                            output.append("\n");
+                            for (Object item : (List<?>) value) {
+                                processObject(item, indent + 2);
+                            }
+                        } else if (!value.getClass().getName().startsWith("java.lang")) {
+                            output.append("\n");
+                            processObject(value, indent + 2);
+                        } else {
+                            output.append(value).append("\n");
+                        }
+                    } catch (IllegalAccessException e) {
+                        log.error("Error accessing field", e);
+                    }
+                }
+            }
+        }
+
+        private void processJsonNode(JsonNode node, int indent) {
+            if (node.isObject()) {
+                node.fields().forEachRemaining(entry -> {
+                    appendIndent(indent);
+                    output.append(entry.getKey()).append(": ");
+                    if (entry.getValue().isValueNode()) {
+                        output.append(entry.getValue().asText()).append("\n");
+                    } else {
+                        output.append("\n");
+                        processJsonNode(entry.getValue(), indent + 2);
+                    }
+                });
+            } else if (node.isArray()) {
+                for (JsonNode element : node) {
+                    processJsonNode(element, indent);
+                }
+            }
+        }
+
+        private void appendIndent(int indent) {
+            output.append("  ".repeat(indent));
+        }
+
+        @Override
+        public String toString() {
+            return output.toString();
         }
     }
 
