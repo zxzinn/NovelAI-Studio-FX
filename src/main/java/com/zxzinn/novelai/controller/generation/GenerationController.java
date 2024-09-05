@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
+import com.zxzinn.novelai.model.GenerationResult;
+import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
@@ -19,7 +21,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -28,8 +29,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
 public class GenerationController {
@@ -71,12 +71,14 @@ public class GenerationController {
     @FXML private TextField extraNoiseSeedField;
     @FXML private Button uploadImageButton;
 
-    private int currentGeneratedCount = 0;
     private CountDownLatch promptUpdateLatch;
     private volatile boolean isGenerating = false;
     private volatile boolean stopRequested = false;
     private volatile boolean isStopping = false;
     private String base64Image;
+    private CountDownLatch generationLatch;
+    private AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
+    private final GenerationTaskManager taskManager = GenerationTaskManager.getInstance();
 
     @Inject
     public GenerationController(FilePreviewService filePreviewService,
@@ -165,14 +167,6 @@ public class GenerationController {
         imagePreviewPane.updatePreview(imageFile);
     }
 
-    private void updatePromptPreviewsAsync() {
-        Platform.runLater(() -> {
-            promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
-            promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
-            promptUpdateLatch.countDown();
-        });
-    }
-
     private void setupListeners() {
         ListenersBuilder.builder()
                 .apiKeyField(apiKeyField)
@@ -204,8 +198,12 @@ public class GenerationController {
     }
 
     private void updatePromptPreviews() {
-        promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
-        promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+        if (!promptManager.isPositivePromptLocked()) {
+            promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+        }
+        if (!promptManager.isNegativePromptLocked()) {
+            promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+        }
     }
 
     @FXML
@@ -226,10 +224,45 @@ public class GenerationController {
         isGenerating = true;
         stopRequested = false;
         isStopping = false;
-        currentGeneratedCount = 0;
-        promptUpdateLatch = new CountDownLatch(1);
         updateButtonState(true);
-        generateImages();
+
+        int maxCount = getMaxCount();
+        isInfiniteMode.set(maxCount == Integer.MAX_VALUE);
+        generationLatch = new CountDownLatch(isInfiniteMode.get() ? 1 : maxCount);
+
+        generateNextImage();
+    }
+
+    private void generateNextImage() {
+        if (stopRequested || (generationLatch.getCount() == 0 && !isInfiniteMode.get())) {
+            finishGeneration();
+            return;
+        }
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                GenerationPayload payload = createGenerationPayload();
+                GenerationTask task = new GenerationTask(payload, apiKeyField.getText());
+
+                taskManager.submitTask(task).thenAccept(this::handleGenerationResult);
+            } catch (Exception e) {
+                log.error("Error creating generation task: ", e);
+                finishGeneration();
+            }
+        });
+    }
+
+    private void handleGenerationResult(GenerationResult result) {
+        if (result.isSuccess()) {
+            handleGeneratedImage(result.getImageData());
+            if (!isInfiniteMode.get()) {
+                generationLatch.countDown();
+            }
+            generateNextImage();
+        } else {
+            Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗: " + result.getErrorMessage()));
+            finishGeneration();
+        }
     }
 
     private void stopGeneration() {
@@ -255,64 +288,8 @@ public class GenerationController {
         });
     }
 
-    private void generateImages() {
-        CompletableFuture.runAsync(() -> {
-            try {
-                int maxCount = getMaxCount();
-                while (isGenerating && !stopRequested && currentGeneratedCount < maxCount) {
-                    GenerationPayload payload = createGenerationPayload();
-
-                    Optional<byte[]> generatedImageData = generateImageWithRetry(payload, apiKeyField.getText());
-
-                    generatedImageData.ifPresentOrElse(
-                            imageData -> {
-                                handleGeneratedImage(imageData);
-                                currentGeneratedCount++;
-                            },
-                            () -> Platform.runLater(() -> NotificationService.showNotification("圖像生成失敗,請稍後重試"))
-                    );
-
-                    promptUpdateLatch = new CountDownLatch(1);
-                    updatePromptPreviewsAsync();
-                }
-            } finally {
-                finishGeneration();
-            }
-        });
-    }
-
-    private Optional<byte[]> generateImageWithRetry(GenerationPayload payload, String apiKey) {
-        return retryStrategy.execute(() -> {
-            Optional<byte[]> result = generateImage(payload, apiKey);
-            return result.orElseThrow(() -> new RuntimeException("Image generation failed"));
-        });
-    }
-
-    private Optional<byte[]> generateImage(GenerationPayload payload, String apiKey) {
-        try {
-            byte[] zipData = apiClient.generateImage(payload, apiKey);
-            return Optional.of(extractImageFromZip(zipData));
-        } catch (IOException e) {
-            log.error("生成圖像時發生錯誤：{}", e.getMessage(), e);
-            return Optional.empty();
-        }
-    }
-
-    private byte[] extractImageFromZip(byte[] zipData) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
-            ZipEntry entry = zis.getNextEntry();
-            if (entry == null) {
-                throw new IOException("ZIP文件為空");
-            }
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            zis.transferTo(outputStream);
-            return outputStream.toByteArray();
-        }
-    }
-
     private void handleGeneratedImage(byte[] imageData) {
         Platform.runLater(() -> {
-
             Image image = new Image(new ByteArrayInputStream(imageData));
             saveImageToFile(imageData).ifPresent(imageFile -> {
                 imagePreviewPane.updatePreview(imageFile);
@@ -320,13 +297,7 @@ public class GenerationController {
                 NotificationService.showNotification("圖像生成成功！");
             });
 
-            // 根據鎖定狀態更新提示詞預覽
-            if (!promptManager.isPositivePromptLocked()) {
-                promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
-            }
-            if (!promptManager.isNegativePromptLocked()) {
-                promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
-            }
+            updatePromptPreviews();
         });
     }
 
