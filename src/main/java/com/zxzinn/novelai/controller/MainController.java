@@ -10,6 +10,7 @@ import com.zxzinn.novelai.service.filemanager.FileOperationService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
+import com.zxzinn.novelai.service.generation.GenerationTaskManager;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
@@ -59,15 +60,31 @@ public class MainController {
         loadTabContent();
     }
 
+    @FXML
     private void loadTabContent() {
         try {
             mainTabPane.getTabs().addAll(
                     createUnifiedGeneratorTab(),
-                    createFileManagerTab()
+                    createFileManagerTab(),
+                    createTaskMonitorTab()  // 新增這行
             );
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Tab createTaskMonitorTab() throws IOException {
+        FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.TASK_MONITOR_FXML);
+        BorderPane content = loader.load();
+        TaskMonitorController controller = loader.getController();
+
+        // 將 controller 設置到 GenerationTaskManager 中，以便更新任務狀態
+        GenerationTaskManager.getInstance().setTaskMonitorController(controller);
+
+        return new Tab("任務監控", content) {{
+            setClosable(false);
+            setGraphic(new FontIcon("fas-tasks"));
+        }};
     }
 
     private Tab createUnifiedGeneratorTab() throws IOException {

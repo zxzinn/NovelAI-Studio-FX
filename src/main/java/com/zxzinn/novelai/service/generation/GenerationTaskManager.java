@@ -1,15 +1,19 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.controller.TaskMonitorController;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
+import com.zxzinn.novelai.model.TaskInfo;
 import com.zxzinn.novelai.utils.strategy.ExponentialBackoffRetry;
 import com.zxzinn.novelai.utils.strategy.RetryStrategy;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,6 +26,8 @@ public class GenerationTaskManager {
     private final ExecutorService executorService;
     private final APIClient apiClient;
     private final RetryStrategy retryStrategy;
+    @Setter
+    private TaskMonitorController taskMonitorController;
 
     private GenerationTaskManager() {
         this.executorService = Executors.newSingleThreadExecutor();
@@ -37,14 +43,20 @@ public class GenerationTaskManager {
     }
 
     public CompletableFuture<GenerationResult> submitTask(GenerationTask task) {
+        String taskId = UUID.randomUUID().toString();
+        taskMonitorController.addTask(new TaskInfo(taskId, "進行中", 0, "開始生成圖像"));
+
         return CompletableFuture.supplyAsync(() -> {
             try {
+                taskMonitorController.updateTask(taskId, "進行中", 0.5, "正在生成圖像");
                 byte[] zipData = retryStrategy.execute(() -> apiClient.generateImage(task.payload(), task.apiKey()))
                         .orElseThrow(() -> new RuntimeException("Image generation failed after retries"));
                 byte[] imageData = extractImageFromZip(zipData);
+                taskMonitorController.updateTask(taskId, "完成", 1.0, "圖像生成成功");
                 return GenerationResult.success(imageData);
             } catch (Exception e) {
                 log.error("Error generating image: ", e);
+                taskMonitorController.updateTask(taskId, "失敗", 1.0, "錯誤: " + e.getMessage());
                 return GenerationResult.failure(e.getMessage());
             }
         }, executorService);
