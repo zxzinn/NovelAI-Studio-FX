@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.service.generation;
 
 import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.api.Endpoint;
 import com.zxzinn.novelai.controller.TaskMonitorController;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
@@ -31,7 +32,7 @@ public class GenerationTaskManager {
 
     private GenerationTaskManager() {
         this.executorService = Executors.newSingleThreadExecutor();
-        this.apiClient = new APIClient();
+        this.apiClient = new APIClient(Endpoint.SUGGEST_TAGS);
         this.retryStrategy = new ExponentialBackoffRetry();
     }
 
