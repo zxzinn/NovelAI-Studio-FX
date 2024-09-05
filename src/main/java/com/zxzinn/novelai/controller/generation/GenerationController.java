@@ -80,12 +80,11 @@ public class GenerationController {
 
     @Inject
     public GenerationController(FilePreviewService filePreviewService,
-                                GenerationSettingsManager generationSettingsManager,
-                                APIClient apiClient) {
+                                GenerationSettingsManager generationSettingsManager) {
         this.filePreviewService = filePreviewService;
         this.generationSettingsManager = generationSettingsManager;
         this.promptManager = new PromptManager(new EmbedProcessor());
-        this.apiClient = apiClient;
+        this.apiClient = new APIClient();
         this.retryStrategy = new ExponentialBackoffRetry();
     }
 
