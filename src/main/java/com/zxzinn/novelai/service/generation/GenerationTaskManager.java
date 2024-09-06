@@ -32,7 +32,7 @@ public class GenerationTaskManager {
 
     private GenerationTaskManager() {
         this.executorService = Executors.newSingleThreadExecutor();
-        this.apiClient = new APIClient(Endpoint.SUGGEST_TAGS);
+        this.apiClient = new APIClient(Endpoint.GENERATE_IMAGE);
         this.retryStrategy = new ExponentialBackoffRetry();
     }
 
