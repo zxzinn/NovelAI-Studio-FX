@@ -22,6 +22,8 @@ public class FileManagerController {
     @FXML private Button removeButton;
     @FXML private Button clearMetadataButton;
     @FXML private Button mergeTxtButton;
+    @FXML private Button text2ImageButton;
+    @FXML private Button image2ImageButton;
     @FXML private ProgressBar progressBar;
     @FXML private Label progressLabel;
 
@@ -70,6 +72,8 @@ public class FileManagerController {
                 updatePreview(newValue);
             }
         });
+        // text2ImageButton.setOnAction(event -> );
+        // image2ImageButton.setOnAction(event -> );
         selectAllButton.setOnAction(event -> fileTreeController.selectAllInDirectory(fileTreeView.getSelectionModel().getSelectedItem()));
         clearMetadataButton.setOnAction(event -> fileOperationService.clearMetadataForSelectedFiles(fileTreeView, fileTreeController, alertService, progressBar, progressLabel));
         mergeTxtButton.setOnAction(event -> fileOperationService.mergeSelectedTxtFiles(fileTreeView, fileTreeController, alertService));

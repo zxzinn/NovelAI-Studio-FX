@@ -42,7 +42,6 @@ module com.zxzinn.novelai {
     opens com.zxzinn.novelai.service.ui to com.google.guice;
     opens com.zxzinn.novelai.utils.image to com.google.guice;
     opens com.zxzinn.novelai.utils.embed to com.google.guice;
-    opens com.zxzinn.novelai.model to javafx.base;
     opens com.zxzinn.novelai.controller to javafx.fxml;
 
     exports com.zxzinn.novelai;
@@ -60,4 +59,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.utils.embed;
     exports com.zxzinn.novelai.service;
     exports com.zxzinn.novelai.model;
+    opens com.zxzinn.novelai.model to com.google.gson, com.google.guice, javafx.base;
 }

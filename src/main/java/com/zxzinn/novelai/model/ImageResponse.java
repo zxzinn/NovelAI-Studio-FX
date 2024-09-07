@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.api;
+package com.zxzinn.novelai.model;
 
 import lombok.Data;
 
