@@ -9,11 +9,10 @@ import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
-import com.zxzinn.novelai.utils.strategy.ExponentialBackoffRetry;
-import com.zxzinn.novelai.utils.strategy.RetryStrategy;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -28,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +35,7 @@ public class GenerationController {
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
 
     private final FilePreviewService filePreviewService;
-    private final GenerationSettingsManager generationSettingsManager;
+    private final PropertiesManager propertiesManager;
     private final PromptManager promptManager;
 
     @FXML private TextField apiKeyField;
@@ -70,20 +68,18 @@ public class GenerationController {
     @FXML private TextField extraNoiseSeedField;
     @FXML private Button uploadImageButton;
 
-    private CountDownLatch promptUpdateLatch;
     private volatile boolean isGenerating = false;
     private volatile boolean stopRequested = false;
     private volatile boolean isStopping = false;
     private String base64Image;
     private AtomicInteger remainingGenerations;
-    private AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
+    private final AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
     private final GenerationTaskManager taskManager = GenerationTaskManager.getInstance();
 
     @Inject
-    public GenerationController(FilePreviewService filePreviewService,
-                                GenerationSettingsManager generationSettingsManager) {
+    public GenerationController(FilePreviewService filePreviewService, PropertiesManager propertiesManager) {
         this.filePreviewService = filePreviewService;
-        this.generationSettingsManager = generationSettingsManager;
+        this.propertiesManager = propertiesManager;
         this.promptManager = new PromptManager(new EmbedProcessor());
     }
 
@@ -122,27 +118,51 @@ public class GenerationController {
     }
 
     private void loadSettings() {
-        SettingsBuilder.builder()
-                .apiKeyField(apiKeyField)
-                .modelComboBox(modelComboBox)
-                .widthField(widthField)
-                .heightField(heightField)
-                .samplerComboBox(samplerComboBox)
-                .stepsField(stepsField)
-                .seedField(seedField)
-                .generateCountComboBox(generateCountComboBox)
-                .positivePromptArea(positivePromptArea)
-                .negativePromptArea(negativePromptArea)
-                .outputDirectoryField(outputDirectoryField)
-                .generationModeComboBox(generationModeComboBox)
-                .smeaCheckBox(smeaCheckBox)
-                .smeaDynCheckBox(smeaDynCheckBox)
-                .strengthSlider(strengthSlider)
-                .extraNoiseSeedField(extraNoiseSeedField)
-                .ratioField(ratioField)
-                .countField(countField)
-                .build()
-                .loadSettings(generationSettingsManager);
+        apiKeyField.setText(propertiesManager.getString("apiKey", ""));
+        modelComboBox.setValue(propertiesManager.getString("model", "nai-diffusion-3"));
+        widthField.setText(String.valueOf(propertiesManager.getInt("width", 832)));
+        heightField.setText(String.valueOf(propertiesManager.getInt("height", 1216)));
+        samplerComboBox.setValue(propertiesManager.getString("sampler", "k_euler"));
+        stepsField.setText(String.valueOf(propertiesManager.getInt("steps", 28)));
+        seedField.setText(String.valueOf(propertiesManager.getInt("seed", 0)));
+        generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
+        positivePromptArea.setPromptText(propertiesManager.getString("positivePrompt", ""));
+        negativePromptArea.setPromptText(propertiesManager.getString("negativePrompt", ""));
+        outputDirectoryField.setText(propertiesManager.getString("outputDirectory", "output"));
+        generationModeComboBox.setValue(propertiesManager.getString("generationMode", "Text2Image"));
+        smeaCheckBox.setSelected(propertiesManager.getBoolean("smea", true));
+        smeaDynCheckBox.setSelected(propertiesManager.getBoolean("smeaDyn", false));
+        strengthSlider.setValue(propertiesManager.getDouble("strength", 0.5));
+        extraNoiseSeedField.setText(String.valueOf(propertiesManager.getLong("extraNoiseSeed", 0)));
+        ratioField.setText(String.valueOf(propertiesManager.getInt("ratio", 7)));
+        countField.setText(String.valueOf(propertiesManager.getInt("count", 1)));
+    }
+
+    private void setupListeners() {
+        apiKeyField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("apiKey", newVal));
+        modelComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("model", newVal));
+        widthField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("width", Integer.parseInt(newVal)));
+        heightField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("height", Integer.parseInt(newVal)));
+        samplerComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("sampler", newVal));
+        stepsField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("steps", Integer.parseInt(newVal)));
+        seedField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("seed", Integer.parseInt(newVal)));
+        generateCountComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("generateCount", newVal));
+        positivePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
+            propertiesManager.setString("positivePrompt", newVal);
+            promptManager.updatePromptPreview(newVal, positivePromptPreviewArea, true);
+        });
+        negativePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
+            propertiesManager.setString("negativePrompt", newVal);
+            promptManager.updatePromptPreview(newVal, negativePromptPreviewArea, false);
+        });
+        outputDirectoryField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("outputDirectory", newVal));
+        generationModeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("generationMode", newVal));
+        smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setBoolean("smea", newVal));
+        smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setBoolean("smeaDyn", newVal));
+        strengthSlider.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setDouble("strength", newVal.doubleValue()));
+        extraNoiseSeedField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setLong("extraNoiseSeed", Long.parseLong(newVal)));
+        ratioField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("ratio", Integer.parseInt(newVal)));
+        countField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("count", Integer.parseInt(newVal)));
     }
 
     private void setupGenerationModeComboBox() {
@@ -162,36 +182,6 @@ public class GenerationController {
 
     private void handleHistoryImageClick(File imageFile) {
         imagePreviewPane.updatePreview(imageFile);
-    }
-
-    private void setupListeners() {
-        ListenersBuilder.builder()
-                .apiKeyField(apiKeyField)
-                .modelComboBox(modelComboBox)
-                .widthField(widthField)
-                .heightField(heightField)
-                .samplerComboBox(samplerComboBox)
-                .stepsField(stepsField)
-                .seedField(seedField)
-                .generateCountComboBox(generateCountComboBox)
-                .positivePromptArea(positivePromptArea)
-                .negativePromptArea(negativePromptArea)
-                .outputDirectoryField(outputDirectoryField)
-                .generationModeComboBox(generationModeComboBox)
-                .smeaCheckBox(smeaCheckBox)
-                .smeaDynCheckBox(smeaDynCheckBox)
-                .strengthSlider(strengthSlider)
-                .extraNoiseSeedField(extraNoiseSeedField)
-                .ratioField(ratioField)
-                .countField(countField)
-                .build()
-                .setupListeners(generationSettingsManager);
-
-
-        positivePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                promptManager.updatePromptPreview(newValue, positivePromptPreviewArea, true));
-        negativePromptArea.getPromptTextArea().textProperty().addListener((observable, oldValue, newValue) ->
-                promptManager.updatePromptPreview(newValue, negativePromptPreviewArea, false));
     }
 
     private void updatePromptPreviews() {

@@ -1,7 +1,6 @@
 package com.zxzinn.novelai.controller;
 
 import com.google.inject.Inject;
-import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.component.NotificationPane;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.GenerationController;
@@ -9,7 +8,6 @@ import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FileOperationService;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
-import com.zxzinn.novelai.service.generation.GenerationSettingsManager;
 import com.zxzinn.novelai.service.generation.GenerationTaskManager;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
@@ -89,9 +87,8 @@ public class MainController {
 
     private Tab createUnifiedGeneratorTab() throws IOException {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
-        GenerationSettingsManager generationSettingsManager = new GenerationSettingsManager(propertiesManager);
         loader.setControllerFactory(param -> new GenerationController(
-                filePreviewService, generationSettingsManager));
+                filePreviewService, propertiesManager));
         BorderPane content = loader.load();
         return new Tab("圖像生成", content) {{
             setClosable(false);
