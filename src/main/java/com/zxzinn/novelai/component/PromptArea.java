@@ -1,46 +1,33 @@
 package com.zxzinn.novelai.component;
 
-import com.zxzinn.novelai.service.generation.AutoCompleteHandler;
-import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import com.zxzinn.novelai.viewmodel.PromptAreaViewModel;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import java.io.IOException;
-
 @Log4j2
 public class PromptArea extends VBox {
 
-    @FXML private Label promptLabel;
-    @Getter @FXML private TextArea promptTextArea;
-    private AutoCompleteHandler autoCompleteHandler;
+    private Label promptLabel;
+    @Getter private TextArea promptTextArea;
+    private PromptAreaViewModel viewModel;
 
     public PromptArea() {
-        loadFXML();
+        this.viewModel = new PromptAreaViewModel();
         initializeComponents();
+        setupBindings();
         setupListeners();
     }
 
-    private void loadFXML() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_AREA));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException exception) {
-            log.error("Failed to load FXML: {}", exception.getMessage());
-            throw new RuntimeException(exception);
-        }
-    }
-
     private void initializeComponents() {
+        promptLabel = new Label();
+        promptTextArea = new TextArea();
         setupPromptTextArea();
-        autoCompleteHandler = new AutoCompleteHandler(promptTextArea);
+        getChildren().addAll(promptLabel, promptTextArea);
+        setSpacing(5.0);
     }
 
     private void setupPromptTextArea() {
@@ -51,31 +38,34 @@ public class PromptArea extends VBox {
         promptTextArea.getStyleClass().add("prompt-area");
     }
 
+    private void setupBindings() {
+        promptLabel.textProperty().bind(viewModel.promptLabelTextProperty());
+        promptTextArea.textProperty().bindBidirectional(viewModel.promptTextProperty());
+    }
+
     private void setupListeners() {
+        viewModel.setTextArea(promptTextArea);
         promptTextArea.textProperty().addListener((observable, oldValue, newValue) ->
-                autoCompleteHandler.handleTextChange(oldValue, newValue));
+                viewModel.handleTextChange(oldValue, newValue));
         promptTextArea.caretPositionProperty().addListener((observable, oldValue, newValue) ->
-                autoCompleteHandler.handleCaretChange(newValue.intValue()));
+                viewModel.handleCaretChange(newValue.intValue()));
         promptTextArea.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED,
-                autoCompleteHandler::handleKeyPress);
+                viewModel::handleKeyPress);
     }
 
     public void setEmbedFileManager(EmbedFileManager embedFileManager) {
-        autoCompleteHandler.setEmbedFileManager(embedFileManager);
+        viewModel.setEmbedFileManager(embedFileManager);
     }
 
     public void setPromptLabel(String label) {
-        promptLabel.setText(label);
+        viewModel.promptLabelTextProperty().set(label);
     }
 
     public String getPromptText() {
-        return promptTextArea.getText();
+        return viewModel.promptTextProperty().get();
     }
 
     public void setPromptText(String text) {
-        if (text == null) {
-            text = "";
-        }
-        promptTextArea.setText(text);
+        viewModel.promptTextProperty().set(text != null ? text : "");
     }
 }
