@@ -1,47 +1,34 @@
 package com.zxzinn.novelai.component;
 
-import com.zxzinn.novelai.utils.common.ResourcePaths;
-import com.zxzinn.novelai.utils.tokenizer.SimpleTokenizer;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import com.zxzinn.novelai.viewmodel.PromptPreviewAreaViewModel;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-
 public class PromptPreviewArea extends VBox {
 
-    @FXML private Label previewLabel;
-    @Getter @FXML private TextArea previewTextArea;
-    @FXML private ProgressBar tokenProgressBar;
-    @FXML private Label tokenCountLabel;
+    private Label previewLabel;
+    @Getter private TextArea previewTextArea;
+    private ProgressBar tokenProgressBar;
+    private Label tokenCountLabel;
 
-    private SimpleTokenizer tokenizer;
-    private static final int TOKEN_LIMIT = 225;
+    private final PromptPreviewAreaViewModel viewModel;
 
     public PromptPreviewArea() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_PREVIEW_AREA));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
-        try {
-            fxmlLoader.load();
-            initializeComponents();
-            initializeTokenizer();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+        this.viewModel = new PromptPreviewAreaViewModel();
+        initializeComponents();
+        setupBindings();
     }
 
     private void initializeComponents() {
+        previewLabel = new Label();
+        previewTextArea = new TextArea();
+        tokenProgressBar = new ProgressBar();
+        tokenCountLabel = new Label();
+
         previewTextArea.setWrapText(true);
         previewTextArea.setPrefHeight(100);
         previewTextArea.setMaxHeight(USE_PREF_SIZE);
@@ -49,68 +36,56 @@ public class PromptPreviewArea extends VBox {
         previewTextArea.setEditable(false);
         previewTextArea.getStyleClass().add("prompt-preview");
 
-        previewTextArea.textProperty().addListener((observable, oldValue, newValue) -> updateTokenCount());
-
         tokenProgressBar.setPrefHeight(6);
         tokenProgressBar.getStyleClass().add("token-progress-bar");
+        tokenProgressBar.setMaxWidth(Double.MAX_VALUE);
+
+        StackPane progressContainer = new StackPane(tokenProgressBar, tokenCountLabel);
+        progressContainer.getStyleClass().add("token-progress-container");
+
+        getChildren().addAll(previewLabel, previewTextArea, progressContainer);
+        setSpacing(5.0);
     }
 
-    private void initializeTokenizer() {
-        try {
-            String resourcePath = ResourcePaths.SIMPLE_TOKENIZER;
-            InputStream inputStream = getClass().getResourceAsStream(resourcePath);
-            if (inputStream == null) {
-                throw new IOException("Cannot find resource: " + resourcePath);
-            }
+    private void setupBindings() {
+        previewLabel.textProperty().bind(viewModel.previewLabelTextProperty());
+        previewTextArea.textProperty().bindBidirectional(viewModel.previewTextProperty());
+        tokenProgressBar.progressProperty().bind(viewModel.tokenProgressProperty());
+        tokenCountLabel.textProperty().bind(viewModel.tokenCountTextProperty());
 
-            Path tempFile = Files.createTempFile("bpe_vocab", ".txt.gz");
-            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-
-            tokenizer = new SimpleTokenizer(tempFile.toString());
-
-            tempFile.toFile().deleteOnExit();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize tokenizer", e);
-        }
+        viewModel.tokenLevelProperty().addListener((observable, oldValue, newValue) -> updateStyles(newValue));
     }
 
-    private void updateTokenCount() {
-        String text = previewTextArea.getText();
-        int tokenCount = tokenizer.encode(text).size();
-        double ratio = (double) tokenCount / TOKEN_LIMIT;
-
-        Platform.runLater(() -> {
-            tokenProgressBar.setProgress(ratio);
-            tokenCountLabel.setText(String.format("%d / %d", tokenCount, TOKEN_LIMIT));
-            updateStyles(ratio);
-        });
-    }
-
-    private void updateStyles(double ratio) {
+    private void updateStyles(PromptPreviewAreaViewModel.TokenLevel tokenLevel) {
         previewTextArea.getStyleClass().removeAll("prompt-preview-low", "prompt-preview-medium", "prompt-preview-high", "prompt-preview-max");
         tokenProgressBar.getStyleClass().remove("token-progress-bar-warning");
 
-        if (ratio < 0.5) {
-            previewTextArea.getStyleClass().add("prompt-preview-low");
-        } else if (ratio < 0.75) {
-            previewTextArea.getStyleClass().add("prompt-preview-medium");
-        } else if (ratio < 0.9) {
-            previewTextArea.getStyleClass().add("prompt-preview-high");
-        } else {
-            previewTextArea.getStyleClass().add("prompt-preview-max");
-            tokenProgressBar.getStyleClass().add("token-progress-bar-warning");
+        switch (tokenLevel) {
+            case LOW:
+                previewTextArea.getStyleClass().add("prompt-preview-low");
+                break;
+            case MEDIUM:
+                previewTextArea.getStyleClass().add("prompt-preview-medium");
+                break;
+            case HIGH:
+                previewTextArea.getStyleClass().add("prompt-preview-high");
+                break;
+            case MAX:
+                previewTextArea.getStyleClass().add("prompt-preview-max");
+                tokenProgressBar.getStyleClass().add("token-progress-bar-warning");
+                break;
         }
     }
 
     public void setPreviewLabel(String label) {
-        previewLabel.setText(label);
+        viewModel.previewLabelTextProperty().set(label);
     }
 
     public String getPreviewText() {
-        return previewTextArea.getText();
+        return viewModel.previewTextProperty().get();
     }
 
     public void setPreviewText(String text) {
-        previewTextArea.setText(text);
+        viewModel.previewTextProperty().set(text);
     }
 }

@@ -13,8 +13,6 @@ public final class ResourcePaths {
     public static final String TASK_MONITOR_FXML = FXML_ROOT + "task_monitor.fxml";
     public static final String FILE_MANAGER_FXML = FXML_ROOT + "filemanager/FileManager.fxml";
     public static final String IMAGE_GENERATOR_FXML = FXML_ROOT + "generator/ImageGenerator.fxml";
-    public static final String PROMPT_CONTROLS = FXML_ROOT + "generator/PromptControls.fxml";
-    public static final String PROMPT_PREVIEW_AREA = FXML_ROOT + "generator/PromptPreviewArea.fxml";
 
     public static final String META_READER_PATH = EXECUTABLE_ROOT + "meta_reader.exe";
 
