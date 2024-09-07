@@ -1,52 +1,68 @@
 package com.zxzinn.novelai.component;
 
-import com.zxzinn.novelai.utils.common.ResourcePaths;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import com.zxzinn.novelai.viewmodel.PromptControlsViewModel;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.IOException;
-
 public class PromptControls extends VBox {
 
-    @FXML private Button refreshButton;
-    @FXML private Button lockButton;
-    @FXML private FontIcon lockIcon;
+    private Button refreshButton;
+    private Button lockButton;
+    private FontIcon lockIcon;
+    private final PromptControlsViewModel viewModel;
 
     public PromptControls() {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(ResourcePaths.PROMPT_CONTROLS));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
-
-        try {
-            fxmlLoader.load();
-            initializeButtons();
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+        this.viewModel = new PromptControlsViewModel();
+        initializeComponents();
+        setupBindings();
     }
 
-    private void initializeButtons() {
-        refreshButton.setPrefSize(30, 30);
-        lockButton.setPrefSize(30, 30);
+    private void initializeComponents() {
+        refreshButton = createButton("fas-sync-alt", "refresh-button");
+        lockButton = createButton("fas-lock-open", "lock-button");
+        lockIcon = (FontIcon) lockButton.getGraphic();
+
+        getChildren().addAll(refreshButton, lockButton);
+        setAlignment(javafx.geometry.Pos.CENTER);
+        setSpacing(5.0);
+    }
+
+    private Button createButton(String iconLiteral, String styleClass) {
+        FontIcon icon = new FontIcon(iconLiteral);
+        icon.setIconSize(16);
+
+        Button button = new Button();
+        button.setGraphic(icon);
+        button.getStyleClass().add(styleClass);
+        button.setPrefSize(30, 30);
+
+        return button;
+    }
+
+    private void setupBindings() {
+        refreshButton.setOnAction(event -> viewModel.refresh());
+        lockButton.setOnAction(event -> viewModel.toggleLock());
+
+        viewModel.lockedProperty().addListener((observable, oldValue, newValue) -> {
+            lockIcon.setIconLiteral(newValue ? "fas-lock" : "fas-lock-open");
+            if (newValue) {
+                lockButton.getStyleClass().add("locked");
+            } else {
+                lockButton.getStyleClass().remove("locked");
+            }
+        });
     }
 
     public void setOnRefreshAction(Runnable action) {
-        refreshButton.setOnAction(event -> action.run());
+        viewModel.setRefreshAction(action);
     }
 
     public void setOnLockAction(Runnable action) {
-        lockButton.setOnAction(event -> action.run());
+        viewModel.setLockAction(action);
     }
 
     public void setLockState(boolean isLocked) {
-        lockIcon.setIconLiteral(isLocked ? "fas-lock" : "fas-lock-open");
-        if (isLocked) {
-            lockButton.getStyleClass().add("locked");
-        } else {
-            lockButton.getStyleClass().remove("locked");
-        }
+        viewModel.lockedProperty().set(isLocked);
     }
 }
