@@ -11,10 +11,9 @@ import com.zxzinn.novelai.utils.ui.LoadingScreen;
 import com.zxzinn.novelai.utils.ui.LoadingTask;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import lombok.extern.log4j.Log4j2;
 
@@ -65,10 +64,8 @@ public class MainApplication extends Application {
             @Override
             public void execute() {
                 try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource(ResourcePaths.MAIN_VIEW_FXML));
                     MainController mainController = injector.getInstance(MainController.class);
-                    loader.setController(mainController);
-                    Parent root = loader.load();
+                    BorderPane root = mainController.createView();
 
                     Scene scene = new Scene(root);
                     scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(ResourcePaths.STYLES_CSS)).toExternalForm());

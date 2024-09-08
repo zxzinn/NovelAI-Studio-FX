@@ -15,7 +15,6 @@ import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -28,8 +27,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class MainController {
-    @FXML private BorderPane rootPane;
-    @FXML private TabPane mainTabPane;
+    private BorderPane rootPane;
+    private TabPane mainTabPane;
 
     private final DragAndDropHandler dragAndDropHandler;
     private final PropertiesManager propertiesManager;
@@ -53,18 +52,20 @@ public class MainController {
         this.fileOperationService = fileOperationService;
     }
 
-    @FXML
-    public void initialize() {
+    public BorderPane createView() {
+        rootPane = new BorderPane();
+        mainTabPane = new TabPane();
+        rootPane.setCenter(mainTabPane);
         loadTabContent();
+        return rootPane;
     }
 
-    @FXML
     private void loadTabContent() {
         try {
             mainTabPane.getTabs().addAll(
                     createUnifiedGeneratorTab(),
                     createFileManagerTab(),
-                    createTaskMonitorTab()  // 新增這行
+                    createTaskMonitorTab()
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +77,6 @@ public class MainController {
         BorderPane content = loader.load();
         TaskMonitorController controller = loader.getController();
 
-        // 將 controller 設置到 GenerationTaskManager 中，以便更新任務狀態
         GenerationTaskManager.getInstance().setTaskMonitorController(controller);
 
         return new Tab("任務監控", content) {{
@@ -85,11 +85,9 @@ public class MainController {
         }};
     }
 
-    private Tab createUnifiedGeneratorTab() throws IOException {
-        FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.IMAGE_GENERATOR_FXML);
-        loader.setControllerFactory(param -> new GenerationController(
-                filePreviewService, propertiesManager));
-        BorderPane content = loader.load();
+    private Tab createUnifiedGeneratorTab() {
+        GenerationController generationController = new GenerationController(filePreviewService, propertiesManager);
+        BorderPane content = generationController.createView();
         return new Tab("圖像生成", content) {{
             setClosable(false);
             setGraphic(new FontIcon("fas-image"));
@@ -114,7 +112,6 @@ public class MainController {
     }
 
     public void setStage(Stage stage) {
-
         StackPane root = new StackPane();
         root.getChildren().add(rootPane);
 
