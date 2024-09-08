@@ -9,11 +9,13 @@ import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
+import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -359,24 +361,54 @@ public class GenerationController {
         previewContainer.getChildren().add(imagePreviewPane);
         historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
 
-        UIInitializer.builder()
-                .modelComboBox(modelComboBox)
-                .samplerComboBox(samplerComboBox)
-                .generateCountComboBox(generateCountComboBox)
-                .positivePromptArea(positivePromptArea)
-                .negativePromptArea(negativePromptArea)
-                .positivePromptPreviewArea(positivePromptPreviewArea)
-                .negativePromptPreviewArea(negativePromptPreviewArea)
-                .strengthSlider(strengthSlider)
-                .build()
-                .initializeFields();
-
+        initializeFields();
         loadSettings();
         setupListeners();
         promptManager.setupPromptControls(positivePromptControls, negativePromptControls,
                 positivePromptArea, negativePromptArea, positivePromptPreviewArea, negativePromptPreviewArea);
         updatePromptPreviews();
         setupGenerationModeComboBox();
+    }
+
+    private void initializeFields() {
+        initializeModelComboBox();
+        initializeSamplerComboBox();
+        initializeGenerateCountComboBox();
+        initializePromptAreas();
+        initializePromptPreviewAreas();
+        setupStrengthSlider();
+    }
+
+    private void initializeModelComboBox() {
+        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
+        modelComboBox.setValue(NAIConstants.MODELS[0]);
+    }
+
+    private void initializeSamplerComboBox() {
+        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
+        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
+    }
+
+    private void initializeGenerateCountComboBox() {
+        generateCountComboBox.getItems().addAll("1", "2", "3", "4", "無限");
+        generateCountComboBox.setValue("1");
+    }
+
+    private void initializePromptAreas() {
+        positivePromptArea.setPromptLabel("正面提示詞:");
+        negativePromptArea.setPromptLabel("負面提示詞:");
+    }
+
+    private void initializePromptPreviewAreas() {
+        positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
+        negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
+    }
+
+    private void setupStrengthSlider() {
+        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
+            strengthSlider.setValue(roundedValue);
+        });
     }
 
     private void loadSettings() {
