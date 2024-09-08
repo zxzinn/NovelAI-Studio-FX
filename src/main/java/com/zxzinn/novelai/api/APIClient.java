@@ -1,6 +1,7 @@
 package com.zxzinn.novelai.api;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -46,8 +47,14 @@ public class APIClient {
 
     @NotNull
     private Request createRequest(GenerationPayload payload, String apiKey) {
-        Gson gson = new Gson();
-        RequestBody body = RequestBody.create(gson.toJson(payload), JSON);
+        // 使用GsonBuilder來創建一個具有Pretty Printing功能的Gson實例
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonPayload = gson.toJson(payload);
+        RequestBody body = RequestBody.create(jsonPayload, JSON);
+
+        // 使用Log4j2打印格式化的payload
+        log.debug("發送的payload:\n{}", jsonPayload);
+
         return new Request.Builder()
                 .url(endpoint.getUrl())
                 .addHeader("Authorization", "Bearer " + apiKey)
