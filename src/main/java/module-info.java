@@ -60,4 +60,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.service;
     exports com.zxzinn.novelai.model;
     opens com.zxzinn.novelai.model to com.google.gson, com.google.guice, javafx.base;
+    exports com.zxzinn.novelai.test to javafx.graphics;
 }
