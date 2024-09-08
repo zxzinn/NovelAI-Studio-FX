@@ -41,16 +41,13 @@ public class GenerationController {
     private final PropertiesManager propertiesManager;
     private final PromptManager promptManager;
 
-    private TextField apiKeyField;
-    private ComboBox<String> modelComboBox;
+    private ApiSettingsPane apiSettingsPane;
+    private OutputSettingsPane outputSettingsPane;
+    private SamplingSettingsPane samplingSettingsPane;
+    private Text2ImageSettingsPane text2ImageSettingsPane;
+    private Image2ImageSettingsPane image2ImageSettingsPane;
+
     private ComboBox<String> generationModeComboBox;
-    private TextField widthField;
-    private TextField heightField;
-    private TextField ratioField;
-    private TextField countField;
-    private ComboBox<String> samplerComboBox;
-    private TextField stepsField;
-    private TextField seedField;
     private PromptArea positivePromptArea;
     private PromptArea negativePromptArea;
     private PromptPreviewArea positivePromptPreviewArea;
@@ -60,16 +57,8 @@ public class GenerationController {
     private ComboBox<String> generateCountComboBox;
     private StackPane previewContainer;
     private HistoryImagesPane historyImagesPane;
-    private TextField outputDirectoryField;
     private ImagePreviewPane imagePreviewPane;
     private Button generateButton;
-    private TitledPane txt2imgSettingsPane;
-    private TitledPane img2imgSettingsPane;
-    private CheckBox smeaCheckBox;
-    private CheckBox smeaDynCheckBox;
-    private Slider strengthSlider;
-    private TextField extraNoiseSeedField;
-    private Button uploadImageButton;
 
     private volatile boolean isGenerating = false;
     private volatile boolean stopRequested = false;
@@ -111,12 +100,18 @@ public class GenerationController {
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
         VBox settingsContent = new VBox(10);
+        apiSettingsPane = new ApiSettingsPane(propertiesManager);
+        outputSettingsPane = new OutputSettingsPane(propertiesManager);
+        samplingSettingsPane = new SamplingSettingsPane(propertiesManager);
+        text2ImageSettingsPane = new Text2ImageSettingsPane(propertiesManager);
+        image2ImageSettingsPane = new Image2ImageSettingsPane(propertiesManager);
+
         settingsContent.getChildren().addAll(
-                createApiSettingsPane(),
-                createOutputSettingsPane(),
-                createSamplingSettingsPane(),
-                createText2ImageSettingsPane(),
-                createImage2ImageSettingsPane()
+                apiSettingsPane,
+                outputSettingsPane,
+                samplingSettingsPane,
+                text2ImageSettingsPane,
+                image2ImageSettingsPane
         );
 
         scrollPane.setContent(settingsContent);
@@ -126,166 +121,6 @@ public class GenerationController {
         leftPanel.getChildren().addAll(scrollPane, controlBar);
 
         return leftPanel;
-    }
-
-    private TitledPane createApiSettingsPane() {
-        VBox content = new VBox(5);
-        content.getStyleClass().add("settings-content");
-
-        apiKeyField = new TextField();
-        apiKeyField.getStyleClass().add("right-aligned-text");
-
-        modelComboBox = new ComboBox<>();
-        modelComboBox.setMaxWidth(Double.MAX_VALUE);
-        modelComboBox.getStyleClass().add("right-aligned-text");
-
-        generationModeComboBox = new ComboBox<>();
-        generationModeComboBox.setMaxWidth(Double.MAX_VALUE);
-        generationModeComboBox.getStyleClass().add("right-aligned-text");
-
-        content.getChildren().addAll(
-                new Label("API Key"),
-                apiKeyField,
-                new Label("模型"),
-                modelComboBox,
-                new Label("生成模式"),
-                generationModeComboBox
-        );
-
-        TitledPane pane = new TitledPane("API Settings", content);
-        pane.getStyleClass().add("settings-section");
-        return pane;
-    }
-
-    private TitledPane createOutputSettingsPane() {
-        VBox content = new VBox(10);
-        content.getStyleClass().add("settings-content");
-
-        HBox resolutionBox = new HBox(10);
-        resolutionBox.setAlignment(Pos.CENTER_LEFT);
-        widthField = new TextField();
-        heightField = new TextField();
-        widthField.getStyleClass().addAll("resolution-field", "right-aligned-text");
-        heightField.getStyleClass().addAll("resolution-field", "right-aligned-text");
-        resolutionBox.getChildren().addAll(
-                new Label("解析度"),
-                widthField,
-                new Label("×"),
-                heightField
-        );
-
-        ratioField = new TextField();
-        ratioField.getStyleClass().add("right-aligned-text");
-        HBox.setHgrow(ratioField, Priority.ALWAYS);
-
-        countField = new TextField();
-        countField.getStyleClass().add("right-aligned-text");
-        HBox.setHgrow(countField, Priority.ALWAYS);
-
-        outputDirectoryField = new TextField();
-        outputDirectoryField.getStyleClass().add("right-aligned-text");
-        HBox.setHgrow(outputDirectoryField, Priority.ALWAYS);
-
-        content.getChildren().addAll(
-                resolutionBox,
-                createLabeledHBox("比例", ratioField),
-                createLabeledHBox("生成數量", countField),
-                createLabeledHBox("輸出目錄", outputDirectoryField)
-        );
-
-        TitledPane pane = new TitledPane("Output Settings", content);
-        pane.getStyleClass().add("settings-section");
-        return pane;
-    }
-
-    private TitledPane createSamplingSettingsPane() {
-        VBox content = new VBox(5);
-        content.getStyleClass().add("settings-content");
-
-        samplerComboBox = new ComboBox<>();
-        samplerComboBox.setMaxWidth(Double.MAX_VALUE);
-        samplerComboBox.getStyleClass().add("right-aligned-text");
-
-        stepsField = new TextField();
-        stepsField.getStyleClass().add("right-aligned-text");
-
-        seedField = new TextField();
-        seedField.getStyleClass().add("right-aligned-text");
-
-        content.getChildren().addAll(
-                new Label("採樣器"),
-                samplerComboBox,
-                new Label("步驟"),
-                stepsField,
-                new Label("種子"),
-                seedField
-        );
-
-        TitledPane pane = new TitledPane("Sampling Settings", content);
-        pane.getStyleClass().add("settings-section");
-        return pane;
-    }
-
-    private TitledPane createText2ImageSettingsPane() {
-        VBox content = new VBox(5);
-        content.getStyleClass().add("settings-content");
-
-        smeaCheckBox = new CheckBox("SMEA");
-        smeaDynCheckBox = new CheckBox("SMEA DYN");
-
-        content.getChildren().addAll(smeaCheckBox, smeaDynCheckBox);
-
-        txt2imgSettingsPane = new TitledPane("Text2Image Settings", content);
-        txt2imgSettingsPane.getStyleClass().add("settings-section");
-        return txt2imgSettingsPane;
-    }
-
-    private TitledPane createImage2ImageSettingsPane() {
-        VBox content = new VBox(5);
-        content.getStyleClass().add("settings-content");
-
-        strengthSlider = new Slider(0, 1, 0.5);
-        strengthSlider.setBlockIncrement(0.1);
-
-        extraNoiseSeedField = new TextField();
-        extraNoiseSeedField.getStyleClass().add("right-aligned-text");
-
-        uploadImageButton = new Button("選擇圖片");
-        uploadImageButton.setMaxWidth(Double.MAX_VALUE);
-        uploadImageButton.getStyleClass().add("upload-button");
-        uploadImageButton.setOnAction(event -> handleUploadImage());
-
-        content.getChildren().addAll(
-                new Label("Strength"),
-                strengthSlider,
-                new Label("Extra Noise Seed"),
-                extraNoiseSeedField,
-                uploadImageButton
-        );
-
-        img2imgSettingsPane = new TitledPane("Image2Image Settings", content);
-        img2imgSettingsPane.getStyleClass().add("settings-section");
-        return img2imgSettingsPane;
-    }
-
-    private HBox createControlBar() {
-        HBox controlBar = new HBox(10);
-        controlBar.setAlignment(Pos.CENTER);
-        controlBar.getStyleClass().add("control-bar");
-
-        generateButton = new Button("生成");
-        generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
-        generateButton.setOnAction(event -> handleGenerateOrStop());
-        HBox.setHgrow(generateButton, Priority.NEVER);
-
-        generateCountComboBox = new ComboBox<>();
-        generateCountComboBox.setPromptText("生成數量");
-        generateCountComboBox.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(generateCountComboBox, Priority.ALWAYS);
-
-        controlBar.getChildren().addAll(generateButton, generateCountComboBox);
-
-        return controlBar;
     }
 
     private HBox createCenterPanel() {
@@ -340,14 +175,24 @@ public class GenerationController {
         return promptBox;
     }
 
-    private HBox createLabeledHBox(String labelText, Control control) {
-        HBox hbox = new HBox(10);
-        hbox.setAlignment(Pos.CENTER_LEFT);
-        Label label = new Label(labelText);
-        label.getStyleClass().add("settings-label");
-        label.setMinWidth(80);
-        hbox.getChildren().addAll(label, control);
-        return hbox;
+    private HBox createControlBar() {
+        HBox controlBar = new HBox(10);
+        controlBar.setAlignment(Pos.CENTER);
+        controlBar.getStyleClass().add("control-bar");
+
+        generateButton = new Button("生成");
+        generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
+        generateButton.setOnAction(event -> handleGenerateOrStop());
+        HBox.setHgrow(generateButton, Priority.NEVER);
+
+        generateCountComboBox = new ComboBox<>();
+        generateCountComboBox.setPromptText("生成數量");
+        generateCountComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(generateCountComboBox, Priority.ALWAYS);
+
+        controlBar.getChildren().addAll(generateButton, generateCountComboBox);
+
+        return controlBar;
     }
 
     private void initialize() {
@@ -371,22 +216,9 @@ public class GenerationController {
     }
 
     private void initializeFields() {
-        initializeModelComboBox();
-        initializeSamplerComboBox();
         initializeGenerateCountComboBox();
         initializePromptAreas();
         initializePromptPreviewAreas();
-        setupStrengthSlider();
-    }
-
-    private void initializeModelComboBox() {
-        modelComboBox.setItems(FXCollections.observableArrayList(NAIConstants.MODELS));
-        modelComboBox.setValue(NAIConstants.MODELS[0]);
-    }
-
-    private void initializeSamplerComboBox() {
-        samplerComboBox.setItems(FXCollections.observableArrayList(NAIConstants.SAMPLERS));
-        samplerComboBox.setValue(NAIConstants.SAMPLERS[0]);
     }
 
     private void initializeGenerateCountComboBox() {
@@ -404,42 +236,13 @@ public class GenerationController {
         negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
     }
 
-    private void setupStrengthSlider() {
-        strengthSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            double roundedValue = Math.round(newValue.doubleValue() * 10.0) / 10.0;
-            strengthSlider.setValue(roundedValue);
-        });
-    }
-
     private void loadSettings() {
-        apiKeyField.setText(propertiesManager.getString("apiKey", ""));
-        modelComboBox.setValue(propertiesManager.getString("model", "nai-diffusion-3"));
-        widthField.setText(String.valueOf(propertiesManager.getInt("width", 832)));
-        heightField.setText(String.valueOf(propertiesManager.getInt("height", 1216)));
-        samplerComboBox.setValue(propertiesManager.getString("sampler", "k_euler"));
-        stepsField.setText(String.valueOf(propertiesManager.getInt("steps", 28)));
-        seedField.setText(String.valueOf(propertiesManager.getInt("seed", 0)));
-        generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
         positivePromptArea.setPromptText(propertiesManager.getString("positivePrompt", ""));
         negativePromptArea.setPromptText(propertiesManager.getString("negativePrompt", ""));
-        outputDirectoryField.setText(propertiesManager.getString("outputDirectory", "output"));
-        generationModeComboBox.setValue(propertiesManager.getString("generationMode", "Text2Image"));
-        smeaCheckBox.setSelected(propertiesManager.getBoolean("smea", true));
-        smeaDynCheckBox.setSelected(propertiesManager.getBoolean("smeaDyn", false));
-        strengthSlider.setValue(propertiesManager.getDouble("strength", 0.5));
-        extraNoiseSeedField.setText(String.valueOf(propertiesManager.getLong("extraNoiseSeed", 0)));
-        ratioField.setText(String.valueOf(propertiesManager.getInt("ratio", 7)));
-        countField.setText(String.valueOf(propertiesManager.getInt("count", 1)));
+        generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
     }
 
     private void setupListeners() {
-        apiKeyField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("apiKey", newVal));
-        modelComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("model", newVal));
-        widthField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("width", Integer.parseInt(newVal)));
-        heightField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("height", Integer.parseInt(newVal)));
-        samplerComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("sampler", newVal));
-        stepsField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("steps", Integer.parseInt(newVal)));
-        seedField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("seed", Integer.parseInt(newVal)));
         generateCountComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("generateCount", newVal));
         positivePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
             propertiesManager.setString("positivePrompt", newVal);
@@ -449,29 +252,20 @@ public class GenerationController {
             propertiesManager.setString("negativePrompt", newVal);
             promptManager.updatePromptPreview(newVal, negativePromptPreviewArea, false);
         });
-        outputDirectoryField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("outputDirectory", newVal));
-        generationModeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setString("generationMode", newVal));
-        smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setBoolean("smea", newVal));
-        smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setBoolean("smeaDyn", newVal));
-        strengthSlider.valueProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setDouble("strength", newVal.doubleValue()));
-        extraNoiseSeedField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setLong("extraNoiseSeed", Long.parseLong(newVal)));
-        ratioField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("ratio", Integer.parseInt(newVal)));
-        countField.textProperty().addListener((obs, oldVal, newVal) -> propertiesManager.setInt("count", Integer.parseInt(newVal)));
     }
 
     private void setupGenerationModeComboBox() {
-        generationModeComboBox.getItems().addAll("Text2Image", "Image2Image");
-        generationModeComboBox.setValue("Text2Image");
+        generationModeComboBox = apiSettingsPane.getGenerationModeComboBox();
         generationModeComboBox.setOnAction(event -> updateSettingsPanes());
         updateSettingsPanes();
     }
 
     private void updateSettingsPanes() {
         boolean isText2Image = "Text2Image".equals(generationModeComboBox.getValue());
-        txt2imgSettingsPane.setVisible(isText2Image);
-        txt2imgSettingsPane.setManaged(isText2Image);
-        img2imgSettingsPane.setVisible(!isText2Image);
-        img2imgSettingsPane.setManaged(!isText2Image);
+        text2ImageSettingsPane.setVisible(isText2Image);
+        text2ImageSettingsPane.setManaged(isText2Image);
+        image2ImageSettingsPane.setVisible(!isText2Image);
+        image2ImageSettingsPane.setManaged(!isText2Image);
     }
 
     private void handleHistoryImageClick(File imageFile) {
@@ -522,7 +316,7 @@ public class GenerationController {
         CompletableFuture.runAsync(() -> {
             try {
                 GenerationPayload payload = createGenerationPayload();
-                GenerationTask task = new GenerationTask(payload, apiKeyField.getText());
+                GenerationTask task = new GenerationTask(payload, apiSettingsPane.getApiKey());
 
                 taskManager.submitTask(task)
                         .thenAccept(this::handleGenerationResult);
@@ -584,7 +378,7 @@ public class GenerationController {
     }
 
     private Optional<File> saveImageToFile(byte[] imageData) {
-        return ImageUtils.saveImage(imageData, outputDirectoryField.getText());
+        return ImageUtils.saveImage(imageData, outputSettingsPane.getOutputDirectory());
     }
 
     private int getMaxCount() {
@@ -603,41 +397,20 @@ public class GenerationController {
                 .generationMode(generationModeComboBox.getValue())
                 .processedPositivePrompt(positivePromptPreviewArea.getPreviewText())
                 .processedNegativePrompt(negativePromptPreviewArea.getPreviewText())
-                .model(modelComboBox.getValue())
-                .width(Integer.parseInt(widthField.getText()))
-                .height(Integer.parseInt(heightField.getText()))
-                .scale(Integer.parseInt(ratioField.getText()))
-                .sampler(samplerComboBox.getValue())
-                .steps(Integer.parseInt(stepsField.getText()))
-                .nSamples(Integer.parseInt(countField.getText()))
-                .seed(Long.parseLong(seedField.getText()))
-                .smea(smeaCheckBox.isSelected())
-                .smeaDyn(smeaDynCheckBox.isSelected())
+                .model(apiSettingsPane.getModel())
+                .width(outputSettingsPane.getOutputWidth())
+                .height(outputSettingsPane.getOutputHeight())
+                .scale(outputSettingsPane.getRatio())
+                .sampler(samplingSettingsPane.getSampler())
+                .steps(samplingSettingsPane.getSteps())
+                .nSamples(outputSettingsPane.getCount())
+                .seed(samplingSettingsPane.getSeed())
+                .smea(text2ImageSettingsPane.isSmea())
+                .smeaDyn(text2ImageSettingsPane.isSmeaDyn())
                 .base64Image(base64Image)
-                .strength(strengthSlider.getValue())
-                .extraNoiseSeed(Long.parseLong(extraNoiseSeedField.getText()))
+                .strength(image2ImageSettingsPane.getStrength())
+                .extraNoiseSeed(image2ImageSettingsPane.getExtraNoiseSeed())
                 .build()
                 .createPayload();
-    }
-
-    private void handleUploadImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("選擇圖片");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
-        );
-        File selectedFile = fileChooser.showOpenDialog(uploadImageButton.getScene().getWindow());
-        if (selectedFile != null) {
-            try {
-                BufferedImage image = ImageUtils.loadImage(selectedFile);
-                base64Image = ImageUtils.imageToBase64(image);
-                imagePreviewPane.updatePreview(selectedFile);
-                log.info("圖片已上傳: {}", selectedFile.getName());
-                NotificationService.showNotification("圖片上傳成功");
-            } catch (IOException e) {
-                log.error("上傳圖片時發生錯誤", e);
-                NotificationService.showNotification("圖片上傳失敗");
-            }
-        }
     }
 }
