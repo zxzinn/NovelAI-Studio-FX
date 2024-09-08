@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Optional;
 
 
@@ -21,13 +20,6 @@ public class ImageUtils {
     private static final String FILE_NAME_FORMAT = "NovelAI_FX_generated_%s.png";
     private static final DateTimeFormatter FILE_NAME_TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-
-    public static String imageToBase64(BufferedImage image) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", outputStream);
-        byte[] imageBytes = outputStream.toByteArray();
-        return Base64.getEncoder().encodeToString(imageBytes);
-    }
 
     public static void clearMetadata(@NotNull BufferedImage image) {
         WritableRaster raster = image.getRaster();
@@ -48,10 +40,6 @@ public class ImageUtils {
         if (!ImageIO.write(image, "png", outputFile)) {
             throw new IOException("無法將圖像保存為PNG格式");
         }
-    }
-
-    public static BufferedImage loadImage(File file) throws IOException {
-        return ImageIO.read(file);
     }
 
     public static Optional<File> saveImage(byte[] imageData, String outputDir) {
