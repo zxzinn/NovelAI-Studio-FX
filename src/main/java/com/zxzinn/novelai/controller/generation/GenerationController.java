@@ -401,6 +401,8 @@ public class GenerationController {
 
         String generationMode = generationModeComboBox.getValue();
         if ("Text2Image".equals(generationMode)) {
+            params.setSm(text2ImageSettingsPane.isSmea());
+            params.setSm_dyn(text2ImageSettingsPane.isSmeaDyn());
             payload.setAction("generate");
         } else {
             payload.setAction("img2img");
@@ -418,8 +420,7 @@ public class GenerationController {
         params.setSteps(samplingSettingsPane.getSteps());
         params.setN_samples(outputSettingsPane.getCount());
         params.setSeed(samplingSettingsPane.getSeed());
-        params.setSm(text2ImageSettingsPane.isSmea());
-        params.setSm_dyn(text2ImageSettingsPane.isSmeaDyn());
+
         params.setNegative_prompt(negativePromptPreviewArea.getPreviewText());
         return payload;
     }
