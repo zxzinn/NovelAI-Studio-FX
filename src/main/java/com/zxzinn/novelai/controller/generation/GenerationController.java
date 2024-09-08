@@ -1,10 +1,7 @@
 package com.zxzinn.novelai.controller.generation;
 
 import com.google.inject.Inject;
-import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.api.ImageGenerationPayload;
-import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
@@ -24,7 +21,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -396,30 +392,25 @@ public class GenerationController {
     }
 
     private GenerationPayload createGenerationPayload() {
-        String generationMode = generationModeComboBox.getValue();
-        GenerationPayload payload;
-
-        if ("Text2Image".equals(generationMode)) {
-            payload = new ImageGenerationPayload();
-            payload.setAction("generate");
-        } else {
-            Img2ImgGenerationPayload img2ImgPayload = new Img2ImgGenerationPayload();
-            img2ImgPayload.setAction("img2img");
-
-            Img2ImgGenerationPayload.Img2ImgGenerationParameters img2ImgParams = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
-            img2ImgParams.setStrength(image2ImageSettingsPane.getStrength());
-            img2ImgParams.setNoise(image2ImageSettingsPane.getNoise());
-            img2ImgParams.setImage(image2ImageSettingsPane.getBase64Image());
-            img2ImgParams.setExtra_noise_seed(image2ImageSettingsPane.getExtraNoiseSeed());
-
-            img2ImgPayload.setParameters(img2ImgParams);
-            payload = img2ImgPayload;
-        }
+        GenerationPayload payload = new GenerationPayload();
+        GenerationPayload.GenerationParameters params = new GenerationPayload.GenerationParameters();
+        payload.setParameters(params);
 
         payload.setInput(positivePromptPreviewArea.getPreviewText());
         payload.setModel(apiSettingsPane.getModel());
 
-        GenerationPayload.GenerationParameters params = payload.getParameters();
+        String generationMode = generationModeComboBox.getValue();
+        if ("Text2Image".equals(generationMode)) {
+            payload.setAction("generate");
+        } else {
+            payload.setAction("img2img");
+            params.setStrength(image2ImageSettingsPane.getStrength());
+            params.setNoise(image2ImageSettingsPane.getNoise());
+            params.setImage(image2ImageSettingsPane.getBase64Image());
+            params.setExtra_noise_seed(image2ImageSettingsPane.getExtraNoiseSeed());
+        }
+
+        params.setParams_version(1); // 假設版本為1
         params.setWidth(outputSettingsPane.getOutputWidth());
         params.setHeight(outputSettingsPane.getOutputHeight());
         params.setScale(outputSettingsPane.getRatio());
@@ -430,7 +421,6 @@ public class GenerationController {
         params.setSm(text2ImageSettingsPane.isSmea());
         params.setSm_dyn(text2ImageSettingsPane.isSmeaDyn());
         params.setNegative_prompt(negativePromptPreviewArea.getPreviewText());
-
         return payload;
     }
 }

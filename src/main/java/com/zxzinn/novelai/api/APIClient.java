@@ -2,6 +2,8 @@ package com.zxzinn.novelai.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +18,7 @@ public class APIClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private final OkHttpClient httpClient;
     private final Endpoint endpoint;
+    private static final int MAX_IMAGE_PREVIEW_LENGTH = 100; // 設置預覽長度
 
     public APIClient(Endpoint endpoint) {
         this.endpoint = endpoint;
@@ -47,19 +50,39 @@ public class APIClient {
 
     @NotNull
     private Request createRequest(GenerationPayload payload, String apiKey) {
-        // 使用GsonBuilder來創建一個具有Pretty Printing功能的Gson實例
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().create();
         String jsonPayload = gson.toJson(payload);
         RequestBody body = RequestBody.create(jsonPayload, JSON);
 
-        // 使用Log4j2打印格式化的payload
-        log.debug("發送的payload:\n{}", jsonPayload);
+        // 為日誌創建一個修改過的 JSON
+        String logJsonPayload = createLogFriendlyJson(payload);
+        log.debug("發送的payload:\n{}", logJsonPayload);
 
         return new Request.Builder()
                 .url(endpoint.getUrl())
                 .addHeader("Authorization", "Bearer " + apiKey)
                 .post(body)
                 .build();
+    }
+
+    private String createLogFriendlyJson(GenerationPayload payload) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonElement jsonElement = gson.toJsonTree(payload);
+
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            if (jsonObject.has("parameters") && jsonObject.get("parameters").isJsonObject()) {
+                JsonObject parameters = jsonObject.getAsJsonObject("parameters");
+                if (parameters.has("image")) {
+                    String imageValue = parameters.get("image").getAsString();
+                    if (imageValue.length() > MAX_IMAGE_PREVIEW_LENGTH) {
+                        parameters.addProperty("image", imageValue.substring(0, MAX_IMAGE_PREVIEW_LENGTH) + "...(省略)");
+                    }
+                }
+            }
+        }
+
+        return gson.toJson(jsonElement);
     }
 
     @NotNull

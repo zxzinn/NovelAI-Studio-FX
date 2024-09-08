@@ -1,35 +1,49 @@
 package com.zxzinn.novelai.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public abstract class GenerationPayload {
-    public String input;
-    public String model;
-    public String action;
-    public GenerationParameters parameters;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class GenerationPayload {
+    private String input;
+    private String model;
+    private String action;
+    private GenerationParameters parameters;
 
     @Data
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class GenerationParameters {
-        public int params_version;
-        public int width;
-        public int height;
-        public int scale;
-        public String sampler;
-        public int steps;
-        public int n_samples;
-        public boolean ucPreset;
-        public boolean qualityToggle;
-        public boolean sm;
-        public boolean sm_dyn;
-        public boolean dynamic_thresholding;
-        public double controlnet_strength = 1;
-        public boolean legacy;
-        public boolean add_original_image = true;
-        public int cfg_rescale;
-        public String noise_schedule;
-        public boolean legacy_v3_extend;
-        public long seed;
-        public String negative_prompt;
+        private int params_version;
+        private int width;
+        private int height;
+        private int scale;
+        private String sampler;
+        private int steps;
+        private int n_samples;
+        private boolean ucPreset;
+        private boolean qualityToggle;
+        private boolean sm;
+        private boolean sm_dyn;
+        private boolean dynamic_thresholding;
+        private double controlnet_strength = 1;
+        private boolean legacy;
+        private boolean add_original_image = true;
+        private int cfg_rescale;
+        private String noise_schedule;
+        private boolean legacy_v3_extend;
+        private long seed;
+        private String negative_prompt;
+
+        // Img2Img specific fields
+        private Double strength;
+        private Double noise;
+        private String image;
+        private Long extra_noise_seed;
+
+        private String[] reference_image_multiple;
+        private String[] reference_information_extracted_multiple;
+        private Double[] reference_strength_multiple;
     }
 }
