@@ -287,9 +287,11 @@ public class GenerationController {
     }
 
     private void startGeneration() {
-        if ("Image2Image".equals(generationModeComboBox.getValue()) && base64Image == null) {
-            NotificationService.showNotification("請先上傳一張圖片");
-            return;
+        if ("Image2Image".equals(generationModeComboBox.getValue())) {
+            if (!isImageUploaded()) {
+                NotificationService.showNotification("請先上傳一張圖片");
+                return;
+            }
         }
 
         isGenerating = true;
@@ -302,6 +304,10 @@ public class GenerationController {
         remainingGenerations = new AtomicInteger(isInfiniteMode.get() ? Integer.MAX_VALUE : maxCount);
 
         generateNextImage();
+    }
+
+    private boolean isImageUploaded() {
+        return image2ImageSettingsPane.getBase64Image() != null && !image2ImageSettingsPane.getBase64Image().isEmpty();
     }
 
     private void generateNextImage() {
@@ -395,21 +401,25 @@ public class GenerationController {
 
         if ("Text2Image".equals(generationMode)) {
             payload = new ImageGenerationPayload();
+            payload.setAction("generate");
         } else {
             Img2ImgGenerationPayload img2ImgPayload = new Img2ImgGenerationPayload();
+            img2ImgPayload.setAction("img2img");
+
             Img2ImgGenerationPayload.Img2ImgGenerationParameters img2ImgParams = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
             img2ImgParams.setStrength(image2ImageSettingsPane.getStrength());
-            img2ImgParams.setImage(base64Image);
+            img2ImgParams.setNoise(image2ImageSettingsPane.getNoise());
+            img2ImgParams.setImage(image2ImageSettingsPane.getBase64Image());
             img2ImgParams.setExtra_noise_seed(image2ImageSettingsPane.getExtraNoiseSeed());
+
             img2ImgPayload.setParameters(img2ImgParams);
             payload = img2ImgPayload;
         }
 
         payload.setInput(positivePromptPreviewArea.getPreviewText());
         payload.setModel(apiSettingsPane.getModel());
-        payload.setAction("generate");
 
-        GenerationPayload.GenerationParameters params = new GenerationPayload.GenerationParameters();
+        GenerationPayload.GenerationParameters params = payload.getParameters();
         params.setWidth(outputSettingsPane.getOutputWidth());
         params.setHeight(outputSettingsPane.getOutputHeight());
         params.setScale(outputSettingsPane.getRatio());
@@ -420,8 +430,6 @@ public class GenerationController {
         params.setSm(text2ImageSettingsPane.isSmea());
         params.setSm_dyn(text2ImageSettingsPane.isSmeaDyn());
         params.setNegative_prompt(negativePromptPreviewArea.getPreviewText());
-
-        payload.setParameters(params);
 
         return payload;
     }

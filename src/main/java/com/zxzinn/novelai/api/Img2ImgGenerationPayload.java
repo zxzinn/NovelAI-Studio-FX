@@ -10,8 +10,16 @@ public class Img2ImgGenerationPayload extends GenerationPayload {
     @EqualsAndHashCode(callSuper = true)
     public static class Img2ImgGenerationParameters extends GenerationParameters {
         private double strength = 0.5;
-        private int noise = 0;
+        private double noise = 0;
         private String image;
         private long extra_noise_seed;
+    }
+
+    @Override
+    public Img2ImgGenerationParameters getParameters() {
+        if (super.getParameters() == null) {
+            setParameters(new Img2ImgGenerationParameters());
+        }
+        return (Img2ImgGenerationParameters) super.getParameters();
     }
 }
