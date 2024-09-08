@@ -3,31 +3,28 @@ package com.zxzinn.novelai.controller.generation;
 import com.google.inject.Inject;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.GenerationPayload;
+import com.zxzinn.novelai.api.ImageGenerationPayload;
+import com.zxzinn.novelai.api.Img2ImgGenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
-import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
 import lombok.extern.log4j.Log4j2;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -393,24 +390,39 @@ public class GenerationController {
     }
 
     private GenerationPayload createGenerationPayload() {
-        return PayloadBuilder.builder()
-                .generationMode(generationModeComboBox.getValue())
-                .processedPositivePrompt(positivePromptPreviewArea.getPreviewText())
-                .processedNegativePrompt(negativePromptPreviewArea.getPreviewText())
-                .model(apiSettingsPane.getModel())
-                .width(outputSettingsPane.getOutputWidth())
-                .height(outputSettingsPane.getOutputHeight())
-                .scale(outputSettingsPane.getRatio())
-                .sampler(samplingSettingsPane.getSampler())
-                .steps(samplingSettingsPane.getSteps())
-                .nSamples(outputSettingsPane.getCount())
-                .seed(samplingSettingsPane.getSeed())
-                .smea(text2ImageSettingsPane.isSmea())
-                .smeaDyn(text2ImageSettingsPane.isSmeaDyn())
-                .base64Image(base64Image)
-                .strength(image2ImageSettingsPane.getStrength())
-                .extraNoiseSeed(image2ImageSettingsPane.getExtraNoiseSeed())
-                .build()
-                .createPayload();
+        String generationMode = generationModeComboBox.getValue();
+        GenerationPayload payload;
+
+        if ("Text2Image".equals(generationMode)) {
+            payload = new ImageGenerationPayload();
+        } else {
+            Img2ImgGenerationPayload img2ImgPayload = new Img2ImgGenerationPayload();
+            Img2ImgGenerationPayload.Img2ImgGenerationParameters img2ImgParams = new Img2ImgGenerationPayload.Img2ImgGenerationParameters();
+            img2ImgParams.setStrength(image2ImageSettingsPane.getStrength());
+            img2ImgParams.setImage(base64Image);
+            img2ImgParams.setExtra_noise_seed(image2ImageSettingsPane.getExtraNoiseSeed());
+            img2ImgPayload.setParameters(img2ImgParams);
+            payload = img2ImgPayload;
+        }
+
+        payload.setInput(positivePromptPreviewArea.getPreviewText());
+        payload.setModel(apiSettingsPane.getModel());
+        payload.setAction("generate");
+
+        GenerationPayload.GenerationParameters params = new GenerationPayload.GenerationParameters();
+        params.setWidth(outputSettingsPane.getOutputWidth());
+        params.setHeight(outputSettingsPane.getOutputHeight());
+        params.setScale(outputSettingsPane.getRatio());
+        params.setSampler(samplingSettingsPane.getSampler());
+        params.setSteps(samplingSettingsPane.getSteps());
+        params.setN_samples(outputSettingsPane.getCount());
+        params.setSeed(samplingSettingsPane.getSeed());
+        params.setSm(text2ImageSettingsPane.isSmea());
+        params.setSm_dyn(text2ImageSettingsPane.isSmeaDyn());
+        params.setNegative_prompt(negativePromptPreviewArea.getPreviewText());
+
+        payload.setParameters(params);
+
+        return payload;
     }
 }
