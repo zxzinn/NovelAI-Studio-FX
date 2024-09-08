@@ -28,7 +28,6 @@ public class FileManagerController {
     @FXML private Label progressLabel;
 
     private final FileManagerService fileManagerService;
-    private final FilePreviewService filePreviewService;
     private final MetadataService metadataService;
     private final AlertService alertService;
     private final FileTreeController fileTreeController;
@@ -37,12 +36,10 @@ public class FileManagerController {
 
     @Inject
     public FileManagerController(FileManagerService fileManagerService,
-                                 FilePreviewService filePreviewService,
                                  MetadataService metadataService,
                                  AlertService alertService,
                                  FileOperationService fileOperationService) {
         this.fileManagerService = fileManagerService;
-        this.filePreviewService = filePreviewService;
         this.metadataService = metadataService;
         this.alertService = alertService;
         this.fileOperationService = fileOperationService;
@@ -51,7 +48,7 @@ public class FileManagerController {
 
     @FXML
     public void initialize() {
-        imagePreviewPane = new ImagePreviewPane(filePreviewService);
+        imagePreviewPane = new ImagePreviewPane();
         previewContainer.getChildren().add(imagePreviewPane);
         setupEventHandlers();
         fileTreeController.setFileTreeView(fileTreeView);

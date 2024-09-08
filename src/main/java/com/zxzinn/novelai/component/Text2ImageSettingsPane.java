@@ -12,8 +12,8 @@ public class Text2ImageSettingsPane extends TitledPane {
     @Getter private CheckBox smeaCheckBox;
     @Getter private CheckBox smeaDynCheckBox;
 
-    public Text2ImageSettingsPane(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public Text2ImageSettingsPane() {
+        this.propertiesManager = PropertiesManager.getInstance();
         setText("Text2Image Settings");
         getStyleClass().add("settings-section");
         initializeComponents();

@@ -6,13 +6,11 @@ import com.zxzinn.novelai.controller.filemanager.FileManagerController;
 import com.zxzinn.novelai.controller.generation.GenerationController;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FileOperationService;
-import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
 import com.zxzinn.novelai.service.generation.GenerationTaskManager;
 import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
-import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
 import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
 import javafx.fxml.FXMLLoader;
@@ -31,21 +29,15 @@ public class MainController {
     private TabPane mainTabPane;
 
     private final DragAndDropHandler dragAndDropHandler;
-    private final PropertiesManager propertiesManager;
-    private final FilePreviewService filePreviewService;
     private final FileManagerService fileManagerService;
     private final MetadataService metadataService;
     private final AlertService alertService;
     private final FileOperationService fileOperationService;
 
     @Inject
-    public MainController(PropertiesManager propertiesManager,
-                          FilePreviewService filePreviewService,
-                          FileManagerService fileManagerService, MetadataService metadataService,
+    public MainController(FileManagerService fileManagerService, MetadataService metadataService,
                           AlertService alertService, FileOperationService fileOperationService) {
         this.dragAndDropHandler = new DragAndDropHandler(this::handleFileDrop);
-        this.propertiesManager = propertiesManager;
-        this.filePreviewService = filePreviewService;
         this.fileManagerService = fileManagerService;
         this.metadataService = metadataService;
         this.alertService = alertService;
@@ -86,7 +78,7 @@ public class MainController {
     }
 
     private Tab createUnifiedGeneratorTab() {
-        GenerationController generationController = new GenerationController(filePreviewService, propertiesManager);
+        GenerationController generationController = new GenerationController();
         BorderPane content = generationController.createView();
         return new Tab("圖像生成", content) {{
             setClosable(false);
@@ -98,7 +90,6 @@ public class MainController {
         FXMLLoader loader = FXMLLoaderFactory.createLoader(ResourcePaths.FILE_MANAGER_FXML);
         FileManagerController controller = new FileManagerController(
                 fileManagerService,
-                filePreviewService,
                 metadataService,
                 alertService,
                 fileOperationService

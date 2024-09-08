@@ -20,8 +20,8 @@ public class Image2ImageSettingsPane extends TitledPane {
     @Getter private Label selectedImageLabel;
     @Getter private String base64Image;
 
-    public Image2ImageSettingsPane(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public Image2ImageSettingsPane() {
+        this.propertiesManager = PropertiesManager.getInstance();
         setText("Image2Image Settings");
         getStyleClass().add("settings-section");
         initializeComponents();

@@ -17,8 +17,8 @@ public class SamplingSettingsPane extends TitledPane {
     private TextField stepsField;
     private TextField seedField;
 
-    public SamplingSettingsPane(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public SamplingSettingsPane() {
+        this.propertiesManager = PropertiesManager.getInstance();
         setText("Sampling Settings");
         getStyleClass().add("settings-section");
         initializeComponents();

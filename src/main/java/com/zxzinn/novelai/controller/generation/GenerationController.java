@@ -5,7 +5,6 @@ import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
-import com.zxzinn.novelai.service.filemanager.FilePreviewService;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
@@ -32,7 +31,6 @@ public class GenerationController {
     private static final String GENERATE_BUTTON_GENERATING_CLASS = "generate-button-generating";
     private static final String GENERATE_BUTTON_STOP_CLASS = "generate-button-stop";
 
-    private final FilePreviewService filePreviewService;
     private final PropertiesManager propertiesManager;
     private final PromptManager promptManager;
     private final GenerationTaskManager taskManager;
@@ -41,9 +39,8 @@ public class GenerationController {
     private final GenerationState generationState;
 
     @Inject
-    public GenerationController(FilePreviewService filePreviewService, PropertiesManager propertiesManager) {
-        this.filePreviewService = filePreviewService;
-        this.propertiesManager = propertiesManager;
+    public GenerationController( ) {
+        this.propertiesManager = PropertiesManager.getInstance();
         this.promptManager = new PromptManager(new EmbedProcessor());
         this.taskManager = GenerationTaskManager.getInstance();
         this.uiComponents = new UIComponents();
@@ -52,11 +49,11 @@ public class GenerationController {
     }
 
     private void initializeUIComponents() {
-        uiComponents.apiSettingsPane = new ApiSettingsPane(propertiesManager);
-        uiComponents.outputSettingsPane = new OutputSettingsPane(propertiesManager);
-        uiComponents.samplingSettingsPane = new SamplingSettingsPane(propertiesManager);
-        uiComponents.text2ImageSettingsPane = new Text2ImageSettingsPane(propertiesManager);
-        uiComponents.image2ImageSettingsPane = new Image2ImageSettingsPane(propertiesManager);
+        uiComponents.apiSettingsPane = new ApiSettingsPane();
+        uiComponents.outputSettingsPane = new OutputSettingsPane();
+        uiComponents.samplingSettingsPane = new SamplingSettingsPane();
+        uiComponents.text2ImageSettingsPane = new Text2ImageSettingsPane();
+        uiComponents.image2ImageSettingsPane = new Image2ImageSettingsPane();
     }
 
     public BorderPane createView() {
@@ -180,7 +177,7 @@ public class GenerationController {
         uiComponents.positivePromptArea.setEmbedFileManager(embedFileManager);
         uiComponents.negativePromptArea.setEmbedFileManager(embedFileManager);
 
-        uiComponents.imagePreviewPane = new ImagePreviewPane(filePreviewService);
+        uiComponents.imagePreviewPane = new ImagePreviewPane();
         uiComponents.previewContainer.getChildren().add(uiComponents.imagePreviewPane);
         uiComponents.historyImagesPane.setOnImageClickHandler(this::handleHistoryImageClick);
 

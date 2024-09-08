@@ -17,8 +17,8 @@ public class OutputSettingsPane extends TitledPane {
     private TextField countField;
     @Getter private TextField outputDirectoryField;
 
-    public OutputSettingsPane(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public OutputSettingsPane() {
+        this.propertiesManager = PropertiesManager.getInstance();
         setText("Output Settings");
         getStyleClass().add("settings-section");
         initializeComponents();

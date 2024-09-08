@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
+import lombok.Value;
 
 public class ApiSettingsPane extends TitledPane {
 
@@ -17,8 +18,8 @@ public class ApiSettingsPane extends TitledPane {
     private ComboBox<String> modelComboBox;
     @Getter private ComboBox<String> generationModeComboBox;
 
-    public ApiSettingsPane(PropertiesManager propertiesManager) {
-        this.propertiesManager = propertiesManager;
+    public ApiSettingsPane() {
+        this.propertiesManager = PropertiesManager.getInstance();
         setText("API Settings");
         getStyleClass().add("settings-section");
         initializeComponents();
