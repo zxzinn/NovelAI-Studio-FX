@@ -12,7 +12,6 @@ import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
-import com.zxzinn.novelai.utils.ui.DragAndDropHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -21,14 +20,12 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.File;
 import java.io.IOException;
 
 public class MainController {
     private BorderPane rootPane;
     private TabPane mainTabPane;
 
-    private final DragAndDropHandler dragAndDropHandler;
     private final FileManagerService fileManagerService;
     private final MetadataService metadataService;
     private final AlertService alertService;
@@ -37,7 +34,6 @@ public class MainController {
     @Inject
     public MainController(FileManagerService fileManagerService, MetadataService metadataService,
                           AlertService alertService, FileOperationService fileOperationService) {
-        this.dragAndDropHandler = new DragAndDropHandler(this::handleFileDrop);
         this.fileManagerService = fileManagerService;
         this.metadataService = metadataService;
         this.alertService = alertService;
@@ -112,11 +108,5 @@ public class MainController {
 
         stage.getScene().setRoot(root);
 
-        dragAndDropHandler.enableDragAndDrop(root);
-    }
-
-    private void handleFileDrop(File file) {
-        System.out.println("File dropped: " + file.getAbsolutePath());
-        NotificationService.showNotification("文件已拖放: " + file.getName());
     }
 }
