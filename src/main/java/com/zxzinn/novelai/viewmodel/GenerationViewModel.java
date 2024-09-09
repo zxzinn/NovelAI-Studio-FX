@@ -2,18 +2,17 @@ package com.zxzinn.novelai.viewmodel;
 
 import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
-import com.zxzinn.novelai.controller.generation.GenerationController;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.model.UIComponentsData;
 import com.zxzinn.novelai.service.generation.GenerationTaskManager;
-import com.zxzinn.novelai.service.generation.PromptManager;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.ComboBox;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GenerationViewModel {
 
     private final PropertiesManager propertiesManager;
-    private final PromptManager promptManager;
+    private final EmbedProcessor embedProcessor;
     private final GenerationTaskManager taskManager;
 
     @Getter private final BooleanProperty generatingProperty = new SimpleBooleanProperty(false);
@@ -31,9 +30,12 @@ public class GenerationViewModel {
     private final AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
     private AtomicInteger remainingGenerations;
 
+    private final AtomicBoolean isPositivePromptLocked = new AtomicBoolean(false);
+    private final AtomicBoolean isNegativePromptLocked = new AtomicBoolean(false);
+
     public GenerationViewModel() {
         this.propertiesManager = PropertiesManager.getInstance();
-        this.promptManager = new PromptManager(new EmbedProcessor());
+        this.embedProcessor = new EmbedProcessor();
         this.taskManager = GenerationTaskManager.getInstance();
     }
 
@@ -49,29 +51,60 @@ public class GenerationViewModel {
                 propertiesManager.setString("generateCount", newVal));
         positivePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
             propertiesManager.setString("positivePrompt", newVal);
-            promptManager.updatePromptPreview(newVal, positivePromptPreviewArea, true);
+            updatePromptPreview(newVal, positivePromptPreviewArea, true);
         });
         negativePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
             propertiesManager.setString("negativePrompt", newVal);
-            promptManager.updatePromptPreview(newVal, negativePromptPreviewArea, false);
+            updatePromptPreview(newVal, negativePromptPreviewArea, false);
         });
     }
 
     public void setupPromptControls(PromptControls positivePromptControls, PromptControls negativePromptControls,
                                     PromptArea positivePromptArea, PromptArea negativePromptArea,
                                     PromptPreviewArea positivePromptPreviewArea, PromptPreviewArea negativePromptPreviewArea) {
-        promptManager.setupPromptControls(positivePromptControls, negativePromptControls,
-                positivePromptArea, negativePromptArea,
-                positivePromptPreviewArea, negativePromptPreviewArea);
+        setupPromptControl(positivePromptControls, positivePromptArea, positivePromptPreviewArea, isPositivePromptLocked, true);
+        setupPromptControl(negativePromptControls, negativePromptArea, negativePromptPreviewArea, isNegativePromptLocked, false);
+    }
+
+    private void setupPromptControl(@NotNull PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
+        controls.setOnRefreshAction(() -> forceRefreshPromptPreview(promptArea, previewArea));
+
+        controls.setOnLockAction(() -> {
+            isLocked.set(!isLocked.get());
+            controls.setLockState(isLocked.get());
+        });
+    }
+
+    public void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea, boolean isPositive) {
+        if (isPromptLocked(isPositive)) {
+            String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
+            previewArea.setPreviewText(processedPrompt);
+        }
+    }
+
+    public void forceRefreshPromptPreview(@NotNull PromptArea promptArea, @NotNull PromptPreviewArea previewArea) {
+        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
+        previewArea.setPreviewText(processedPrompt);
+    }
+
+    public void updatePromptPreview(String newValue, PromptPreviewArea previewArea, boolean isPositive) {
+        if (isPromptLocked(isPositive)) {
+            String processedPrompt = embedProcessor.processPrompt(newValue);
+            previewArea.setPreviewText(processedPrompt);
+        }
+    }
+
+    public boolean isPromptLocked(boolean isPositive) {
+        return isPositive ? !isPositivePromptLocked.get() : !isNegativePromptLocked.get();
     }
 
     public void updatePromptPreviews(PromptArea positivePromptArea, PromptPreviewArea positivePromptPreviewArea,
                                      PromptArea negativePromptArea, PromptPreviewArea negativePromptPreviewArea) {
-        if (!promptManager.isPositivePromptLocked()) {
-            promptManager.refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+        if (!isPositivePromptLocked.get()) {
+            refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
         }
-        if (!promptManager.isNegativePromptLocked()) {
-            promptManager.refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+        if (!isNegativePromptLocked.get()) {
+            refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
         }
     }
 
@@ -159,4 +192,5 @@ public class GenerationViewModel {
     public boolean isStopping() {
         return stoppingProperty.get();
     }
+
 }
