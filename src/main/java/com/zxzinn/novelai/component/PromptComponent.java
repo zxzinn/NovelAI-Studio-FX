@@ -31,6 +31,7 @@ public class PromptComponent extends HBox {
         setupLayout();
         setupBindings();
         setupListeners();
+        viewModel.initialize(promptTextArea);
     }
 
     private void initializeComponents() {

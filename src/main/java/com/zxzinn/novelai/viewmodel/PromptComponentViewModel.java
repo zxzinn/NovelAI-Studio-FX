@@ -6,6 +6,7 @@ import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.tokenizer.SimpleTokenizer;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyEvent;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +37,12 @@ public class PromptComponentViewModel {
     private SimpleTokenizer tokenizer;
 
     public PromptComponentViewModel() {
-        this.autoCompleteHandler = new AutoCompleteHandler(null);
         initializeTokenizer();
         setupListeners();
+    }
+
+    public void initialize(TextArea promptTextArea) {
+        this.autoCompleteHandler = new AutoCompleteHandler(promptTextArea);
     }
 
     private void initializeTokenizer() {
@@ -64,20 +68,28 @@ public class PromptComponentViewModel {
     }
 
     public void setEmbedFileManager(EmbedFileManager embedFileManager) {
-        autoCompleteHandler.setEmbedFileManager(embedFileManager);
+        if (autoCompleteHandler != null) {
+            autoCompleteHandler.setEmbedFileManager(embedFileManager);
+        }
     }
 
     public void handleTextChange(String oldValue, String newValue) {
-        autoCompleteHandler.handleTextChange(oldValue, newValue);
-        previewText.set(newValue); // 簡單起見,這裡直接設置預覽文本,實際應用中可能需要更複雜的處理
+        if (autoCompleteHandler != null) {
+            autoCompleteHandler.handleTextChange(oldValue, newValue);
+        }
+        previewText.set(newValue);
     }
 
     public void handleCaretChange(int newValue) {
-        autoCompleteHandler.handleCaretChange(newValue);
+        if (autoCompleteHandler != null) {
+            autoCompleteHandler.handleCaretChange(newValue);
+        }
     }
 
     public void handleKeyPress(KeyEvent event) {
-        autoCompleteHandler.handleKeyPress(event);
+        if (autoCompleteHandler != null) {
+            autoCompleteHandler.handleKeyPress(event);
+        }
     }
 
     public void refresh() {
