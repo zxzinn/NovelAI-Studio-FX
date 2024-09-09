@@ -8,9 +8,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
 public class SimpleTokenizer {
+    private static final int VOCAB_SIZE = 49152 - 256 - 2 + 1;
+    private static final String START_OF_TEXT = "<|startoftext|>";
+    private static final String END_OF_TEXT = "<|endoftext|>";
+    private static final String END_OF_WORD = "</w>";
+
     private final Map<Integer, String> byteEncoder;
     private final Map<String, Integer> encoder;
     private final Map<String, Integer> bpeRanks;
@@ -19,75 +25,76 @@ public class SimpleTokenizer {
 
     @Inject
     public SimpleTokenizer(String bpePath) throws IOException {
-        byteEncoder = bytesToUnicode();
+        this.byteEncoder = bytesToUnicode();
         List<String[]> merges = readMerges(bpePath);
-        List<String> vocab = new ArrayList<>(byteEncoder.values());
-        vocab.addAll(vocab.stream().map(v -> v + "</w>").toList());
-        merges.forEach(merge -> vocab.add(String.join("", merge)));
-        vocab.add("<|startoftext|>");
-        vocab.add("<|endoftext|>");
-
-        encoder = new HashMap<>();
-        for (int i = 0; i < vocab.size(); i++) {
-            encoder.put(vocab.get(i), i);
-        }
-
-        bpeRanks = new HashMap<>();
-        for (int i = 0; i < merges.size(); i++) {
-            bpeRanks.put(String.join("", merges.get(i)), i);
-        }
-
-        cache = new HashMap<>();
-        // 修改正則表達式，排除 { } [ ] 和換行符
-        pattern = Pattern.compile("<\\|startoftext\\|>|<\\|endoftext\\|>|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
+        this.encoder = buildEncoder(merges);
+        this.bpeRanks = buildBpeRanks(merges);
+        this.cache = new HashMap<>();
+        this.pattern = compilePattern();
     }
 
     @NotNull
     private Map<Integer, String> bytesToUnicode() {
         List<Integer> bs = new ArrayList<>();
-        for (int i = '!'; i <= '~'; i++) bs.add(i);
-        for (int i = '¡'; i <= '¬'; i++) bs.add(i);
-        for (int i = '®'; i <= 'ÿ'; i++) bs.add(i);
+        IntStream.rangeClosed('!', '~').forEach(bs::add);
+        IntStream.rangeClosed('¡', '¬').forEach(bs::add);
+        IntStream.rangeClosed('®', 'ÿ').forEach(bs::add);
 
         List<Integer> cs = new ArrayList<>(bs);
         int n = 0;
         for (int b = 0; b < 256; b++) {
             if (!bs.contains(b)) {
                 bs.add(b);
-                cs.add(256 + n);
-                n++;
+                cs.add(256 + n++);
             }
         }
 
-        Map<Integer, String> byteEncoder = new HashMap<>();
-        for (int i = 0; i < bs.size(); i++) {
-            byteEncoder.put(bs.get(i), String.valueOf((char) cs.get(i).intValue()));
-        }
-        return byteEncoder;
+        return IntStream.range(0, bs.size()).boxed()
+                .collect(Collectors.toMap(bs::get, i -> String.valueOf((char) cs.get(i).intValue())));
     }
 
     @NotNull
     private List<String[]> readMerges(String path) throws IOException {
         List<String[]> merges = new ArrayList<>();
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path)), StandardCharsets.UTF_8))) {
-            bufferedReader.readLine(); // Skip first line
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(path)), StandardCharsets.UTF_8))) {
+            reader.readLine(); // Skip first line
             String line;
-            while ((line = bufferedReader.readLine()) != null && merges.size() < 49152 - 256 - 2 + 1) {
+            while ((line = reader.readLine()) != null && merges.size() < VOCAB_SIZE) {
                 merges.add(line.split(" "));
             }
         }
         return merges;
     }
 
+    private Map<String, Integer> buildEncoder(List<String[]> merges) {
+        List<String> vocab = new ArrayList<>(byteEncoder.values());
+        vocab.addAll(vocab.stream().map(v -> v + END_OF_WORD).toList());
+        merges.forEach(merge -> vocab.add(String.join("", merge)));
+        vocab.add(START_OF_TEXT);
+        vocab.add(END_OF_TEXT);
+
+        return IntStream.range(0, vocab.size()).boxed()
+                .collect(Collectors.toMap(vocab::get, i -> i));
+    }
+
+    private Map<String, Integer> buildBpeRanks(List<String[]> merges) {
+        return IntStream.range(0, merges.size()).boxed()
+                .collect(Collectors.toMap(i -> String.join("", merges.get(i)), i -> i));
+    }
+
+    private Pattern compilePattern() {
+        return Pattern.compile(START_OF_TEXT + "|" + END_OF_TEXT + "|'s|'t|'re|'ve|'m|'ll|'d|[\\p{L}]+|[\\p{N}]|[^\\s\\p{L}\\p{N}{}\\[\\]\n]+", Pattern.CASE_INSENSITIVE);
+    }
+
     private String bpe(String token) {
-        if (cache.containsKey(token)) {
-            return cache.get(token);
-        }
+        return cache.computeIfAbsent(token, this::computeBpe);
+    }
 
+    private String computeBpe(String token) {
         List<String> word = new ArrayList<>(Arrays.asList(token.split("")));
-        word.set(word.size() - 1, word.getLast() + "</w>");
+        word.set(word.size() - 1, word.get(word.size() - 1) + END_OF_WORD);
 
-        while (true) {
+        while (word.size() > 1) {
             int minRank = Integer.MAX_VALUE;
             String bestPair = null;
             for (int i = 0; i < word.size() - 1; i++) {
@@ -111,13 +118,9 @@ public class SimpleTokenizer {
                 }
             }
             word = newWord;
-
-            if (word.size() == 1) break;
         }
 
-        String result = String.join(" ", word);
-        cache.put(token, result);
-        return result;
+        return String.join(" ", word);
     }
 
     public List<Integer> encode(String text) {
@@ -128,30 +131,28 @@ public class SimpleTokenizer {
         StringBuilder currentToken = new StringBuilder();
         while (matcher.find()) {
             if (!currentToken.isEmpty()) {
-                String encodedToken = currentToken.toString().chars()
-                        .mapToObj(byteEncoder::get)
-                        .collect(Collectors.joining());
-                for (String bpeToken : bpe(encodedToken).split(" ")) {
-                    bpeTokens.add(encoder.getOrDefault(bpeToken, encoder.get("<|endoftext|>")));
-                }
+                processToken(currentToken.toString(), bpeTokens);
                 currentToken = new StringBuilder();
             }
             String group = matcher.group();
-            // 檢查是否為 { } [ ] 或換行符，如果是則跳過
             if (!group.matches("[{}\\[\\]\n]")) {
                 currentToken.append(group);
             }
         }
 
         if (!currentToken.isEmpty()) {
-            String encodedToken = currentToken.toString().chars()
-                    .mapToObj(byteEncoder::get)
-                    .collect(Collectors.joining());
-            for (String bpeToken : bpe(encodedToken).split(" ")) {
-                bpeTokens.add(encoder.getOrDefault(bpeToken, encoder.get("<|endoftext|>")));
-            }
+            processToken(currentToken.toString(), bpeTokens);
         }
 
         return bpeTokens;
+    }
+
+    private void processToken(String token, List<Integer> bpeTokens) {
+        String encodedToken = token.chars()
+                .mapToObj(byteEncoder::get)
+                .collect(Collectors.joining());
+        for (String bpeToken : bpe(encodedToken).split(" ")) {
+            bpeTokens.add(encoder.getOrDefault(bpeToken, encoder.get(END_OF_TEXT)));
+        }
     }
 }
