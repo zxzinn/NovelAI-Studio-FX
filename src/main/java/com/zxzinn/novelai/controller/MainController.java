@@ -12,6 +12,7 @@ import com.zxzinn.novelai.service.ui.AlertService;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.FXMLLoaderFactory;
 import com.zxzinn.novelai.utils.common.ResourcePaths;
+import com.zxzinn.novelai.viewmodel.GenerationViewModel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -74,7 +75,8 @@ public class MainController {
     }
 
     private Tab createUnifiedGeneratorTab() {
-        GenerationController generationController = new GenerationController();
+        GenerationViewModel viewModel = new GenerationViewModel();
+        GenerationController generationController = new GenerationController(viewModel);
         BorderPane content = generationController.createView();
         return new Tab("圖像生成", content) {{
             setClosable(false);

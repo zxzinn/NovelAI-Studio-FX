@@ -1,16 +1,17 @@
 package com.zxzinn.novelai.controller.generation;
 
 import com.google.inject.Inject;
-import com.zxzinn.novelai.api.GenerationPayload;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
+import com.zxzinn.novelai.model.UIComponentsData;
 import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
 import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
+import com.zxzinn.novelai.viewmodel.GenerationViewModel;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -22,8 +23,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
 public class GenerationController {
@@ -31,21 +30,14 @@ public class GenerationController {
     private static final String GENERATE_BUTTON_GENERATING_CLASS = "generate-button-generating";
     private static final String GENERATE_BUTTON_STOP_CLASS = "generate-button-stop";
 
-    private final PropertiesManager propertiesManager;
-    private final PromptManager promptManager;
-    private final GenerationTaskManager taskManager;
-
+    private final GenerationViewModel viewModel;
     private final UIComponents uiComponents;
-    private final GenerationState generationState;
 
     @Inject
-    public GenerationController( ) {
-        this.propertiesManager = PropertiesManager.getInstance();
-        this.promptManager = new PromptManager(new EmbedProcessor());
-        this.taskManager = GenerationTaskManager.getInstance();
+    public GenerationController(GenerationViewModel viewModel) {
+        this.viewModel = viewModel;
         this.uiComponents = new UIComponents();
-        this.generationState = new GenerationState();
-        initializeUIComponents(); // 新增這行
+        initializeUIComponents();
     }
 
     private void initializeUIComponents() {
@@ -184,7 +176,7 @@ public class GenerationController {
         initializeFields();
         loadSettings();
         setupListeners();
-        promptManager.setupPromptControls(uiComponents.positivePromptControls, uiComponents.negativePromptControls,
+        viewModel.setupPromptControls(uiComponents.positivePromptControls, uiComponents.negativePromptControls,
                 uiComponents.positivePromptArea, uiComponents.negativePromptArea,
                 uiComponents.positivePromptPreviewArea, uiComponents.negativePromptPreviewArea);
         updatePromptPreviews();
@@ -213,22 +205,12 @@ public class GenerationController {
     }
 
     private void loadSettings() {
-        uiComponents.positivePromptArea.setPromptText(propertiesManager.getString("positivePrompt", ""));
-        uiComponents.negativePromptArea.setPromptText(propertiesManager.getString("negativePrompt", ""));
-        uiComponents.generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
+        viewModel.loadSettings(uiComponents.positivePromptArea, uiComponents.negativePromptArea, uiComponents.generateCountComboBox);
     }
 
     private void setupListeners() {
-        uiComponents.generateCountComboBox.valueProperty().addListener((obs, oldVal, newVal) ->
-                propertiesManager.setString("generateCount", newVal));
-        uiComponents.positivePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
-            propertiesManager.setString("positivePrompt", newVal);
-            promptManager.updatePromptPreview(newVal, uiComponents.positivePromptPreviewArea, true);
-        });
-        uiComponents.negativePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
-            propertiesManager.setString("negativePrompt", newVal);
-            promptManager.updatePromptPreview(newVal, uiComponents.negativePromptPreviewArea, false);
-        });
+        viewModel.setupListeners(uiComponents.generateCountComboBox, uiComponents.positivePromptArea, uiComponents.negativePromptArea,
+                uiComponents.positivePromptPreviewArea, uiComponents.negativePromptPreviewArea);
     }
 
     private void setupGenerationModeComboBox() {
@@ -250,18 +232,14 @@ public class GenerationController {
     }
 
     private void updatePromptPreviews() {
-        if (!promptManager.isPositivePromptLocked()) {
-            promptManager.refreshPromptPreview(uiComponents.positivePromptArea, uiComponents.positivePromptPreviewArea, true);
-        }
-        if (!promptManager.isNegativePromptLocked()) {
-            promptManager.refreshPromptPreview(uiComponents.negativePromptArea, uiComponents.negativePromptPreviewArea, false);
-        }
+        viewModel.updatePromptPreviews(uiComponents.positivePromptArea, uiComponents.positivePromptPreviewArea,
+                uiComponents.negativePromptArea, uiComponents.negativePromptPreviewArea);
     }
 
     private void handleGenerateOrStop() {
-        if (!generationState.isGenerating && !generationState.isStopping) {
+        if (!viewModel.isGenerating() && !viewModel.isStopping()) {
             startGeneration();
-        } else if (generationState.isGenerating && !generationState.isStopping) {
+        } else if (viewModel.isGenerating() && !viewModel.isStopping()) {
             stopGeneration();
         }
     }
@@ -272,14 +250,8 @@ public class GenerationController {
             return;
         }
 
-        generationState.isGenerating = true;
-        generationState.stopRequested = false;
-        generationState.isStopping = false;
+        viewModel.startGeneration();
         updateButtonState(true);
-
-        int maxCount = getMaxCount();
-        generationState.isInfiniteMode.set(maxCount == Integer.MAX_VALUE);
-        generationState.remainingGenerations = new AtomicInteger(generationState.isInfiniteMode.get() ? Integer.MAX_VALUE : maxCount);
 
         generateNextImage();
     }
@@ -289,18 +261,41 @@ public class GenerationController {
                 !uiComponents.image2ImageSettingsPane.getBase64Image().isEmpty();
     }
 
+    private UIComponentsData collectUIData() {
+        UIComponentsData data = new UIComponentsData();
+        data.apiKey = uiComponents.apiSettingsPane.getApiKey();
+        data.model = uiComponents.apiSettingsPane.getModel();
+        data.generationMode = uiComponents.generationModeComboBox.getValue();
+        data.positivePromptPreviewText = uiComponents.positivePromptPreviewArea.getPreviewText();
+        data.negativePromptPreviewText = uiComponents.negativePromptPreviewArea.getPreviewText();
+        data.smea = uiComponents.text2ImageSettingsPane.isSmea();
+        data.smeaDyn = uiComponents.text2ImageSettingsPane.isSmeaDyn();
+        data.strength = uiComponents.image2ImageSettingsPane.getStrength();
+        data.noise = uiComponents.image2ImageSettingsPane.getNoise();
+        data.base64Image = uiComponents.image2ImageSettingsPane.getBase64Image();
+        data.extraNoiseSeed = uiComponents.image2ImageSettingsPane.getExtraNoiseSeed();
+        data.outputWidth = uiComponents.outputSettingsPane.getOutputWidth();
+        data.outputHeight = uiComponents.outputSettingsPane.getOutputHeight();
+        data.ratio = uiComponents.outputSettingsPane.getRatio();
+        data.sampler = uiComponents.samplingSettingsPane.getSampler();
+        data.steps = uiComponents.samplingSettingsPane.getSteps();
+        data.count = uiComponents.outputSettingsPane.getCount();
+        data.seed = uiComponents.samplingSettingsPane.getSeed();
+        return data;
+    }
+
     private void generateNextImage() {
-        if (generationState.stopRequested || (!generationState.isInfiniteMode.get() && generationState.remainingGenerations.get() <= 0)) {
+        if (viewModel.shouldStopGeneration()) {
             finishGeneration();
             return;
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                GenerationPayload payload = createGenerationPayload();
-                GenerationTask task = new GenerationTask(payload, uiComponents.apiSettingsPane.getApiKey());
+                UIComponentsData uiData = collectUIData();
+                GenerationTask task = viewModel.createGenerationTask(uiData);
 
-                taskManager.submitTask(task)
+                viewModel.submitTask(task)
                         .thenAccept(this::handleGenerationResult);
             } catch (Exception e) {
                 log.error("Error creating generation task: ", e);
@@ -314,9 +309,7 @@ public class GenerationController {
             Platform.runLater(() -> {
                 handleGeneratedImage(result.getImageData());
                 updatePromptPreviews();
-                if (!generationState.isInfiniteMode.get()) {
-                    generationState.remainingGenerations.decrementAndGet();
-                }
+                viewModel.decrementRemainingGenerations();
                 generateNextImage();
             });
         } else {
@@ -328,8 +321,7 @@ public class GenerationController {
     }
 
     private void stopGeneration() {
-        generationState.stopRequested = true;
-        generationState.isStopping = true;
+        viewModel.stopGeneration();
         updateButtonState(false);
     }
 
@@ -339,14 +331,14 @@ public class GenerationController {
             if (generating) {
                 uiComponents.generateButton.getStyleClass().add(GENERATE_BUTTON_GENERATING_CLASS);
                 uiComponents.generateButton.setText("停止");
-            } else if (generationState.isStopping) {
+            } else if (viewModel.isStopping()) {
                 uiComponents.generateButton.getStyleClass().add(GENERATE_BUTTON_STOP_CLASS);
                 uiComponents.generateButton.setText("停止中...");
             } else {
                 uiComponents.generateButton.getStyleClass().add(GENERATE_BUTTON_CLASS);
                 uiComponents.generateButton.setText("生成");
             }
-            uiComponents.generateButton.setDisable(generationState.isStopping);
+            uiComponents.generateButton.setDisable(viewModel.isStopping());
         });
     }
 
@@ -363,52 +355,12 @@ public class GenerationController {
         return ImageUtils.saveImage(imageData, uiComponents.outputSettingsPane.getOutputDirectory());
     }
 
-    private int getMaxCount() {
-        String selectedCount = uiComponents.generateCountComboBox.getValue();
-        return "無限".equals(selectedCount) ? Integer.MAX_VALUE : Integer.parseInt(selectedCount);
-    }
-
     private void finishGeneration() {
-        generationState.isGenerating = false;
-        generationState.isStopping = false;
+        viewModel.finishGeneration();
         updateButtonState(false);
     }
 
-    private GenerationPayload createGenerationPayload() {
-        GenerationPayload payload = new GenerationPayload();
-        GenerationPayload.GenerationParameters params = new GenerationPayload.GenerationParameters();
-        payload.setParameters(params);
-
-        payload.setInput(uiComponents.positivePromptPreviewArea.getPreviewText());
-        payload.setModel(uiComponents.apiSettingsPane.getModel());
-
-        String generationMode = uiComponents.generationModeComboBox.getValue();
-        if ("Text2Image".equals(generationMode)) {
-            params.setSm(uiComponents.text2ImageSettingsPane.isSmea());
-            params.setSm_dyn(uiComponents.text2ImageSettingsPane.isSmeaDyn());
-            payload.setAction("generate");
-        } else {
-            payload.setAction("img2img");
-            params.setStrength(uiComponents.image2ImageSettingsPane.getStrength());
-            params.setNoise(uiComponents.image2ImageSettingsPane.getNoise());
-            params.setImage(uiComponents.image2ImageSettingsPane.getBase64Image());
-            params.setExtra_noise_seed(uiComponents.image2ImageSettingsPane.getExtraNoiseSeed());
-        }
-
-        params.setParams_version(1);
-        params.setWidth(uiComponents.outputSettingsPane.getOutputWidth());
-        params.setHeight(uiComponents.outputSettingsPane.getOutputHeight());
-        params.setScale(uiComponents.outputSettingsPane.getRatio());
-        params.setSampler(uiComponents.samplingSettingsPane.getSampler());
-        params.setSteps(uiComponents.samplingSettingsPane.getSteps());
-        params.setN_samples(uiComponents.outputSettingsPane.getCount());
-        params.setSeed(uiComponents.samplingSettingsPane.getSeed());
-
-        params.setNegative_prompt(uiComponents.negativePromptPreviewArea.getPreviewText());
-        return payload;
-    }
-
-    private static class UIComponents {
+    public static class UIComponents {
         ApiSettingsPane apiSettingsPane;
         OutputSettingsPane outputSettingsPane;
         SamplingSettingsPane samplingSettingsPane;
@@ -427,13 +379,5 @@ public class GenerationController {
         HistoryImagesPane historyImagesPane;
         ImagePreviewPane imagePreviewPane;
         Button generateButton;
-    }
-
-    private static class GenerationState {
-        volatile boolean isGenerating = false;
-        volatile boolean stopRequested = false;
-        volatile boolean isStopping = false;
-        AtomicInteger remainingGenerations;
-        final AtomicBoolean isInfiniteMode = new AtomicBoolean(false);
     }
 }
