@@ -1,117 +1,112 @@
- /* 全局樣式 */
+/* 全局樣式 */
 .root {
-   -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
-   -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
-   -fx-font-size: 18px; /* 增加全局字體大小 */
+    -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B);
+    -fx-font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+    -fx-font-size: 18px;
 }
 
 /* 文本樣式 */
-.text {
-    -fx-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-font-weight: bold; /* 加粗字體 */
-}
-
-.label {
-    -fx-text-fill: #E0E0F0; /* 更亮的標籤顏色 */
-    -fx-font-weight: bold; /* 加粗字體 */
+.text, .label {
+    -fx-fill: #E0E0F0;
+    -fx-text-fill: #E0E0F0;
+    -fx-font-weight: bold;
 }
 
 .prompt-text {
-    -fx-fill: #B9C1E6; /* 更亮的提示文本顏色 */
-    -fx-font-size: 15px; /* 增加提示文本大小 */
+    -fx-fill: #B9C1E6;
+    -fx-font-size: 15px;
 }
 
 .emphasis-text {
-    -fx-fill: #FFB8CB; /* 更亮的強調文本顏色 */
+    -fx-fill: #FFB8CB;
     -fx-font-weight: bold;
-    -fx-font-size: 16px; /* 增加強調文本大小 */
+    -fx-font-size: 16px;
 }
 
 .error-text {
-    -fx-fill: #FF869E; /* 更亮的錯誤文本顏色 */
+    -fx-fill: #FF869E;
     -fx-font-weight: bold;
-    -fx-font-size: 16px; /* 增加錯誤文本大小 */
+    -fx-font-size: 16px;
 }
 
 .success-text {
-    -fx-fill: #AEDE7A; /* 更亮的成功文本顏色 */
+    -fx-fill: #AEDE7A;
     -fx-font-weight: bold;
-    -fx-font-size: 16px; /* 增加成功文本大小 */
+    -fx-font-size: 16px;
 }
 
- /* 標籤頁樣式 */
- .tab-pane .tab-header-area .tab-header-background {
-     -fx-background-color: transparent;
- }
+/* 標籤頁樣式 */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
 
- .tab-pane .tab {
-     -fx-background-color: rgba(64, 69, 92, 0.8);
-     -fx-background-radius: 6px 6px 0 0;
-     -fx-padding: 8px 16px; /* 稍微減少內邊距以縮小空間 */
-     -fx-transition: all 0.3s ease;
- }
+.tab-pane .tab {
+    -fx-background-color: rgba(64, 69, 92, 0.8);
+    -fx-background-radius: 6px 6px 0 0;
+    -fx-padding: 8px 16px;
+    -fx-transition: all 0.3s ease;
+}
 
- .tab-pane .tab:hover {
-     -fx-background-color: rgba(64, 69, 92, 1);
- }
+.tab-pane .tab:hover {
+    -fx-background-color: rgba(64, 69, 92, 1);
+}
 
- .tab-pane .tab:selected {
-     -fx-background-color: #CBB9FF;
-     -fx-focus-color: transparent; /* 移除選中時的藍色邊框 */
-     -fx-faint-focus-color: transparent;
- }
+.tab-pane .tab:selected {
+    -fx-background-color: #CBB9FF;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
 
- .tab-pane .tab .tab-label {
-     -fx-text-fill: #B9C1E6;
-     -fx-font-size: 14px; /* 稍微減小字體大小以縮小空間 */
- }
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #B9C1E6;
+    -fx-font-size: 14px;
+}
 
- .tab-pane .tab:selected .tab-label {
-     -fx-text-fill: #1A1B26;
-     -fx-font-weight: bold;
- }
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #1A1B26;
+    -fx-font-weight: bold;
+}
 
- /* 縮小標題和標籤的空間 */
- .tab-pane > .tab-header-area {
-     -fx-padding: 0 0 0 0;
-     -fx-pref-height: 36px; /* 調整整體高度 */
- }
+.tab-pane > .tab-header-area {
+    -fx-padding: 0;
+    -fx-pref-height: 36px;
+}
 
- .tab-pane > .tab-header-area > .headers-region > .tab {
-     -fx-pref-height: 36px; /* 確保標籤高度與header-area一致 */
- }
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-pref-height: 36px;
+}
 
 /* 文本輸入框樣式 */
 .text-field {
-    -fx-background-color: rgba(75, 82, 114, 0.95); /* 更亮的輸入框背景 */
-    -fx-text-fill: #E0E0F0; /* 更亮的輸入文本顏色 */
-    -fx-prompt-text-fill: #666F99; /* 更亮的提示文本顏色 */
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-text-fill: #E0E0F0;
+    -fx-prompt-text-fill: #666F99;
     -fx-background-radius: 6px;
     -fx-border-radius: 6px;
-    -fx-border-color: #515888; /* 更亮的邊框顏色 */
+    -fx-border-color: #515888;
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加輸入文本大小 */
+    -fx-font-size: 15px;
 }
 
 .text-field:hover {
-    -fx-background-color: rgba(85, 92, 124, 1); /* 更亮的輸入框懸停背景 */
-    -fx-border-color: #8AA2FF; /* 更亮的懸停邊框顏色 */
+    -fx-background-color: rgba(85, 92, 124, 1);
+    -fx-border-color: #8AA2FF;
 }
 
 .text-field:focused {
-    -fx-background-color: rgba(92, 100, 138, 1); /* 更亮的輸入框焦點背景 */
-    -fx-border-color: #8AA2FF; /* 更亮的焦點邊框顏色 */
+    -fx-background-color: rgba(92, 100, 138, 1);
+    -fx-border-color: #8AA2FF;
     -fx-border-width: 2px;
 }
 
 /* 文本區域樣式 */
 .text-area {
-    -fx-control-inner-background: rgba(64, 69, 92, 0.95) !important; /* 更亮的文本區域背景 */
+    -fx-control-inner-background: rgba(64, 69, 92, 0.95) !important;
     -fx-background-color: rgba(64, 69, 92, 0.95) !important;
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
+    -fx-text-fill: #E0E0F0;
     -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加文本區域文本大小 */
+    -fx-font-size: 15px;
 }
 
 .text-area .content {
@@ -119,175 +114,165 @@
 }
 
 .text-area:focused {
-    -fx-border-color: #8AA2FF; /* 更亮的焦點邊框顏色 */
+    -fx-border-color: #8AA2FF;
     -fx-border-width: 2px;
 }
 
 /* 下拉框樣式 */
 .combo-box {
-    -fx-background-color: rgba(75, 82, 114, 0.95); /* 更亮的下拉框背景 */
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-border-color: #515888; /* 更亮的邊框顏色 */
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-text-fill: #E0E0F0;
+    -fx-border-color: #515888;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
     -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加下拉框文本大小 */
+    -fx-font-size: 15px;
 }
 
 .combo-box:hover {
-    -fx-background-color: rgba(85, 92, 124, 1); /* 更亮的下拉框懸停背景 */
-    -fx-border-color: #8AA2FF; /* 更亮的懸停邊框顏色 */
+    -fx-background-color: rgba(85, 92, 124, 1);
+    -fx-border-color: #8AA2FF;
 }
 
 .combo-box:showing {
-    -fx-background-color: rgba(92, 100, 138, 1); /* 更亮的下拉框展開背景 */
-    -fx-border-color: #8AA2FF; /* 更亮的展開邊框顏色 */
+    -fx-background-color: rgba(92, 100, 138, 1);
+    -fx-border-color: #8AA2FF;
     -fx-border-width: 2px;
 }
 
 .combo-box .list-cell {
-    -fx-background-color: rgba(75, 82, 114, 0.95); /* 更亮的列表單元格背景 */
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-text-fill: #E0E0F0;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: rgba(75, 82, 114, 0.95); /* 更亮的彈出列表背景 */
-    -fx-border-color: #515888; /* 更亮的邊框顏色 */
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-border-color: #515888;
 }
 
 /* 按鈕樣式 */
 .button {
-    -fx-background-color: linear-gradient(to bottom right, #8AA2FF, #CBB9FF); /* 更亮的按鈕背景 */
+    -fx-background-color: linear-gradient(to bottom right, #8AA2FF, #CBB9FF);
     -fx-text-fill: #1A1B26;
     -fx-font-weight: bold;
     -fx-background-radius: 6px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);
     -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加按鈕文本大小 */
+    -fx-font-size: 15px;
 }
 
 .button:hover {
-    -fx-background-color: linear-gradient(to bottom right, #CBB9FF, #8AA2FF); /* 更亮的按鈕懸停背景 */
+    -fx-background-color: linear-gradient(to bottom right, #CBB9FF, #8AA2FF);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
-.generate-button, .generate-button-stop, .generate-button-generating {
-    -fx-background-color: linear-gradient(to right, #8AA2FF, #CBB9FF); /* 更亮的生成按鈕背景 */
-    -fx-text-fill: #1A1B26;
-    -fx-font-size: 18px; /* 增加生成按鈕文本大小 */
-    -fx-font-weight: bold;
-    -fx-padding: 12px 24px; /* 增加內邊距 */
-    -fx-background-radius: 6px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);
-    -fx-transition: all 0.3s ease;
-    -fx-min-width: 140px; /* 增加最小寬度 */
-    -fx-max-width: 140px; /* 增加最大寬度 */
-    -fx-min-height: 48px; /* 增加最小高度 */
-    -fx-max-height: 48px; /* 增加最大高度 */
-    -fx-alignment: center;
-}
-
-.generate-button:hover, .generate-button-stop:hover, .generate-button-generating:hover {
-    -fx-background-color: linear-gradient(to right, #CBB9FF, #8AA2FF); /* 更亮的生成按鈕懸停背景 */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
-}
-
-.generate-button:pressed, .generate-button-stop:pressed, .generate-button-generating:pressed {
+.button:pressed {
     -fx-scale-x: 0.98;
     -fx-scale-y: 0.98;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 3, 0, 0, 1);
 }
 
+.generate-button, .generate-button-stop, .generate-button-generating {
+    -fx-background-color: linear-gradient(to right, #8AA2FF, #CBB9FF);
+    -fx-text-fill: #1A1B26;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 24px;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);
+    -fx-transition: all 0.3s ease;
+    -fx-min-width: 140px;
+    -fx-max-width: 140px;
+    -fx-min-height: 48px;
+    -fx-max-height: 48px;
+    -fx-alignment: center;
+}
+
+.generate-button:hover, .generate-button-stop:hover, .generate-button-generating:hover {
+    -fx-background-color: linear-gradient(to right, #CBB9FF, #8AA2FF);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
+}
+
 .generate-button-generating {
-    -fx-background-color: linear-gradient(to right, #FF869E, #FFAE74); /* 更亮的生成中按鈕背景 */
+    -fx-background-color: linear-gradient(to right, #FF869E, #FFAE74);
 }
 
 .generate-button-stop {
-    -fx-background-color: linear-gradient(to right, #FFAE74, #FF869E); /* 更亮的停止按鈕背景 */
+    -fx-background-color: linear-gradient(to right, #FFAE74, #FF869E);
 }
 
 /* Settings hover效果 */
 .settings-section {
-    -fx-background-color: rgba(64, 69, 92, 0.9); /* 更亮的設置區域背景 */
+    -fx-background-color: rgba(64, 69, 92, 0.9);
     -fx-background-radius: 6px;
     -fx-transition: all 0.3s ease;
 }
 
 .settings-section:hover {
-    -fx-background-color: rgba(64, 69, 92, 1); /* 更亮的設置區域懸停背景 */
+    -fx-background-color: rgba(64, 69, 92, 1);
     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.3), 12, 0, 0, 0);
 }
 
- /* 提示词区域样式 */
- .prompt-area {
-     -fx-background-color: rgba(64, 69, 92, 1);
-     -fx-background-radius: 6px;
-     -fx-transition: all 0.3s ease;
- }
+/* 提示词区域样式 */
+.prompt-area {
+    -fx-background-color: rgba(64, 69, 92, 1);
+    -fx-background-radius: 6px;
+    -fx-transition: all 0.3s ease;
+}
 
- .prompt-area:hover {
-     -fx-background-color: rgba(64, 69, 92, 1.1);
-     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
- }
+.prompt-preview {
+    -fx-background-color: rgba(64, 69, 92, 1);
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+}
 
- /* 提示词预览区域样式 */
- .prompt-preview {
-     -fx-background-color: rgba(64, 69, 92, 1);
-     -fx-background-radius: 6px;
-     -fx-transition: all 0.3s ease;
- }
+.prompt-area:hover, .prompt-preview:hover {
+    -fx-background-color: rgba(64, 69, 92, 1.1);
+    -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
+}
 
- .prompt-preview:hover {
-     -fx-background-color: rgba(64, 69, 92, 1.1);
-     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
- }
+.prompt-area .text-area, .prompt-preview .text-area {
+    -fx-control-inner-background: rgba(64, 69, 92, 1) !important;
+    -fx-background-color: rgba(64, 69, 92, 1) !important;
+}
 
- /* 提示词区域和预览区域的共同样式 */
- .prompt-area .text-area, .prompt-preview .text-area {
-     -fx-control-inner-background: rgba(64, 69, 92, 1) !important;
-     -fx-background-color: rgba(64, 69, 92, 1) !important;
- }
+.prompt-area:focused, .prompt-preview:focused {
+    -fx-border-color: #8AA2FF;
+    -fx-border-width: 2px;
+}
 
- .prompt-area:focused, .prompt-preview:focused {
-     -fx-border-color: #8AA2FF;
-     -fx-border-width: 2px;
- }
+.prompt-area .text-area .scroll-pane,
+.prompt-preview .text-area .scroll-pane {
+    -fx-fit-to-height: false;
+}
 
- /* 确保滚动条在需要时显示 */
- .prompt-area .text-area .scroll-pane,
- .prompt-preview .text-area .scroll-pane {
-     -fx-fit-to-height: false;
- }
+.token-progress-container {
+    -fx-background-color: rgba(64, 69, 92, 0.2);
+    -fx-background-radius: 12;
+    -fx-padding: 4px 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 1);
+}
 
- /* Token 进度条容器样式 */
- .token-progress-container {
-     -fx-background-color: rgba(64, 69, 92, 0.4);
-     -fx-background-radius: 12;
-     -fx-padding: 3;
- }
-
- /* Token 计数标签样式 */
- .token-count-label {
-     -fx-text-fill: #E0E0F0;
-     -fx-font-size: 14px;
-     -fx-font-weight: bold;
-     -fx-padding: 0 6 0 6;
- }
+.token-count-label {
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 0 5;
+}
 
 /* imagePreviewPane hover效果 */
 .preview-container {
-    -fx-background-color: rgba(64, 69, 92, 0.6); /* 更亮的預覽容器背景 */
+    -fx-background-color: rgba(64, 69, 92, 0.6);
     -fx-background-radius: 6px;
-    -fx-border-color: #8AA2FF; /* 更亮的邊框顏色 */
+    -fx-border-color: #8AA2FF;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
     -fx-transition: all 0.3s ease;
 }
 
 .preview-container:hover {
-    -fx-background-color: rgba(64, 69, 92, 0.8); /* 更亮的預覽容器懸停背景 */
+    -fx-background-color: rgba(64, 69, 92, 0.8);
     -fx-effect: dropshadow(three-pass-box, rgba(138,162,255,0.5), 12, 0, 0, 0);
 }
 
@@ -299,30 +284,19 @@
 
 .scroll-bar:vertical .thumb,
 .scroll-bar:horizontal .thumb {
-    -fx-background-color: rgba(138, 162, 255, 0.8); /* 更亮的滾動條顏色 */
+    -fx-background-color: rgba(138, 162, 255, 0.8);
     -fx-background-radius: 6px;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: rgba(203, 185, 255, 0.8); /* 更亮的滾動條懸停顏色 */
-}
-
-/* 提示區域和預覽區域的共同樣式 */
-.prompt-area .text-area, .prompt-preview .text-area {
-    -fx-control-inner-background: rgba(64, 69, 92, 1) !important; /* 更亮的背景 */
-    -fx-background-color: rgba(64, 69, 92, 1) !important;
-}
-
-.prompt-area:focused, .prompt-preview:focused {
-    -fx-border-color: #8AA2FF; /* 更亮的焦點邊框顏色 */
-    -fx-border-width: 2px;
+    -fx-background-color: rgba(203, 185, 255, 0.8);
 }
 
 /* 刷新和鎖定按鈕樣式 */
 .refresh-button, .lock-button {
-    -fx-background-color: rgba(138, 162, 255, 0.8); /* 更亮的按鈕背景 */
+    -fx-background-color: rgba(138, 162, 255, 0.8);
     -fx-background-radius: 50%;
-    -fx-min-width: 36px; /* 增加按鈕大小 */
+    -fx-min-width: 36px;
     -fx-min-height: 36px;
     -fx-max-width: 36px;
     -fx-max-height: 36px;
@@ -331,27 +305,27 @@
 }
 
 .refresh-button:hover, .lock-button:hover {
-    -fx-background-color: rgba(203, 185, 255, 0.8); /* 更亮的按鈕懸停背景 */
+    -fx-background-color: rgba(203, 185, 255, 0.8);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
 }
 
 .refresh-button .ikonli-font-icon, .lock-button .ikonli-font-icon {
     -fx-icon-color: #1A1B26;
-    -fx-icon-size: 18px; /* 增加圖標大小 */
+    -fx-icon-size: 18px;
 }
 
 /* 圖像控制欄樣式 */
 .image-control-bar {
     -fx-background-color: linear-gradient(to right, #24283B, #1A1B26);
-    -fx-padding: 12px; /* 增加內邊距 */
-    -fx-spacing: 12px; /* 增加間距 */
+    -fx-padding: 12px;
+    -fx-spacing: 12px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 6);
 }
 
 .control-button {
-    -fx-background-color: rgba(138, 162, 255, 0.8); /* 更亮的控制按鈕背景 */
+    -fx-background-color: rgba(138, 162, 255, 0.8);
     -fx-text-fill: #1A1B26;
-    -fx-min-width: 18px; /* 增加按鈕大小 */
+    -fx-min-width: 18px;
     -fx-min-height: 18px;
     -fx-max-width: 18px;
     -fx-max-height: 18px;
@@ -361,14 +335,14 @@
 }
 
 .control-button:hover {
-    -fx-background-color: rgba(203, 185, 255, 0.8); /* 更亮的控制按鈕懸停背景 */
+    -fx-background-color: rgba(203, 185, 255, 0.8);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
 }
 
 /* 歷史面板樣式 */
 .history-panel {
-    -fx-background-color: rgba(64, 69, 92, 1); /* 更亮的歷史面板背景 */
-    -fx-padding: 12px; /* 增加內邊距 */
+    -fx-background-color: rgba(64, 69, 92, 1);
+    -fx-padding: 12px;
     -fx-background-radius: 6px;
 }
 
@@ -379,38 +353,38 @@
 
 .history-list-view .list-cell {
     -fx-background-color: transparent;
-    -fx-padding: 6px 0; /* 增加內邊距 */
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-padding: 6px 0;
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 15px;
 }
 
 .history-list-view .list-cell:filled:hover {
-    -fx-background-color: rgba(75, 82, 114, 1); /* 更亮的列表單元格懸停背景 */
+    -fx-background-color: rgba(75, 82, 114, 1);
 }
 
-/* 設置部分樣式 (續) */
+/* 設置部分樣式 */
 .settings-section > .title {
-    -fx-background-color: #515888; /* 更亮的標題背景 */
+    -fx-background-color: #515888;
     -fx-background-radius: 6px 6px 0 0;
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
+    -fx-text-fill: #E0E0F0;
     -fx-font-weight: bold;
-    -fx-font-size: 16px; /* 增加標題文本大小 */
+    -fx-font-size: 16px;
 }
 
 .settings-section > .content {
-    -fx-background-color: rgba(51, 56, 76, 1); /* 更亮的內容背景 */
-    -fx-border-color: #515888; /* 更亮的邊框顏色 */
+    -fx-background-color: rgba(51, 56, 76, 1);
+    -fx-border-color: #515888;
     -fx-border-width: 1px;
     -fx-border-radius: 0 0 6px 6px;
 }
 
 .settings-content {
-    -fx-padding: 12px; /* 增加內邊距 */
+    -fx-padding: 12px;
     -fx-transition: all 0.3s ease;
 }
 
 .settings-content:hover {
-    -fx-background-color: rgba(64, 69, 92, 0.7); /* 更亮的設置內容懸停背景 */
+    -fx-background-color: rgba(64, 69, 92, 0.7);
 }
 
 .settings-content .text-field:hover,
@@ -419,25 +393,25 @@
 }
 
 .settings-label {
-    -fx-text-fill: #E0E0F0; /* 更亮的標籤文本顏色 */
+    -fx-text-fill: #E0E0F0;
     -fx-font-weight: bold;
-    -fx-font-size: 15px; /* 增加標籤文本大小 */
+    -fx-font-size: 15px;
 }
 
 /* 復選框樣式 */
 .check-box {
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 15px;
 }
 
 .check-box .box {
-    -fx-background-color: rgba(138, 162, 255, 0.4); /* 更亮的復選框背景 */
-    -fx-border-color: #8AA2FF; /* 更亮的邊框顏色 */
+    -fx-background-color: rgba(138, 162, 255, 0.4);
+    -fx-border-color: #8AA2FF;
     -fx-border-radius: 4px;
 }
 
 .check-box:selected .box {
-    -fx-background-color: #8AA2FF; /* 更亮的選中背景 */
+    -fx-background-color: #8AA2FF;
 }
 
 .check-box:selected .mark {
@@ -450,21 +424,21 @@
 
 /* 解析度和大小標籤樣式 */
 .resolution-label, .size-label {
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-font-size: 16px; /* 增加文本大小 */
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 16px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 4, 0, 0, 1);
 }
 
 .resolution-label {
-    -fx-min-width: 140px; /* 增加最小寬度 */
+    -fx-min-width: 140px;
 }
 
 /* 設置面板樣式 */
 .settings-panel {
     -fx-max-width: 350px;
-    -fx-background-color: rgba(64, 69, 92, 0.9); /* 更亮的設置面板背景 */
-    -fx-padding: 12px; /* 增加內邊距 */
-    -fx-spacing: 12px; /* 增加間距 */
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+    -fx-padding: 12px;
+    -fx-spacing: 12px;
 }
 
 /* 側邊欄樣式 */
@@ -484,57 +458,40 @@
 
 /* 控制欄樣式 */
 .control-bar {
-    -fx-background-color: rgba(75, 82, 114, 0.9); /* 更亮的控制欄背景 */
-    -fx-padding: 12px; /* 增加內邊距 */
-    -fx-spacing: 12px; /* 增加間距 */
+    -fx-background-color: rgba(75, 82, 114, 0.9);
+    -fx-padding: 12px;
+    -fx-spacing: 12px;
 }
 
 /* 解析度欄位樣式 */
 .resolution-field {
-    -fx-pref-width: 70px; /* 增加寬度 */
+    -fx-pref-width: 70px;
     -fx-max-width: 70px;
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-font-size: 15px;
 }
 
 .resolution-separator {
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
+    -fx-text-fill: #E0E0F0;
     -fx-font-weight: bold;
-    -fx-padding: 0 6 0 6; /* 增加內邊距 */
-    -fx-font-size: 16px; /* 增加文本大小 */
+    -fx-padding: 0 6 0 6;
+    -fx-font-size: 16px;
 }
 
-/* 進度條容器樣式 */
-.token-progress-container {
-    -fx-background-color: rgba(64, 69, 92, 0.4); /* 更亮的進度條容器背景 */
-    -fx-background-radius: 12;
-    -fx-padding: 3;
-}
-
-/* 進度條樣式 */
 .token-progress-bar {
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(64, 69, 92, 0.3);
     -fx-background-radius: 10;
     -fx-padding: 0;
 }
 
 .token-progress-bar > .bar {
-    -fx-background-color: linear-gradient(to right, #AEDE7A, #FFB8CB 50%, #FF869E); /* 更亮的進度條顏色 */
-    -fx-background-radius: 10;
+    -fx-background-color: linear-gradient(to right, #7FFF00, #FFD700 50%, #FF6347);
+    -fx-background-radius: 5;
     -fx-background-insets: 0;
-    -fx-padding: 4; /* 增加內邊距 */
 }
 
 .token-progress-bar > .track {
-    -fx-background-color: transparent;
-    -fx-background-radius: 10;
-}
-
-/* Token 計數標籤樣式 */
-.token-count-label {
-    -fx-text-fill: #E0E0F0; /* 更亮的文本顏色 */
-    -fx-font-size: 14px; /* 增加文本大小 */
-    -fx-font-weight: bold;
-    -fx-padding: 0 6 0 6; /* 增加內邊距 */
+    -fx-background-color: rgba(64, 69, 92, 0.6);
+    -fx-background-radius: 5;
 }
 
 /* 警告效果 */
@@ -545,23 +502,23 @@
 }
 
 .token-progress-bar-warning > .bar {
-    -fx-background-color: #FF869E; /* 更亮的警告顏色 */
+    -fx-background-color: #FF869E;
     -fx-animation: pulse 1s infinite;
 }
 
 /* 上傳按鈕樣式 */
 .upload-button {
-    -fx-background-color: linear-gradient(to bottom right, #8AA2FF, #CBB9FF); /* 更亮的上傳按鈕背景 */
+    -fx-background-color: linear-gradient(to bottom right, #8AA2FF, #CBB9FF);
     -fx-text-fill: #1A1B26;
     -fx-font-weight: bold;
     -fx-background-radius: 6px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 0, 2);
     -fx-transition: all 0.3s ease;
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-font-size: 15px;
 }
 
 .upload-button:hover {
-    -fx-background-color: linear-gradient(to bottom right, #CBB9FF, #8AA2FF); /* 更亮的上傳按鈕懸停背景 */
+    -fx-background-color: linear-gradient(to bottom right, #CBB9FF, #8AA2FF);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 2);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
@@ -574,11 +531,11 @@
 }
 
 .slider .track {
-    -fx-background-color: #8AA2FF; /* 更亮的滑塊軌道顏色 */
+    -fx-background-color: #8AA2FF;
 }
 
 .slider .thumb {
-    -fx-background-color: #CBB9FF; /* 更亮的滑塊顏色 */
+    -fx-background-color: #CBB9FF;
 }
 
 .slider .thumb:hover {
@@ -587,14 +544,9 @@
 
 /* 主要內容區域樣式 */
 .main-content {
-    -fx-background-color: rgba(64, 69, 92, 0.6); /* 更亮的主要內容背景 */
+    -fx-background-color: rgba(64, 69, 92, 0.6);
     -fx-background-radius: 6px;
-    -fx-padding: 12px; /* 增加內邊距 */
-}
-
-/* 滾動面板樣式 */
-.scroll-pane {
-    -fx-background-color: transparent;
+    -fx-padding: 12px;
 }
 
 /* 滾動面板樣式 */
@@ -607,13 +559,13 @@
 }
 
 .prompt-preview-low, .prompt-preview-medium, .prompt-preview-high, .prompt-preview-max {
-    -fx-control-inner-background: rgba(64, 69, 92, 1); /* 更亮的背景 */
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-control-inner-background: rgba(64, 69, 92, 1);
+    -fx-font-size: 15px;
 }
 
 /* 櫻花效果 */
 .cherry-blossom {
-    -fx-background-color: rgba(255, 184, 203, 0.2); /* 更亮的櫻花顏色 */
+    -fx-background-color: rgba(255, 184, 203, 0.2);
     -fx-shape: "M10,0 C5,5 0,10 0,15 C0,20 5,25 10,25 C15,25 20,20 20,15 C20,10 15,5 10,0 Z";
 }
 
@@ -624,50 +576,44 @@
 }
 
 .cherry-blossom-animation {
-    -fx-animation: fall 12s linear infinite; /* 增加動畫時間 */
+    -fx-animation: fall 12s linear infinite;
 }
 
 /* 新增：懸停時的放大效果 */
 .zoom-on-hover {
-    -fx-transition: -fx-scale-x 0.3s, -fx-scale-y 0.3s; /* 增加過渡時間 */
+    -fx-transition: -fx-scale-x 0.3s, -fx-scale-y 0.3s;
 }
 
 .zoom-on-hover:hover {
-    -fx-scale-x: 1.08; /* 增加放大比例 */
+    -fx-scale-x: 1.08;
     -fx-scale-y: 1.08;
-}
-
-/* 新增：按鈕點擊時的縮小效果 */
-.button:pressed {
-    -fx-scale-x: 0.92; /* 增加縮小比例 */
-    -fx-scale-y: 0.92;
 }
 
 /* 新增：滑鼠懸停時的光暈效果 */
 .glow-on-hover {
-    -fx-transition: -fx-effect 0.4s; /* 增加過渡時間 */
+    -fx-transition: -fx-effect 0.4s;
 }
 
 .glow-on-hover:hover {
-    -fx-effect: dropshadow(gaussian, rgba(138,162,255,0.9), 12, 0, 0, 0); /* 增加光暈強度 */
+    -fx-effect: dropshadow(gaussian, rgba(138,162,255,0.9), 12, 0, 0, 0);
 }
 
 /* 新增：漸變背景效果 */
 .gradient-background {
-    -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B, #414868, #515888); /* 增加更多顏色 */
+    -fx-background-color: linear-gradient(to bottom right, #1A1B26, #24283B, #414868, #515888);
 }
 
 /* 新增：波紋效果（用於按鈕點擊） */
 @keyframes ripple {
     to {
         -fx-opacity: 0;
-        -fx-scale-x: 2.5; /* 增加波紋大小 */
+        -fx-scale-x: 2.5;
         -fx-scale-y: 2.5;
     }
 }
 
 .ripple {
-    -fx-background-color: rgba(255, 255, 255, 0.4); /* 增加波紋透明度 */
+    -fx-background-color: rgba(255, 255, 255, 0.4);
     -fx-shape: "M 0 0 L 0 1 L 1 1 L 1 0 Z";
     -fx-scale-x: 0;
     -fx-scale-y: 0;
@@ -675,47 +621,47 @@
 }
 
 .ripple-animation {
-    -fx-animation: ripple 0.6s linear; /* 增加動畫時間 */
+    -fx-animation: ripple 0.6s linear;
 }
 
 /* 新增：淡入淡出效果 */
 .fade-transition {
-    -fx-transition: -fx-opacity 0.4s; /* 增加過渡時間 */
+    -fx-transition: -fx-opacity 0.4s;
 }
 
 .fade-transition:hover {
-    -fx-opacity: 0.7; /* 調整透明度 */
+    -fx-opacity: 0.7;
 }
 
 /* 新增：文字陰影效果 */
 .text-shadow {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 3, 0, 0, 1); /* 增加陰影強度 */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 3, 0, 0, 1);
 }
 
 /* 新增：閃爍效果 */
 @keyframes blink {
     0% { -fx-opacity: 1; }
-    50% { -fx-opacity: 0.2; } /* 調整最低透明度 */
+    50% { -fx-opacity: 0.2; }
     100% { -fx-opacity: 1; }
 }
 
 .blink {
-    -fx-animation: blink 1.2s infinite; /* 增加動畫時間 */
+    -fx-animation: blink 1.2s infinite;
 }
 
 /* 新增：3D按鈕效果 */
 .button-3d {
-    -fx-background-color: linear-gradient(to bottom, #8AA2FF, #6E91F4); /* 更亮的按鈕顏色 */
+    -fx-background-color: linear-gradient(to bottom, #8AA2FF, #6E91F4);
     -fx-background-radius: 6px;
-    -fx-border-color: #5A77C7; /* 更亮的邊框顏色 */
+    -fx-border-color: #5A77C7;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 6, 0, 3, 0);
-    -fx-font-size: 15px; /* 增加文本大小 */
+    -fx-font-size: 15px;
 }
 
 .button-3d:hover {
-    -fx-background-color: linear-gradient(to bottom, #6E91F4, #8AA2FF); /* 更亮的懸停顏色 */
+    -fx-background-color: linear-gradient(to bottom, #6E91F4, #8AA2FF);
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 5, 0);
 }
 
@@ -724,114 +670,402 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 3, 0, 1, 0);
 }
 
- /* 文件樹視圖樣式 */
- .file-tree {
-     -fx-background-color: rgba(64, 69, 92, 0.8);
-     -fx-background-radius: 6px;
- }
+/* 文件樹視圖樣式 */
+.file-tree {
+    -fx-background-color: rgba(64, 69, 92, 0.8);
+    -fx-background-radius: 6px;
+}
 
- .file-tree .tree-cell {
-     -fx-background-color: transparent;
-     -fx-text-fill: #E0E0F0;
-     -fx-font-size: 14px;
- }
+.file-tree .tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 14px;
+}
 
- .file-tree .tree-cell:selected {
-     -fx-background-color: #8AA2FF;
- }
+.file-tree .tree-cell:selected {
+    -fx-background-color: #8AA2FF;
+}
 
- .file-tree .tree-cell > .tree-disclosure-node > .arrow {
-     -fx-background-color: #E0E0F0;
- }
+.file-tree .tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: #E0E0F0;
+}
 
- /* 添加和刪除按鈕樣式 */
- .icon-button {
-     -fx-background-color: rgba(138, 162, 255, 0.8);
-     -fx-background-radius: 50%;
-     -fx-min-width: 30px;
-     -fx-min-height: 30px;
-     -fx-max-width: 30px;
-     -fx-max-height: 30px;
- }
+/* 添加和刪除按鈕樣式 */
+.icon-button {
+    -fx-background-color: rgba(138, 162, 255, 0.8);
+    -fx-background-radius: 50%;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-width: 30px;
+    -fx-max-height: 30px;
+}
 
- .icon-button:hover {
-     -fx-background-color: rgba(203, 185, 255, 0.8);
- }
+.icon-button:hover {
+    -fx-background-color: rgba(203, 185, 255, 0.8);
+}
 
- .icon-button .ikonli-font-icon {
-     -fx-icon-color: #1A1B26;
- }
+.icon-button .ikonli-font-icon {
+    -fx-icon-color: #1A1B26;
+}
 
- /* 預覽容器樣式 */
- .preview-container {
-     -fx-background-color: rgba(64, 69, 92, 0.6);
-     -fx-background-radius: 6px;
-     -fx-border-color: #8AA2FF;
-     -fx-border-width: 1px;
-     -fx-border-radius: 6px;
- }
+/* 進度條和標籤樣式 */
+.progress-bar {
+    -fx-accent: #8AA2FF;
+}
 
- /* 進度條和標籤樣式 */
- .progress-bar {
-     -fx-accent: #8AA2FF;
- }
+.progress-bar .track {
+    -fx-background-color: rgba(64, 69, 92, 0.6);
+}
 
- .progress-bar .track {
-     -fx-background-color: rgba(64, 69, 92, 0.6);
- }
+#progressLabel {
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 14px;
+}
 
- #progressLabel {
-     -fx-text-fill: #E0E0F0;
-     -fx-font-size: 14px;
- }
+.auto-complete-list {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: #E0E0F0;
+    -fx-border-color: #3A3A3A;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}
 
- .auto-complete-list {
-     -fx-background-color: #2A2A2A;
-     -fx-text-fill: #E0E0F0;
-     -fx-border-color: #3A3A3A;
-     -fx-border-width: 1px;
-     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
- }
+.auto-complete-list .list-cell {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: #E0E0F0;
+    -fx-padding: 5px 10px;
+}
 
- .auto-complete-list .list-cell {
-     -fx-background-color: #2A2A2A;
-     -fx-text-fill: #E0E0F0;
-     -fx-padding: 5px;
- }
+.auto-complete-list .list-cell:filled:hover,
+.auto-complete-list .list-cell:filled:selected {
+    -fx-background-color: #8AA2FF;
+    -fx-text-fill: #1A1B26;
+}
 
- .auto-complete-list .list-cell:filled:hover,
- .auto-complete-list .list-cell:filled:selected {
-     -fx-background-color: #8AA2FF;
-     -fx-text-fill: #1A1B26;
- }
+.auto-complete-list .scroll-bar:vertical {
+    -fx-background-color: #2A2A2A;
+    -fx-border-color: #3A3A3A;
+}
 
- .auto-complete-list .scroll-bar:vertical {
-     -fx-background-color: #2A2A2A;
-     -fx-border-color: #3A3A3A;
- }
+.auto-complete-list .scroll-bar:vertical .thumb {
+    -fx-background-color: #8AA2FF;
+}
 
- .auto-complete-list .scroll-bar:vertical .thumb {
-     -fx-background-color: #8AA2FF;
- }
+/* 鎖定按鈕樣式 */
+.lock-button.locked {
+    -fx-background-color: rgba(255, 134, 158, 0.8);
+}
 
- /* 鎖定按鈕樣式 */
- .lock-button.locked {
-     -fx-background-color: rgba(255, 134, 158, 0.8); /* 更亮的鎖定按鈕背景 */
- }
+.lock-button.locked:hover {
+    -fx-background-color: rgba(255, 134, 158, 1);
+}
 
- .lock-button.locked:hover {
-     -fx-background-color: rgba(255, 134, 158, 1); /* 更亮的鎖定按鈕懸停背景 */
- }
+.lock-button.locked .ikonli-font-icon {
+    -fx-icon-color: #1A1B26;
+}
 
- .lock-button.locked .ikonli-font-icon {
-     -fx-icon-color: #1A1B26;
- }
+.auto-complete-list .folder-label {
+    -fx-text-fill: #888888;
+    -fx-font-style: italic;
+}
 
- .auto-complete-list .list-cell {
-     -fx-padding: 5 10 5 10;
- }
+/* 新增：自定義滾動條樣式 */
+.custom-scroll-pane {
+    -fx-background-color: transparent;
+}
 
- .auto-complete-list .folder-label {
-     -fx-text-fill: #888888;
-     -fx-font-style: italic;
- }
+.custom-scroll-pane .scroll-bar:vertical,
+.custom-scroll-pane .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.custom-scroll-pane .increment-button,
+.custom-scroll-pane .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.custom-scroll-pane .scroll-bar:vertical .track,
+.custom-scroll-pane .scroll-bar:horizontal .track {
+    -fx-background-color: rgba(64, 69, 92, 0.3);
+    -fx-border-color: transparent;
+    -fx-background-radius: 0em;
+}
+
+.custom-scroll-pane .scroll-bar:vertical .thumb,
+.custom-scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+    -fx-background-radius: 5em;
+}
+
+.custom-scroll-pane .scroll-bar:vertical .thumb:hover,
+.custom-scroll-pane .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(203, 185, 255, 0.8);
+}
+
+/* 新增：工具提示樣式 */
+.tooltip {
+    -fx-background-color: #1A1B26;
+    -fx-text-fill: #E0E0F0;
+    -fx-font-size: 14px;
+    -fx-padding: 5px 10px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 0);
+}
+
+/* 新增：分隔線樣式 */
+.separator {
+    -fx-background-color: rgba(138, 162, 255, 0.3);
+}
+
+.separator:vertical .line {
+    -fx-border-color: rgba(138, 162, 255, 0.3) transparent transparent transparent;
+    -fx-border-width: 1px;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: transparent rgba(138, 162, 255, 0.3) transparent transparent;
+    -fx-border-width: 1px;
+}
+
+/* 新增：表格樣式 */
+.table-view {
+    -fx-background-color: rgba(64, 69, 92, 0.8);
+    -fx-table-cell-border-color: rgba(138, 162, 255, 0.3);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: rgba(75, 82, 114, 0.9);
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(138, 162, 255, 0.3);
+    -fx-border-width: 0 1px 1px 0;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #E0E0F0;
+}
+
+.table-row-cell {
+    -fx-background-color: rgba(64, 69, 92, 0.6);
+    -fx-table-cell-border-color: rgba(138, 162, 255, 0.3);
+}
+
+.table-row-cell:odd {
+    -fx-background-color: rgba(75, 82, 114, 0.6);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(138, 162, 255, 0.4);
+}
+
+/* 新增：菜單樣式 */
+.menu-bar {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+}
+
+.menu-bar .label {
+    -fx-text-fill: #E0E0F0;
+}
+
+.menu-item {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+}
+
+.menu-item .label {
+    -fx-text-fill: #E0E0F0;
+}
+
+.menu-item:focused {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+}
+
+.context-menu {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
+    -fx-padding: 0.333333em 0.083333em 0.666667em 0.083333em;
+}
+
+/* 新增：日期選擇器樣式 */
+.date-picker {
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+}
+
+.date-picker .cell {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+    -fx-text-fill: #E0E0F0;
+}
+
+.date-picker .cell:hover {
+    -fx-background-color: rgba(138, 162, 255, 0.4);
+}
+
+.date-picker .cell:focused {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+}
+
+.date-picker .selected {
+    -fx-background-color: rgba(138, 162, 255, 0.8);
+    -fx-text-fill: #1A1B26;
+}
+
+/* 新增：顏色選擇器樣式 */
+.color-picker {
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+}
+
+.color-picker .color-picker-label {
+    -fx-text-fill: #E0E0F0;
+}
+
+.color-palette {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+}
+
+.color-palette .color-picker-grid {
+    -fx-background-color: transparent;
+}
+
+/* 新增：滑動開關樣式 */
+.toggle-switch {
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-text-fill: #E0E0F0;
+}
+
+.toggle-switch .thumb {
+    -fx-background-color: #E0E0F0;
+}
+
+.toggle-switch:selected .thumb-area {
+    -fx-background-color: rgba(138, 162, 255, 0.8);
+}
+
+/* 新增：進度指示器樣式 */
+.progress-indicator {
+    -fx-progress-color: rgba(138, 162, 255, 0.8);
+}
+
+.progress-indicator .percentage {
+    -fx-fill: #E0E0F0;
+}
+
+/* 新增：標籤樣式 */
+.titled-pane {
+    -fx-text-fill: #E0E0F0;
+}
+
+.titled-pane > .title {
+    -fx-background-color: rgba(75, 82, 114, 0.95);
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 3 3 0 0, 2 2 0 0, 1 1 0 0;
+}
+
+.titled-pane > .title > .arrow-button .arrow {
+    -fx-background-color: #E0E0F0;
+}
+
+/* 新增：分割面板樣式 */
+.split-pane {
+    -fx-background-color: transparent;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: rgba(138, 162, 255, 0.3);
+}
+
+/* 新增：工具欄樣式 */
+.tool-bar {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+    -fx-background-insets: 0, 0 0 1 0;
+}
+
+.tool-bar .button {
+    -fx-background-color: transparent;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: rgba(138, 162, 255, 0.4);
+}
+
+/* 新增：狀態欄樣式 */
+.status-bar {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+    -fx-padding: 4px;
+}
+
+.status-bar .label {
+    -fx-text-fill: #E0E0F0;
+}
+
+/* 新增：超連結樣式 */
+.hyperlink {
+    -fx-text-fill: #8AA2FF;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #CBB9FF;
+}
+
+/* 新增：文件選擇器樣式 */
+.file-chooser {
+    -fx-background-color: rgba(64, 69, 92, 0.9);
+}
+
+.file-chooser .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0E0F0;
+}
+
+.file-chooser .list-cell:filled:selected,
+.file-chooser .list-cell:filled:selected:hover {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+}
+
+.custom-font {
+    -fx-font-family: 'CustomFont', 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+}
+
+/* 新增：動畫過渡效果 */
+.animated-node {
+    -fx-transition: -fx-background-color 0.3s, -fx-scale-x 0.3s, -fx-scale-y 0.3s;
+}
+
+.animated-node:hover {
+    -fx-background-color: rgba(138, 162, 255, 0.4);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* 新增：自定義捲軸樣式 */
+.custom-scroll-bar:vertical .track {
+    -fx-background-color: rgba(64, 69, 92, 0.3);
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 2em;
+}
+
+.custom-scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(138, 162, 255, 0.6);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 2em;
+}
+
+.custom-scroll-bar .increment-button,
+.custom-scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0em;
+    -fx-padding: 0 10 0 0;
+}
+
+.custom-scroll-bar .increment-arrow,
+.custom-scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}

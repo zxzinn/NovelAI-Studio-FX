@@ -48,7 +48,13 @@ public class PromptComponent extends HBox {
         setupPreviewTextArea();
 
         tokenProgressBar = new ProgressBar();
+        tokenProgressBar.setPrefWidth(150);
+        tokenProgressBar.setMaxWidth(150);
+        tokenProgressBar.setMinHeight(10);
+        tokenProgressBar.setMaxHeight(10);
+
         tokenCountLabel = new Label();
+        tokenCountLabel.getStyleClass().add("token-count-label");
     }
 
     private void setupLayout() {
@@ -64,9 +70,10 @@ public class PromptComponent extends HBox {
         controlsBox.getChildren().addAll(refreshButton, lockButton);
 
         VBox previewBox = new VBox(5);
-        StackPane progressContainer = new StackPane(tokenProgressBar, tokenCountLabel);
-        progressContainer.getStyleClass().add("token-progress-container");
-        previewBox.getChildren().addAll(previewLabel, previewTextArea, progressContainer);
+        HBox tokenCountBox = new HBox(5);
+        tokenCountBox.setAlignment(Pos.CENTER_RIGHT);
+        tokenCountBox.getChildren().addAll(tokenProgressBar, tokenCountLabel);
+        previewBox.getChildren().addAll(previewLabel, previewTextArea, tokenCountBox);
         HBox.setHgrow(previewBox, Priority.ALWAYS);
 
         getChildren().addAll(promptBox, controlsBox, previewBox);
