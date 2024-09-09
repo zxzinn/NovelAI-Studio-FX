@@ -39,58 +39,54 @@ public class GenerationViewModel {
         this.taskManager = GenerationTaskManager.getInstance();
     }
 
-    public void loadSettings(PromptArea positivePromptArea, PromptArea negativePromptArea, ComboBox<String> generateCountComboBox) {
-        positivePromptArea.setPromptText(propertiesManager.getString("positivePrompt", ""));
-        negativePromptArea.setPromptText(propertiesManager.getString("negativePrompt", ""));
+    public void loadSettings(PromptComponent positivePromptComponent, PromptComponent negativePromptComponent, ComboBox<String> generateCountComboBox) {
+        positivePromptComponent.setPromptText(propertiesManager.getString("positivePrompt", ""));
+        negativePromptComponent.setPromptText(propertiesManager.getString("negativePrompt", ""));
         generateCountComboBox.setValue(propertiesManager.getString("generateCount", "1"));
     }
 
-    public void setupListeners(ComboBox<String> generateCountComboBox, PromptArea positivePromptArea, PromptArea negativePromptArea,
-                               PromptPreviewArea positivePromptPreviewArea, PromptPreviewArea negativePromptPreviewArea) {
+    public void setupListeners(ComboBox<String> generateCountComboBox, PromptComponent positivePromptComponent, PromptComponent negativePromptComponent) {
         generateCountComboBox.valueProperty().addListener((obs, oldVal, newVal) ->
                 propertiesManager.setString("generateCount", newVal));
-        positivePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
+        positivePromptComponent.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
             propertiesManager.setString("positivePrompt", newVal);
-            updatePromptPreview(newVal, positivePromptPreviewArea, true);
+            updatePromptPreview(newVal, positivePromptComponent, true);
         });
-        negativePromptArea.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
+        negativePromptComponent.getPromptTextArea().textProperty().addListener((obs, oldVal, newVal) -> {
             propertiesManager.setString("negativePrompt", newVal);
-            updatePromptPreview(newVal, negativePromptPreviewArea, false);
+            updatePromptPreview(newVal, negativePromptComponent, false);
         });
     }
 
-    public void setupPromptControls(PromptControls positivePromptControls, PromptControls negativePromptControls,
-                                    PromptArea positivePromptArea, PromptArea negativePromptArea,
-                                    PromptPreviewArea positivePromptPreviewArea, PromptPreviewArea negativePromptPreviewArea) {
-        setupPromptControl(positivePromptControls, positivePromptArea, positivePromptPreviewArea, isPositivePromptLocked, true);
-        setupPromptControl(negativePromptControls, negativePromptArea, negativePromptPreviewArea, isNegativePromptLocked, false);
+    public void setupPromptControls(PromptComponent positivePromptComponent, PromptComponent negativePromptComponent) {
+        setupPromptControl(positivePromptComponent, isPositivePromptLocked, true);
+        setupPromptControl(negativePromptComponent, isNegativePromptLocked, false);
     }
 
-    private void setupPromptControl(@NotNull PromptControls controls, PromptArea promptArea, PromptPreviewArea previewArea, AtomicBoolean isLocked, boolean isPositive) {
-        controls.setOnRefreshAction(() -> forceRefreshPromptPreview(promptArea, previewArea));
-
-        controls.setOnLockAction(() -> {
+    private void setupPromptControl(PromptComponent promptComponent, AtomicBoolean isLocked, boolean isPositive) {
+        promptComponent.setOnRefreshAction(() -> forceRefreshPromptPreview(promptComponent));
+        promptComponent.setOnLockAction(() -> {
             isLocked.set(!isLocked.get());
-            controls.setLockState(isLocked.get());
+            promptComponent.setLockState(isLocked.get());
         });
     }
 
-    public void refreshPromptPreview(PromptArea promptArea, PromptPreviewArea previewArea, boolean isPositive) {
+    public void refreshPromptPreview(PromptComponent promptComponent, boolean isPositive) {
         if (isPromptLocked(isPositive)) {
-            String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
-            previewArea.setPreviewText(processedPrompt);
+            String processedPrompt = embedProcessor.processPrompt(promptComponent.getPromptText());
+            promptComponent.setPreviewText(processedPrompt);
         }
     }
 
-    public void forceRefreshPromptPreview(@NotNull PromptArea promptArea, @NotNull PromptPreviewArea previewArea) {
-        String processedPrompt = embedProcessor.processPrompt(promptArea.getPromptText());
-        previewArea.setPreviewText(processedPrompt);
+    public void forceRefreshPromptPreview(@NotNull PromptComponent promptComponent) {
+        String processedPrompt = embedProcessor.processPrompt(promptComponent.getPromptText());
+        promptComponent.setPreviewText(processedPrompt);
     }
 
-    public void updatePromptPreview(String newValue, PromptPreviewArea previewArea, boolean isPositive) {
+    public void updatePromptPreview(String newValue, PromptComponent promptComponent, boolean isPositive) {
         if (isPromptLocked(isPositive)) {
             String processedPrompt = embedProcessor.processPrompt(newValue);
-            previewArea.setPreviewText(processedPrompt);
+            promptComponent.setPreviewText(processedPrompt);
         }
     }
 
@@ -98,13 +94,12 @@ public class GenerationViewModel {
         return isPositive ? !isPositivePromptLocked.get() : !isNegativePromptLocked.get();
     }
 
-    public void updatePromptPreviews(PromptArea positivePromptArea, PromptPreviewArea positivePromptPreviewArea,
-                                     PromptArea negativePromptArea, PromptPreviewArea negativePromptPreviewArea) {
+    public void updatePromptPreviews(PromptComponent positivePromptComponent, PromptComponent negativePromptComponent) {
         if (!isPositivePromptLocked.get()) {
-            refreshPromptPreview(positivePromptArea, positivePromptPreviewArea, true);
+            refreshPromptPreview(positivePromptComponent, true);
         }
         if (!isNegativePromptLocked.get()) {
-            refreshPromptPreview(negativePromptArea, negativePromptPreviewArea, false);
+            refreshPromptPreview(negativePromptComponent, false);
         }
     }
 
@@ -192,5 +187,4 @@ public class GenerationViewModel {
     public boolean isStopping() {
         return stoppingProperty.get();
     }
-
 }

@@ -119,24 +119,15 @@ public class GenerationController {
         HBox promptBox = new HBox(10);
         HBox.setHgrow(promptBox, Priority.ALWAYS);
 
-        PromptArea promptArea = new PromptArea();
-        HBox.setHgrow(promptArea, Priority.ALWAYS);
+        PromptComponent promptComponent = new PromptComponent();
+        HBox.setHgrow(promptComponent, Priority.ALWAYS);
 
-        PromptControls promptControls = new PromptControls();
-
-        PromptPreviewArea promptPreviewArea = new PromptPreviewArea();
-        HBox.setHgrow(promptPreviewArea, Priority.ALWAYS);
-
-        promptBox.getChildren().addAll(promptArea, promptControls, promptPreviewArea);
+        promptBox.getChildren().add(promptComponent);
 
         if (isPositive) {
-            uiComponents.positivePromptArea = promptArea;
-            uiComponents.positivePromptControls = promptControls;
-            uiComponents.positivePromptPreviewArea = promptPreviewArea;
+            uiComponents.positivePromptComponent = promptComponent;
         } else {
-            uiComponents.negativePromptArea = promptArea;
-            uiComponents.negativePromptControls = promptControls;
-            uiComponents.negativePromptPreviewArea = promptPreviewArea;
+            uiComponents.negativePromptComponent = promptComponent;
         }
 
         return promptBox;
@@ -166,8 +157,8 @@ public class GenerationController {
         EmbedFileManager embedFileManager = new EmbedFileManager();
         embedFileManager.scanEmbedFiles();
 
-        uiComponents.positivePromptArea.setEmbedFileManager(embedFileManager);
-        uiComponents.negativePromptArea.setEmbedFileManager(embedFileManager);
+        uiComponents.positivePromptComponent.setEmbedFileManager(embedFileManager);
+        uiComponents.negativePromptComponent.setEmbedFileManager(embedFileManager);
 
         uiComponents.imagePreviewPane = new ImagePreviewPane();
         uiComponents.previewContainer.getChildren().add(uiComponents.imagePreviewPane);
@@ -176,9 +167,7 @@ public class GenerationController {
         initializeFields();
         loadSettings();
         setupListeners();
-        viewModel.setupPromptControls(uiComponents.positivePromptControls, uiComponents.negativePromptControls,
-                uiComponents.positivePromptArea, uiComponents.negativePromptArea,
-                uiComponents.positivePromptPreviewArea, uiComponents.negativePromptPreviewArea);
+        viewModel.setupPromptControls(uiComponents.positivePromptComponent, uiComponents.negativePromptComponent);
         updatePromptPreviews();
         setupGenerationModeComboBox();
     }
@@ -195,22 +184,21 @@ public class GenerationController {
     }
 
     private void initializePromptAreas() {
-        uiComponents.positivePromptArea.setPromptLabel("正面提示詞:");
-        uiComponents.negativePromptArea.setPromptLabel("負面提示詞:");
+        uiComponents.positivePromptComponent.setPromptLabel("正面提示詞:");
+        uiComponents.negativePromptComponent.setPromptLabel("負面提示詞:");
     }
 
     private void initializePromptPreviewAreas() {
-        uiComponents.positivePromptPreviewArea.setPreviewLabel("正面提示詞預覽");
-        uiComponents.negativePromptPreviewArea.setPreviewLabel("負面提示詞預覽");
+        uiComponents.positivePromptComponent.setPreviewLabel("正面提示詞預覽");
+        uiComponents.negativePromptComponent.setPreviewLabel("負面提示詞預覽");
     }
 
     private void loadSettings() {
-        viewModel.loadSettings(uiComponents.positivePromptArea, uiComponents.negativePromptArea, uiComponents.generateCountComboBox);
+        viewModel.loadSettings(uiComponents.positivePromptComponent, uiComponents.negativePromptComponent, uiComponents.generateCountComboBox);
     }
 
     private void setupListeners() {
-        viewModel.setupListeners(uiComponents.generateCountComboBox, uiComponents.positivePromptArea, uiComponents.negativePromptArea,
-                uiComponents.positivePromptPreviewArea, uiComponents.negativePromptPreviewArea);
+        viewModel.setupListeners(uiComponents.generateCountComboBox, uiComponents.positivePromptComponent, uiComponents.negativePromptComponent);
     }
 
     private void setupGenerationModeComboBox() {
@@ -232,8 +220,7 @@ public class GenerationController {
     }
 
     private void updatePromptPreviews() {
-        viewModel.updatePromptPreviews(uiComponents.positivePromptArea, uiComponents.positivePromptPreviewArea,
-                uiComponents.negativePromptArea, uiComponents.negativePromptPreviewArea);
+        viewModel.updatePromptPreviews(uiComponents.positivePromptComponent, uiComponents.negativePromptComponent);
     }
 
     private void handleGenerateOrStop() {
@@ -266,8 +253,8 @@ public class GenerationController {
         data.apiKey = uiComponents.apiSettingsPane.getApiKey();
         data.model = uiComponents.apiSettingsPane.getModel();
         data.generationMode = uiComponents.generationModeComboBox.getValue();
-        data.positivePromptPreviewText = uiComponents.positivePromptPreviewArea.getPreviewText();
-        data.negativePromptPreviewText = uiComponents.negativePromptPreviewArea.getPreviewText();
+        data.positivePromptPreviewText = uiComponents.positivePromptComponent.getPreviewText();
+        data.negativePromptPreviewText = uiComponents.negativePromptComponent.getPreviewText();
         data.smea = uiComponents.text2ImageSettingsPane.isSmea();
         data.smeaDyn = uiComponents.text2ImageSettingsPane.isSmeaDyn();
         data.strength = uiComponents.image2ImageSettingsPane.getStrength();
@@ -368,12 +355,8 @@ public class GenerationController {
         Image2ImageSettingsPane image2ImageSettingsPane;
 
         ComboBox<String> generationModeComboBox;
-        PromptArea positivePromptArea;
-        PromptArea negativePromptArea;
-        PromptPreviewArea positivePromptPreviewArea;
-        PromptPreviewArea negativePromptPreviewArea;
-        PromptControls positivePromptControls;
-        PromptControls negativePromptControls;
+        PromptComponent positivePromptComponent;
+        PromptComponent negativePromptComponent;
         ComboBox<String> generateCountComboBox;
         StackPane previewContainer;
         HistoryImagesPane historyImagesPane;
