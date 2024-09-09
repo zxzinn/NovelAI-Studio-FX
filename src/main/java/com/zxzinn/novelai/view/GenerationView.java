@@ -1,15 +1,12 @@
-package com.zxzinn.novelai.controller.generation;
+package com.zxzinn.novelai.view;
 
 import com.google.inject.Inject;
 import com.zxzinn.novelai.component.*;
 import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.GenerationTask;
 import com.zxzinn.novelai.model.UIComponentsData;
-import com.zxzinn.novelai.service.generation.*;
 import com.zxzinn.novelai.service.ui.NotificationService;
-import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.embed.EmbedFileManager;
-import com.zxzinn.novelai.utils.embed.EmbedProcessor;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import com.zxzinn.novelai.viewmodel.GenerationViewModel;
 import javafx.application.Platform;
@@ -25,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Log4j2
-public class GenerationController {
+public class GenerationView {
     private static final String GENERATE_BUTTON_CLASS = "generate-button";
     private static final String GENERATE_BUTTON_GENERATING_CLASS = "generate-button-generating";
     private static final String GENERATE_BUTTON_STOP_CLASS = "generate-button-stop";
@@ -34,7 +31,7 @@ public class GenerationController {
     private final UIComponents uiComponents;
 
     @Inject
-    public GenerationController(GenerationViewModel viewModel) {
+    public GenerationView(GenerationViewModel viewModel) {
         this.viewModel = viewModel;
         this.uiComponents = new UIComponents();
         initializeUIComponents();

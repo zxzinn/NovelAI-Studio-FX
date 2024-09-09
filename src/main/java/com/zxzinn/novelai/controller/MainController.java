@@ -3,7 +3,7 @@ package com.zxzinn.novelai.controller;
 import com.google.inject.Inject;
 import com.zxzinn.novelai.component.NotificationPane;
 import com.zxzinn.novelai.controller.filemanager.FileManagerController;
-import com.zxzinn.novelai.controller.generation.GenerationController;
+import com.zxzinn.novelai.view.GenerationView;
 import com.zxzinn.novelai.service.filemanager.FileManagerService;
 import com.zxzinn.novelai.service.filemanager.FileOperationService;
 import com.zxzinn.novelai.service.filemanager.MetadataService;
@@ -76,8 +76,8 @@ public class MainController {
 
     private Tab createUnifiedGeneratorTab() {
         GenerationViewModel viewModel = new GenerationViewModel();
-        GenerationController generationController = new GenerationController(viewModel);
-        BorderPane content = generationController.createView();
+        GenerationView generationView = new GenerationView(viewModel);
+        BorderPane content = generationView.createView();
         return new Tab("圖像生成", content) {{
             setClosable(false);
             setGraphic(new FontIcon("fas-image"));
