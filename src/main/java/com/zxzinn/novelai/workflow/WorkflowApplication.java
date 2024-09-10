@@ -3,8 +3,6 @@ package com.zxzinn.novelai.workflow;
 import com.zxzinn.novelai.api.APIClient;
 import com.zxzinn.novelai.api.Endpoint;
 import com.zxzinn.novelai.api.GenerationPayload;
-import com.zxzinn.novelai.component.*;
-import com.zxzinn.novelai.model.GenerationResult;
 import com.zxzinn.novelai.model.UIComponentsData;
 import com.zxzinn.novelai.utils.common.NAIConstants;
 import com.zxzinn.novelai.utils.common.PropertiesManager;
@@ -17,13 +15,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
@@ -33,11 +28,9 @@ import lombok.Getter;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -46,8 +39,8 @@ public class WorkflowApplication extends Application {
 
     private Pane workflowPane;
     private Group zoomGroup;
-    private List<WorkflowNode> nodes = new ArrayList<>();
-    private List<Connection> connections = new ArrayList<>();
+    private final List<WorkflowNode> nodes = new ArrayList<>();
+    private final List<Connection> connections = new ArrayList<>();
     private WorkflowNode sourceNode;
     private PortCircle sourcePort;
     private CubicCurve previewCurve;
@@ -58,7 +51,6 @@ public class WorkflowApplication extends Application {
     private PropertiesManager propertiesManager;
     private APIClient apiClient;
 
-    private double scaleValue = 1.0;
     private Point2D lastMousePosition;
 
     @Override
@@ -96,28 +88,6 @@ public class WorkflowApplication extends Application {
         primaryStage.show();
     }
 
-    private class InfinitePane extends Pane {
-        private Rectangle clip;
-
-        public InfinitePane() {
-            clip = new Rectangle();
-            setClip(clip);
-            layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
-                clip.setWidth(newValue.getWidth());
-                clip.setHeight(newValue.getHeight());
-            });
-        }
-
-        @Override
-        protected void layoutChildren() {
-            super.layoutChildren();
-            double width = getWidth();
-            double height = getHeight();
-            clip.setWidth(width);
-            clip.setHeight(height);
-        }
-    }
-
     private void setupZoomAndPan(Scene scene, ScrollPane scrollPane) {
         scene.setOnScroll(event -> {
             event.consume();
@@ -144,37 +114,6 @@ public class WorkflowApplication extends Application {
                 lastMousePosition = new Point2D(event.getX(), event.getY());
             }
         });
-    }
-
-    private void handleScroll(ScrollEvent event) {
-        double zoomFactor = 1.05;
-        double deltaY = event.getDeltaY();
-
-        if (deltaY < 0) {
-            zoomFactor = 2.0 - zoomFactor;
-        }
-
-        scaleValue *= zoomFactor;
-        workflowPane.setScaleX(scaleValue);
-        workflowPane.setScaleY(scaleValue);
-
-        event.consume();
-    }
-
-    private void handleMousePressed(MouseEvent event) {
-        lastMousePosition = new Point2D(event.getSceneX(), event.getSceneY());
-    }
-
-    private void handleMouseDragged(MouseEvent event) {
-        if (lastMousePosition != null) {
-            double deltaX = (event.getSceneX() - lastMousePosition.getX()) / scaleValue;
-            double deltaY = (event.getSceneY() - lastMousePosition.getY()) / scaleValue;
-
-            workflowPane.setTranslateX(workflowPane.getTranslateX() + deltaX);
-            workflowPane.setTranslateY(workflowPane.getTranslateY() + deltaY);
-
-            lastMousePosition = new Point2D(event.getSceneX(), event.getSceneY());
-        }
     }
 
     private void drawGrid() {
@@ -216,20 +155,20 @@ public class WorkflowApplication extends Application {
     }
 
     private void createPresetConnections() {
-        connectNodes("API設置", "生成");
-        connectNodes("正面提示詞", "生成");
-        connectNodes("負面提示詞", "生成");
-        connectNodes("採樣設置", "生成");
-        connectNodes("輸出設置", "生成");
-        connectNodes("文生圖設置", "生成");
+        connectNodes("API設置");
+        connectNodes("正面提示詞");
+        connectNodes("負面提示詞");
+        connectNodes("採樣設置");
+        connectNodes("輸出設置");
+        connectNodes("文生圖設置");
     }
 
-    private void connectNodes(String sourceTitle, String targetTitle) {
+    private void connectNodes(String sourceTitle) {
         WorkflowNode sourceNode = findNodeByTitle(sourceTitle);
-        WorkflowNode targetNode = findNodeByTitle(targetTitle);
+        WorkflowNode targetNode = findNodeByTitle("生成");
 
         if (sourceNode != null && targetNode != null) {
-            PortCircle sourcePort = sourceNode.outputPorts.get(0);
+            PortCircle sourcePort = sourceNode.outputPorts.getFirst();
             PortCircle targetPort = targetNode.inputPorts.stream()
                     .filter(port -> port.portName.equals(sourceTitle))
                     .findFirst()
@@ -365,8 +304,8 @@ public class WorkflowApplication extends Application {
     }
 
     private class ApiSettingsNode extends WorkflowNode {
-        private TextField apiKeyField;
-        private ComboBox<String> modelComboBox;
+        private final TextField apiKeyField;
+        private final ComboBox<String> modelComboBox;
 
         public ApiSettingsNode(String title, double x, double y) {
             super(title, x, y);
@@ -409,7 +348,7 @@ public class WorkflowApplication extends Application {
     }
 
     private class PromptNode extends WorkflowNode {
-        private TextArea promptArea;
+        private final TextArea promptArea;
 
         public PromptNode(String title, double x, double y) {
             super(title, x, y);
@@ -435,9 +374,9 @@ public class WorkflowApplication extends Application {
     }
 
     private class SamplingSettingsNode extends WorkflowNode {
-        private ComboBox<String> samplerComboBox;
-        private Slider stepsSlider;
-        private TextField seedField;
+        private final ComboBox<String> samplerComboBox;
+        private final Slider stepsSlider;
+        private final TextField seedField;
 
         public SamplingSettingsNode(String title, double x, double y) {
             super(title, x, y);
@@ -475,7 +414,7 @@ public class WorkflowApplication extends Application {
             stepsSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
                 int steps = newVal.intValue();
                 propertiesManager.setInt("steps", steps);
-                ((Label)((VBox)getChildren().get(0)).getChildren().get(4)).setText("步數: " + steps);
+                ((Label)((VBox)getChildren().getFirst()).getChildren().get(4)).setText("步數: " + steps);
             });
             seedField.textProperty().addListener((obs, oldVal, newVal) ->
                     propertiesManager.setInt("seed", Integer.parseInt(newVal)));
@@ -495,11 +434,11 @@ public class WorkflowApplication extends Application {
     }
 
     private class OutputSettingsNode extends WorkflowNode {
-        private TextField widthField;
-        private TextField heightField;
-        private TextField ratioField;
-        private TextField countField;
-        private TextField outputDirectoryField;
+        private final TextField widthField;
+        private final TextField heightField;
+        private final TextField ratioField;
+        private final TextField countField;
+        private final TextField outputDirectoryField;
 
         public OutputSettingsNode(String title, double x, double y) {
             super(title, x, y);
@@ -564,8 +503,8 @@ public class WorkflowApplication extends Application {
     }
 
     private class Text2ImageSettingsNode extends WorkflowNode {
-        private CheckBox smeaCheckBox;
-        private CheckBox smeaDynCheckBox;
+        private final CheckBox smeaCheckBox;
+        private final CheckBox smeaDynCheckBox;
 
         public Text2ImageSettingsNode(String title, double x, double y) {
             super(title, x, y);
@@ -606,9 +545,8 @@ public class WorkflowApplication extends Application {
     }
 
     private class GenerationNode extends WorkflowNode {
-        private Button generateButton;
-        private ImageView previewImageView;
-        private ScrollPane imageScrollPane;
+        private final ImageView previewImageView;
+        private final ScrollPane imageScrollPane;
 
         public GenerationNode(String title, double x, double y) {
             super(title, x, y);
@@ -620,7 +558,7 @@ public class WorkflowApplication extends Application {
             addInputPort("文生圖設置");
             addOutputPort("生成結果");
 
-            generateButton = new Button("生成");
+            Button generateButton = new Button("生成");
             generateButton.setLayoutX(50);
             generateButton.setLayoutY(40);
             generateButton.setPrefSize(100, 30);
