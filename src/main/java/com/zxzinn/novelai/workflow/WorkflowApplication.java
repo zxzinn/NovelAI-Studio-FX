@@ -11,29 +11,41 @@ import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.CubicCurve;
+import lombok.Getter;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class WorkflowApplication extends Application {
 
     private Pane workflowPane;
+    private Group zoomGroup;
     private List<WorkflowNode> nodes = new ArrayList<>();
     private List<Connection> connections = new ArrayList<>();
     private WorkflowNode sourceNode;
@@ -46,35 +58,137 @@ public class WorkflowApplication extends Application {
     private PropertiesManager propertiesManager;
     private APIClient apiClient;
 
+    private double scaleValue = 1.0;
+    private Point2D lastMousePosition;
+
     @Override
     public void start(Stage primaryStage) {
         propertiesManager = PropertiesManager.getInstance();
         apiClient = new APIClient(Endpoint.GENERATE_IMAGE);
 
         workflowPane = new Pane();
-        workflowPane.setPrefSize(1200, 800);
         workflowPane.setStyle("-fx-background-color: #2b2b2b;");
+
+        zoomGroup = new Group(workflowPane);
 
         drawGrid();
 
-        Scene scene = new Scene(workflowPane);
+        ScrollPane scrollPane = new ScrollPane(zoomGroup);
+        scrollPane.setPannable(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        AnchorPane anchorPane = new AnchorPane(scrollPane);
+        AnchorPane.setTopAnchor(scrollPane, 0.0);
+        AnchorPane.setRightAnchor(scrollPane, 0.0);
+        AnchorPane.setBottomAnchor(scrollPane, 0.0);
+        AnchorPane.setLeftAnchor(scrollPane, 0.0);
+
+        Scene scene = new Scene(anchorPane, 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.setTitle("NovelAI Workflow");
 
         createNodes();
         createPresetConnections();
 
+        setupZoomAndPan(scene, scrollPane);
+
         primaryStage.show();
     }
 
+    private class InfinitePane extends Pane {
+        private Rectangle clip;
+
+        public InfinitePane() {
+            clip = new Rectangle();
+            setClip(clip);
+            layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {
+                clip.setWidth(newValue.getWidth());
+                clip.setHeight(newValue.getHeight());
+            });
+        }
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            double width = getWidth();
+            double height = getHeight();
+            clip.setWidth(width);
+            clip.setHeight(height);
+        }
+    }
+
+    private void setupZoomAndPan(Scene scene, ScrollPane scrollPane) {
+        scene.setOnScroll(event -> {
+            event.consume();
+            if (event.isControlDown()) {
+                double zoomFactor = 1.05;
+                if (event.getDeltaY() < 0) {
+                    zoomFactor = 2.0 - zoomFactor;
+                }
+                zoomGroup.setScaleX(zoomGroup.getScaleX() * zoomFactor);
+                zoomGroup.setScaleY(zoomGroup.getScaleY() * zoomFactor);
+            }
+        });
+
+        zoomGroup.setOnMousePressed(event -> {
+            lastMousePosition = new Point2D(event.getX(), event.getY());
+        });
+
+        zoomGroup.setOnMouseDragged(event -> {
+            if (lastMousePosition != null) {
+                double deltaX = event.getX() - lastMousePosition.getX();
+                double deltaY = event.getY() - lastMousePosition.getY();
+                scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / workflowPane.getWidth());
+                scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / workflowPane.getHeight());
+                lastMousePosition = new Point2D(event.getX(), event.getY());
+            }
+        });
+    }
+
+    private void handleScroll(ScrollEvent event) {
+        double zoomFactor = 1.05;
+        double deltaY = event.getDeltaY();
+
+        if (deltaY < 0) {
+            zoomFactor = 2.0 - zoomFactor;
+        }
+
+        scaleValue *= zoomFactor;
+        workflowPane.setScaleX(scaleValue);
+        workflowPane.setScaleY(scaleValue);
+
+        event.consume();
+    }
+
+    private void handleMousePressed(MouseEvent event) {
+        lastMousePosition = new Point2D(event.getSceneX(), event.getSceneY());
+    }
+
+    private void handleMouseDragged(MouseEvent event) {
+        if (lastMousePosition != null) {
+            double deltaX = (event.getSceneX() - lastMousePosition.getX()) / scaleValue;
+            double deltaY = (event.getSceneY() - lastMousePosition.getY()) / scaleValue;
+
+            workflowPane.setTranslateX(workflowPane.getTranslateX() + deltaX);
+            workflowPane.setTranslateY(workflowPane.getTranslateY() + deltaY);
+
+            lastMousePosition = new Point2D(event.getSceneX(), event.getSceneY());
+        }
+    }
+
     private void drawGrid() {
-        for (int i = 0; i < workflowPane.getPrefWidth(); i += GRID_SIZE) {
-            javafx.scene.shape.Line vline = new javafx.scene.shape.Line(i, 0, i, workflowPane.getPrefHeight());
+        double width = 10000;  // 使用一個很大的值
+        double height = 10000; // 使用一個很大的值
+
+        for (double x = 0; x < width; x += GRID_SIZE) {
+            Line vline = new Line(x, 0, x, height);
             vline.setStroke(Color.gray(0.2));
             workflowPane.getChildren().add(vline);
         }
-        for (int i = 0; i < workflowPane.getPrefHeight(); i += GRID_SIZE) {
-            javafx.scene.shape.Line hline = new javafx.scene.shape.Line(0, i, workflowPane.getPrefWidth(), i);
+
+        for (double y = 0; y < height; y += GRID_SIZE) {
+            Line hline = new Line(0, y, width, y);
             hline.setStroke(Color.gray(0.2));
             workflowPane.getChildren().add(hline);
         }
@@ -494,6 +608,7 @@ public class WorkflowApplication extends Application {
     private class GenerationNode extends WorkflowNode {
         private Button generateButton;
         private ImageView previewImageView;
+        private ScrollPane imageScrollPane;
 
         public GenerationNode(String title, double x, double y) {
             super(title, x, y);
@@ -513,13 +628,16 @@ public class WorkflowApplication extends Application {
             generateButton.setOnAction(event -> generateImage());
 
             previewImageView = new ImageView();
-            previewImageView.setLayoutX(10);
-            previewImageView.setLayoutY(80);
-            previewImageView.setFitWidth(180);
-            previewImageView.setFitHeight(100);
             previewImageView.setPreserveRatio(true);
 
-            getChildren().addAll(generateButton, previewImageView);
+            imageScrollPane = new ScrollPane(previewImageView);
+            imageScrollPane.setLayoutX(10);
+            imageScrollPane.setLayoutY(80);
+            imageScrollPane.setPrefSize(180, 100);
+            imageScrollPane.setFitToWidth(true);
+            imageScrollPane.setFitToHeight(true);
+
+            getChildren().addAll(generateButton, imageScrollPane);
         }
 
         private void generateImage() {
@@ -527,7 +645,8 @@ public class WorkflowApplication extends Application {
             CompletableFuture.runAsync(() -> {
                 try {
                     GenerationPayload payload = createGenerationPayload(uiData);
-                    byte[] imageData = apiClient.generateImage(payload, uiData.apiKey);
+                    byte[] zipData = apiClient.generateImage(payload, uiData.apiKey);
+                    byte[] imageData = extractImageFromZip(zipData);
                     handleGeneratedImage(imageData);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -536,10 +655,47 @@ public class WorkflowApplication extends Application {
             });
         }
 
+        private byte[] extractImageFromZip(byte[] zipData) throws IOException {
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipData))) {
+                ZipEntry entry = zis.getNextEntry();
+                if (entry == null) {
+                    throw new IOException("ZIP file is empty");
+                }
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[4096];
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, len);
+                }
+                return outputStream.toByteArray();
+            }
+        }
+
         private void handleGeneratedImage(byte[] imageData) {
             Platform.runLater(() -> {
                 Image image = new Image(new ByteArrayInputStream(imageData));
                 previewImageView.setImage(image);
+
+                // 調整節點大小以適應圖片
+                double imageWidth = image.getWidth();
+                double imageHeight = image.getHeight();
+                double maxWidth = 400;  // 最大寬度
+                double maxHeight = 300; // 最大高度
+
+                if (imageWidth > maxWidth || imageHeight > maxHeight) {
+                    double widthRatio = maxWidth / imageWidth;
+                    double heightRatio = maxHeight / imageHeight;
+                    double scale = Math.min(widthRatio, heightRatio);
+                    imageWidth *= scale;
+                    imageHeight *= scale;
+                }
+
+                previewImageView.setFitWidth(imageWidth);
+                previewImageView.setFitHeight(imageHeight);
+
+                imageScrollPane.setPrefSize(imageWidth + 20, imageHeight + 20);
+                setPrefSize(Math.max(200, imageWidth + 40), Math.max(200, imageHeight + 120));
+
                 saveImageToFile(imageData);
             });
         }
@@ -723,8 +879,10 @@ public class WorkflowApplication extends Application {
     }
 
     private class Connection extends CubicCurve {
+        @Getter
         private final WorkflowNode sourceNode;
         private final PortCircle sourcePort;
+        @Getter
         private final WorkflowNode targetNode;
         private final PortCircle targetPort;
 
@@ -769,13 +927,6 @@ public class WorkflowApplication extends Application {
             workflowPane.getChildren().remove(this);
         }
 
-        public WorkflowNode getSourceNode() {
-            return sourceNode;
-        }
-
-        public WorkflowNode getTargetNode() {
-            return targetNode;
-        }
     }
 
     private void showAlert(String title, String content) {
