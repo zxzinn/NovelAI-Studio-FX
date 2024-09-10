@@ -1,19 +1,35 @@
 package com.zxzinn.novelai.workflow;
 
+import com.zxzinn.novelai.api.APIClient;
+import com.zxzinn.novelai.api.Endpoint;
+import com.zxzinn.novelai.api.GenerationPayload;
+import com.zxzinn.novelai.component.*;
+import com.zxzinn.novelai.model.GenerationResult;
+import com.zxzinn.novelai.model.UIComponentsData;
+import com.zxzinn.novelai.utils.common.NAIConstants;
+import com.zxzinn.novelai.utils.common.PropertiesManager;
+import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.CubicCurve;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class WorkflowApplication extends Application {
 
@@ -25,12 +41,18 @@ public class WorkflowApplication extends Application {
     private CubicCurve previewCurve;
 
     private static final double GRID_SIZE = 20;
-    private static final double CONNECTION_DISTANCE_THRESHOLD = 50; // 連接距離閾值
+    private static final double CONNECTION_DISTANCE_THRESHOLD = 50;
+
+    private PropertiesManager propertiesManager;
+    private APIClient apiClient;
 
     @Override
     public void start(Stage primaryStage) {
+        propertiesManager = PropertiesManager.getInstance();
+        apiClient = new APIClient(Endpoint.GENERATE_IMAGE);
+
         workflowPane = new Pane();
-        workflowPane.setPrefSize(1000, 800);
+        workflowPane.setPrefSize(1200, 800);
         workflowPane.setStyle("-fx-background-color: #2b2b2b;");
 
         drawGrid();
@@ -40,6 +62,7 @@ public class WorkflowApplication extends Application {
         primaryStage.setTitle("NovelAI Workflow");
 
         createNodes();
+        createPresetConnections();
 
         primaryStage.show();
     }
@@ -58,15 +81,59 @@ public class WorkflowApplication extends Application {
     }
 
     private void createNodes() {
-        PromptNode promptNode = new PromptNode("提示詞", 50, 50);
-        SamplerNode samplerNode = new SamplerNode("採樣器", 300, 50);
-        OutputNode outputNode = new OutputNode("輸出", 550, 50);
+        ApiSettingsNode apiSettingsNode = new ApiSettingsNode("API設置", 50, 50);
+        PromptNode positivePromptNode = new PromptNode("正面提示詞", 50, 250);
+        PromptNode negativePromptNode = new PromptNode("負面提示詞", 50, 450);
+        SamplingSettingsNode samplingSettingsNode = new SamplingSettingsNode("採樣設置", 300, 50);
+        OutputSettingsNode outputSettingsNode = new OutputSettingsNode("輸出設置", 300, 250);
+        Text2ImageSettingsNode text2ImageSettingsNode = new Text2ImageSettingsNode("文生圖設置", 300, 450);
+        GenerationNode generationNode = new GenerationNode("生成", 550, 250);
 
-        nodes.add(promptNode);
-        nodes.add(samplerNode);
-        nodes.add(outputNode);
+        nodes.add(apiSettingsNode);
+        nodes.add(positivePromptNode);
+        nodes.add(negativePromptNode);
+        nodes.add(samplingSettingsNode);
+        nodes.add(outputSettingsNode);
+        nodes.add(text2ImageSettingsNode);
+        nodes.add(generationNode);
 
-        workflowPane.getChildren().addAll(promptNode, samplerNode, outputNode);
+        workflowPane.getChildren().addAll(apiSettingsNode, positivePromptNode, negativePromptNode,
+                samplingSettingsNode, outputSettingsNode, text2ImageSettingsNode, generationNode);
+    }
+
+    private void createPresetConnections() {
+        connectNodes("API設置", "生成");
+        connectNodes("正面提示詞", "生成");
+        connectNodes("負面提示詞", "生成");
+        connectNodes("採樣設置", "生成");
+        connectNodes("輸出設置", "生成");
+        connectNodes("文生圖設置", "生成");
+    }
+
+    private void connectNodes(String sourceTitle, String targetTitle) {
+        WorkflowNode sourceNode = findNodeByTitle(sourceTitle);
+        WorkflowNode targetNode = findNodeByTitle(targetTitle);
+
+        if (sourceNode != null && targetNode != null) {
+            PortCircle sourcePort = sourceNode.outputPorts.get(0);
+            PortCircle targetPort = targetNode.inputPorts.stream()
+                    .filter(port -> port.portName.equals(sourceTitle))
+                    .findFirst()
+                    .orElse(null);
+
+            if (sourcePort != null && targetPort != null) {
+                Connection connection = new Connection(sourceNode, sourcePort, targetNode, targetPort);
+                connections.add(connection);
+                workflowPane.getChildren().add(connection);
+            }
+        }
+    }
+
+    private WorkflowNode findNodeByTitle(String title) {
+        return nodes.stream()
+                .filter(node -> node.title.equals(title))
+                .findFirst()
+                .orElse(null);
     }
 
     private abstract class WorkflowNode extends Pane {
@@ -79,7 +146,7 @@ public class WorkflowApplication extends Application {
             this.title = title;
             setLayoutX(snapToGrid(x));
             setLayoutY(snapToGrid(y));
-            setPrefSize(200, 150);
+            setPrefSize(200, 200);
             setStyle("-fx-background-color: #3c3f41; -fx-border-color: #5e5e5e; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-radius: 5;");
 
             DropShadow dropShadow = new DropShadow();
@@ -183,59 +250,361 @@ public class WorkflowApplication extends Application {
         return Math.round(value / GRID_SIZE) * GRID_SIZE;
     }
 
+    private class ApiSettingsNode extends WorkflowNode {
+        private TextField apiKeyField;
+        private ComboBox<String> modelComboBox;
+
+        public ApiSettingsNode(String title, double x, double y) {
+            super(title, x, y);
+            addOutputPort("API設置");
+
+            VBox content = new VBox(5);
+            content.setLayoutX(10);
+            content.setLayoutY(40);
+            content.setPrefWidth(180);
+
+            apiKeyField = new TextField();
+            apiKeyField.setPromptText("API Key");
+
+            modelComboBox = new ComboBox<>();
+            modelComboBox.getItems().addAll(NAIConstants.MODELS);
+            modelComboBox.setValue(propertiesManager.getString("model", "nai-diffusion-3"));
+
+            content.getChildren().addAll(new Label("API Key"), apiKeyField,
+                    new Label("模型"), modelComboBox);
+
+            getChildren().add(content);
+
+            setupListeners();
+        }
+
+        private void setupListeners() {
+            apiKeyField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setString("apiKey", newVal));
+            modelComboBox.valueProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setString("model", newVal));
+        }
+
+        public String getApiKey() {
+            return apiKeyField.getText();
+        }
+
+        public String getModel() {
+            return modelComboBox.getValue();
+        }
+    }
+
     private class PromptNode extends WorkflowNode {
+        private TextArea promptArea;
+
         public PromptNode(String title, double x, double y) {
             super(title, x, y);
             addOutputPort("提示詞");
 
-            TextArea promptArea = new TextArea();
+            promptArea = new TextArea();
             promptArea.setLayoutX(10);
             promptArea.setLayoutY(40);
-            promptArea.setPrefSize(180, 100);
+            promptArea.setPrefSize(180, 150);
             getChildren().add(promptArea);
+
+            setupListeners();
+        }
+
+        private void setupListeners() {
+            promptArea.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setString(title.equals("正面提示詞") ? "positivePrompt" : "negativePrompt", newVal));
+        }
+
+        public String getPromptText() {
+            return promptArea.getText();
         }
     }
 
-    private class SamplerNode extends WorkflowNode {
-        public SamplerNode(String title, double x, double y) {
+    private class SamplingSettingsNode extends WorkflowNode {
+        private ComboBox<String> samplerComboBox;
+        private Slider stepsSlider;
+        private TextField seedField;
+
+        public SamplingSettingsNode(String title, double x, double y) {
             super(title, x, y);
-            addInputPort("提示詞");
-            addOutputPort("圖像");
+            addOutputPort("採樣設置");
 
-            ComboBox<String> samplerComboBox = new ComboBox<>();
-            samplerComboBox.getItems().addAll("Euler a", "Euler", "LMS", "Heun", "DPM2", "DPM2 a", "DPM++ 2S a", "DPM++ 2M", "DPM++ SDE", "DPM fast", "DPM adaptive", "LMS Karras", "DPM2 Karras", "DPM2 a Karras", "DPM++ 2S a Karras", "DPM++ 2M Karras", "DPM++ SDE Karras", "DDIM", "PLMS");
-            samplerComboBox.setLayoutX(10);
-            samplerComboBox.setLayoutY(40);
-            samplerComboBox.setPrefWidth(180);
+            VBox content = new VBox(5);
+            content.setLayoutX(10);
+            content.setLayoutY(40);
+            content.setPrefWidth(180);
 
-            Slider stepsSlider = new Slider(1, 150, 28);
-            stepsSlider.setLayoutX(10);
-            stepsSlider.setLayoutY(80);
-            stepsSlider.setPrefWidth(180);
+            samplerComboBox = new ComboBox<>();
+            samplerComboBox.getItems().addAll(NAIConstants.SAMPLERS);
+            samplerComboBox.setValue(propertiesManager.getString("sampler", "k_euler"));
 
+            stepsSlider = new Slider(1, 150, 28);
             Label stepsLabel = new Label("步數: 28");
-            stepsLabel.setLayoutX(10);
-            stepsLabel.setLayoutY(110);
-            stepsLabel.setStyle("-fx-text-fill: white;");
 
-            stepsSlider.valueProperty().addListener((obs, oldVal, newVal) ->
-                    stepsLabel.setText(String.format("步數: %d", newVal.intValue())));
+            seedField = new TextField();
+            seedField.setPromptText("種子");
 
-            getChildren().addAll(samplerComboBox, stepsSlider, stepsLabel);
+            content.getChildren().addAll(
+                    new Label("採樣器"), samplerComboBox,
+                    new Label("步數"), stepsSlider, stepsLabel,
+                    new Label("種子"), seedField
+            );
+
+            getChildren().add(content);
+
+            setupListeners();
+        }
+
+        private void setupListeners() {
+            samplerComboBox.valueProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setString("sampler", newVal));
+            stepsSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                int steps = newVal.intValue();
+                propertiesManager.setInt("steps", steps);
+                ((Label)((VBox)getChildren().get(0)).getChildren().get(4)).setText("步數: " + steps);
+            });
+            seedField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setInt("seed", Integer.parseInt(newVal)));
+        }
+
+        public String getSampler() {
+            return samplerComboBox.getValue();
+        }
+
+        public int getSteps() {
+            return (int) stepsSlider.getValue();
+        }
+
+        public long getSeed() {
+            return Long.parseLong(seedField.getText());
         }
     }
 
-    private class OutputNode extends WorkflowNode {
-        public OutputNode(String title, double x, double y) {
-            super(title, x, y);
-            addInputPort("圖像");
+    private class OutputSettingsNode extends WorkflowNode {
+        private TextField widthField;
+        private TextField heightField;
+        private TextField ratioField;
+        private TextField countField;
+        private TextField outputDirectoryField;
 
-            Button generateButton = new Button("生成");
+        public OutputSettingsNode(String title, double x, double y) {
+            super(title, x, y);
+            addOutputPort("輸出設置");
+
+            VBox content = new VBox(5);
+            content.setLayoutX(10);
+            content.setLayoutY(40);
+            content.setPrefWidth(180);
+
+            widthField = new TextField(String.valueOf(propertiesManager.getInt("width", 832)));
+            heightField = new TextField(String.valueOf(propertiesManager.getInt("height", 1216)));
+            ratioField = new TextField(String.valueOf(propertiesManager.getInt("ratio", 7)));
+            countField = new TextField(String.valueOf(propertiesManager.getInt("count", 1)));
+            outputDirectoryField = new TextField(propertiesManager.getString("outputDirectory", "output"));
+
+            content.getChildren().addAll(
+                    new Label("寬度"), widthField,
+                    new Label("高度"), heightField,
+                    new Label("比例"), ratioField,
+                    new Label("生成數量"), countField,
+                    new Label("輸出目錄"), outputDirectoryField
+            );
+
+            getChildren().add(content);
+
+            setupListeners();
+        }
+
+        private void setupListeners() {
+            widthField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setInt("width", Integer.parseInt(newVal)));
+            heightField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setInt("height", Integer.parseInt(newVal)));
+            ratioField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setInt("ratio", Integer.parseInt(newVal)));
+            countField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setInt("count", Integer.parseInt(newVal)));
+            outputDirectoryField.textProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setString("outputDirectory", newVal));
+        }
+
+        public int getOutputWidth() {
+            return Integer.parseInt(widthField.getText());
+        }
+
+        public int getOutputHeight() {
+            return Integer.parseInt(heightField.getText());
+        }
+
+        public int getRatio() {
+            return Integer.parseInt(ratioField.getText());
+        }
+
+        public int getCount() {
+            return Integer.parseInt(countField.getText());
+        }
+
+        public String getOutputDirectory() {
+            return outputDirectoryField.getText();
+        }
+    }
+
+    private class Text2ImageSettingsNode extends WorkflowNode {
+        private CheckBox smeaCheckBox;
+        private CheckBox smeaDynCheckBox;
+
+        public Text2ImageSettingsNode(String title, double x, double y) {
+            super(title, x, y);
+            addOutputPort("文生圖設置");
+
+            VBox content = new VBox(5);
+            content.setLayoutX(10);
+            content.setLayoutY(40);
+            content.setPrefWidth(180);
+
+            smeaCheckBox = new CheckBox("SMEA");
+            smeaCheckBox.setSelected(propertiesManager.getBoolean("smea", true));
+
+            smeaDynCheckBox = new CheckBox("SMEA DYN");
+            smeaDynCheckBox.setSelected(propertiesManager.getBoolean("smeaDyn", false));
+
+            content.getChildren().addAll(smeaCheckBox, smeaDynCheckBox);
+
+            getChildren().add(content);
+
+            setupListeners();
+        }
+
+        private void setupListeners() {
+            smeaCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setBoolean("smea", newVal));
+            smeaDynCheckBox.selectedProperty().addListener((obs, oldVal, newVal) ->
+                    propertiesManager.setBoolean("smeaDyn", newVal));
+        }
+
+        public boolean isSmea() {
+            return smeaCheckBox.isSelected();
+        }
+
+        public boolean isSmeaDyn() {
+            return smeaDynCheckBox.isSelected();
+        }
+    }
+
+    private class GenerationNode extends WorkflowNode {
+        private Button generateButton;
+        private ImageView previewImageView;
+
+        public GenerationNode(String title, double x, double y) {
+            super(title, x, y);
+            addInputPort("API設置");
+            addInputPort("正面提示詞");
+            addInputPort("負面提示詞");
+            addInputPort("採樣設置");
+            addInputPort("輸出設置");
+            addInputPort("文生圖設置");
+            addOutputPort("生成結果");
+
+            generateButton = new Button("生成");
             generateButton.setLayoutX(50);
-            generateButton.setLayoutY(60);
+            generateButton.setLayoutY(40);
             generateButton.setPrefSize(100, 30);
 
-            getChildren().add(generateButton);
+            generateButton.setOnAction(event -> generateImage());
+
+            previewImageView = new ImageView();
+            previewImageView.setLayoutX(10);
+            previewImageView.setLayoutY(80);
+            previewImageView.setFitWidth(180);
+            previewImageView.setFitHeight(100);
+            previewImageView.setPreserveRatio(true);
+
+            getChildren().addAll(generateButton, previewImageView);
+        }
+
+        private void generateImage() {
+            UIComponentsData uiData = collectUIData();
+            CompletableFuture.runAsync(() -> {
+                try {
+                    GenerationPayload payload = createGenerationPayload(uiData);
+                    byte[] imageData = apiClient.generateImage(payload, uiData.apiKey);
+                    handleGeneratedImage(imageData);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Platform.runLater(() -> showAlert("錯誤", "生成圖像時發生錯誤: " + e.getMessage()));
+                }
+            });
+        }
+
+        private void handleGeneratedImage(byte[] imageData) {
+            Platform.runLater(() -> {
+                Image image = new Image(new ByteArrayInputStream(imageData));
+                previewImageView.setImage(image);
+                saveImageToFile(imageData);
+            });
+        }
+
+        private void saveImageToFile(byte[] imageData) {
+            OutputSettingsNode outputSettingsNode = (OutputSettingsNode) findNodeByTitle("輸出設置");
+            String outputDirectory = outputSettingsNode.getOutputDirectory();
+            ImageUtils.saveImage(imageData, outputDirectory).ifPresent(file ->
+                    showAlert("成功", "圖像已保存到: " + file.getAbsolutePath())
+            );
+        }
+
+        private UIComponentsData collectUIData() {
+            UIComponentsData data = new UIComponentsData();
+
+            ApiSettingsNode apiSettingsNode = (ApiSettingsNode) findNodeByTitle("API設置");
+            data.apiKey = apiSettingsNode.getApiKey();
+            data.model = apiSettingsNode.getModel();
+
+            PromptNode positivePromptNode = (PromptNode) findNodeByTitle("正面提示詞");
+            data.positivePromptPreviewText = positivePromptNode.getPromptText();
+
+            PromptNode negativePromptNode = (PromptNode) findNodeByTitle("負面提示詞");
+            data.negativePromptPreviewText = negativePromptNode.getPromptText();
+
+            SamplingSettingsNode samplingSettingsNode = (SamplingSettingsNode) findNodeByTitle("採樣設置");
+            data.sampler = samplingSettingsNode.getSampler();
+            data.steps = samplingSettingsNode.getSteps();
+            data.seed = samplingSettingsNode.getSeed();
+
+            OutputSettingsNode outputSettingsNode = (OutputSettingsNode) findNodeByTitle("輸出設置");
+            data.outputWidth = outputSettingsNode.getOutputWidth();
+            data.outputHeight = outputSettingsNode.getOutputHeight();
+            data.ratio = outputSettingsNode.getRatio();
+            data.count = outputSettingsNode.getCount();
+
+            Text2ImageSettingsNode text2ImageSettingsNode = (Text2ImageSettingsNode) findNodeByTitle("文生圖設置");
+            data.smea = text2ImageSettingsNode.isSmea();
+            data.smeaDyn = text2ImageSettingsNode.isSmeaDyn();
+
+            return data;
+        }
+
+        private GenerationPayload createGenerationPayload(UIComponentsData uiData) {
+            GenerationPayload payload = new GenerationPayload();
+            GenerationPayload.GenerationParameters params = new GenerationPayload.GenerationParameters();
+            payload.setParameters(params);
+
+            payload.setInput(uiData.positivePromptPreviewText);
+            payload.setModel(uiData.model);
+            payload.setAction("generate");
+
+            params.setParams_version(1);
+            params.setWidth(uiData.outputWidth);
+            params.setHeight(uiData.outputHeight);
+            params.setScale(uiData.ratio);
+            params.setSampler(uiData.sampler);
+            params.setSteps(uiData.steps);
+            params.setN_samples(uiData.count);
+            params.setSeed(uiData.seed);
+            params.setSm(uiData.smea);
+            params.setSm_dyn(uiData.smeaDyn);
+
+            params.setNegative_prompt(uiData.negativePromptPreviewText);
+            return payload;
         }
     }
 
@@ -407,6 +776,14 @@ public class WorkflowApplication extends Application {
         public WorkflowNode getTargetNode() {
             return targetNode;
         }
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {
