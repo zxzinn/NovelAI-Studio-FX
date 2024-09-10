@@ -1,4 +1,4 @@
-package com.zxzinn.novelai.test;
+package com.zxzinn.novelai.workflow;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;

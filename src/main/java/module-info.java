@@ -61,6 +61,5 @@ module com.zxzinn.novelai {
     exports com.zxzinn.novelai.viewmodel;
     exports com.zxzinn.novelai.workflow;
     opens com.zxzinn.novelai.model to com.google.gson, com.google.guice, javafx.base;
-    exports com.zxzinn.novelai.test to javafx.graphics;
     opens com.zxzinn.novelai.view to com.google.guice, javafx.fxml;
 }

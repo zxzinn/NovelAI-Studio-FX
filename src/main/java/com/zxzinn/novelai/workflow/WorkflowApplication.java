@@ -9,33 +9,46 @@ import com.zxzinn.novelai.utils.common.PropertiesManager;
 import com.zxzinn.novelai.utils.image.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
-import javafx.stage.Stage;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.effect.DropShadow;
-import javafx.geometry.Point2D;
 import javafx.scene.shape.CubicCurve;
+import javafx.scene.shape.Line;
+import javafx.scene.transform.Scale;
+import javafx.stage.Stage;
 import lombok.Getter;
-import org.apache.commons.io.output.ByteArrayOutputStream;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+@Log4j2
 public class WorkflowApplication extends Application {
+
+    private static final double GRID_SIZE = 20;
+    private static final double CONNECTION_DISTANCE_THRESHOLD = 50;
+    private static final double ZOOM_FACTOR = 1.1;
+    private static final double MIN_ZOOM = 0.1;
+    private static final double MAX_ZOOM = 10;
 
     private Pane workflowPane;
     private Group zoomGroup;
@@ -45,13 +58,12 @@ public class WorkflowApplication extends Application {
     private PortCircle sourcePort;
     private CubicCurve previewCurve;
 
-    private static final double GRID_SIZE = 20;
-    private static final double CONNECTION_DISTANCE_THRESHOLD = 50;
-
     private PropertiesManager propertiesManager;
     private APIClient apiClient;
 
     private Point2D lastMousePosition;
+    private Scale scaleTransform;
+    private GenerationNode generationNode;
 
     @Override
     public void start(Stage primaryStage) {
@@ -62,63 +74,152 @@ public class WorkflowApplication extends Application {
         workflowPane.setStyle("-fx-background-color: #2b2b2b;");
 
         zoomGroup = new Group(workflowPane);
+        scaleTransform = new Scale();
+        zoomGroup.getTransforms().add(scaleTransform);
 
         drawGrid();
 
-        ScrollPane scrollPane = new ScrollPane(zoomGroup);
-        scrollPane.setPannable(true);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        Pane outerPane = new Pane(zoomGroup);
+        outerPane.setPrefSize(1200, 800);
 
-        AnchorPane anchorPane = new AnchorPane(scrollPane);
-        AnchorPane.setTopAnchor(scrollPane, 0.0);
-        AnchorPane.setRightAnchor(scrollPane, 0.0);
-        AnchorPane.setBottomAnchor(scrollPane, 0.0);
-        AnchorPane.setLeftAnchor(scrollPane, 0.0);
-
-        Scene scene = new Scene(anchorPane, 1200, 800);
+        Scene scene = new Scene(outerPane);
         primaryStage.setScene(scene);
         primaryStage.setTitle("NovelAI Workflow");
 
         createNodes();
         createPresetConnections();
 
-        setupZoomAndPan(scene, scrollPane);
+        setupZoomAndPan(scene, outerPane);
+        setupContextMenu(workflowPane);
+        setupKeyboardShortcuts(scene);
 
         primaryStage.show();
     }
 
-    private void setupZoomAndPan(Scene scene, ScrollPane scrollPane) {
+    private void updateWorkflowPaneSize() {
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        double maxY = Double.MIN_VALUE;
+
+        for (WorkflowNode node : nodes) {
+            minX = Math.min(minX, node.getLayoutX());
+            minY = Math.min(minY, node.getLayoutY());
+            maxX = Math.max(maxX, node.getLayoutX() + node.getWidth());
+            maxY = Math.max(maxY, node.getLayoutY() + node.getHeight());
+        }
+
+        // 添加一些邊距
+        double margin = 50;
+        workflowPane.setPrefSize(maxX - minX + margin * 2, maxY - minY + margin * 2);
+
+        // 移動所有節點，確保它們都在可見區域內
+        double offsetX = margin - minX;
+        double offsetY = margin - minY;
+        for (WorkflowNode node : nodes) {
+            node.setLayoutX(node.getLayoutX() + offsetX);
+            node.setLayoutY(node.getLayoutY() + offsetY);
+        }
+    }
+
+    private void setupZoomAndPan(Scene scene, Pane outerPane) {
         scene.setOnScroll(event -> {
             event.consume();
-            if (event.isControlDown()) {
-                double zoomFactor = 1.05;
-                if (event.getDeltaY() < 0) {
-                    zoomFactor = 2.0 - zoomFactor;
-                }
-                zoomGroup.setScaleX(zoomGroup.getScaleX() * zoomFactor);
-                zoomGroup.setScaleY(zoomGroup.getScaleY() * zoomFactor);
-            }
+            double zoomFactor = event.getDeltaY() > 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
+            zoom(zoomFactor, new Point2D(event.getX(), event.getY()));
         });
 
-        zoomGroup.setOnMousePressed(event -> {
+        outerPane.setOnMousePressed(event -> {
             lastMousePosition = new Point2D(event.getX(), event.getY());
         });
 
-        zoomGroup.setOnMouseDragged(event -> {
+        outerPane.setOnMouseDragged(event -> {
             if (lastMousePosition != null) {
                 double deltaX = event.getX() - lastMousePosition.getX();
                 double deltaY = event.getY() - lastMousePosition.getY();
-                scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / workflowPane.getWidth());
-                scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / workflowPane.getHeight());
+
+                // 限制平移範圍
+                double newTranslateX = zoomGroup.getTranslateX() + deltaX;
+                double newTranslateY = zoomGroup.getTranslateY() + deltaY;
+
+                double minTranslateX = outerPane.getWidth() - workflowPane.getWidth() * scaleTransform.getX();
+                double minTranslateY = outerPane.getHeight() - workflowPane.getHeight() * scaleTransform.getY();
+
+                newTranslateX = Math.min(0, Math.max(newTranslateX, minTranslateX));
+                newTranslateY = Math.min(0, Math.max(newTranslateY, minTranslateY));
+
+                zoomGroup.setTranslateX(newTranslateX);
+                zoomGroup.setTranslateY(newTranslateY);
+
                 lastMousePosition = new Point2D(event.getX(), event.getY());
             }
         });
     }
 
+    private void zoom(double factor, Point2D pivot) {
+        double oldScale = scaleTransform.getX();
+        double newScale = oldScale * factor;
+        newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+
+        Point2D mousePoint = zoomGroup.sceneToLocal(pivot);
+
+        scaleTransform.setX(newScale);
+        scaleTransform.setY(newScale);
+
+        Point2D newMousePoint = zoomGroup.sceneToLocal(pivot);
+
+        zoomGroup.setTranslateX(zoomGroup.getTranslateX() - (newMousePoint.getX() - mousePoint.getX()) * newScale);
+        zoomGroup.setTranslateY(zoomGroup.getTranslateY() - (newMousePoint.getY() - mousePoint.getY()) * newScale);
+    }
+
+    private void setupKeyboardShortcuts(Scene scene) {
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.SPACE) {
+                focusOnGenerationNode();
+            }
+        });
+    }
+
+    private void focusOnGenerationNode() {
+        if (generationNode != null) {
+            Point2D nodeCenter = generationNode.localToScene(
+                    generationNode.getBoundsInLocal().getWidth() / 2,
+                    generationNode.getBoundsInLocal().getHeight() / 2
+            );
+
+            double sceneWidth = zoomGroup.getScene().getWidth();
+            double sceneHeight = zoomGroup.getScene().getHeight();
+
+            double newTranslateX = sceneWidth / 2 - nodeCenter.getX() * scaleTransform.getX();
+            double newTranslateY = sceneHeight / 2 - nodeCenter.getY() * scaleTransform.getY();
+
+            zoomGroup.setTranslateX(newTranslateX);
+            zoomGroup.setTranslateY(newTranslateY);
+        }
+    }
+
+    private void setupContextMenu(Pane pane) {
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem addNodeItem = new MenuItem("添加新節點");
+        addNodeItem.setOnAction(e -> addNewNode(contextMenu.getX(), contextMenu.getY()));
+        contextMenu.getItems().add(addNodeItem);
+
+        pane.setOnContextMenuRequested(event -> {
+            contextMenu.show(pane, event.getScreenX(), event.getScreenY());
+        });
+    }
+
+    private void addNewNode(double x, double y) {
+        Point2D localPoint = zoomGroup.sceneToLocal(x, y);
+        WorkflowNode newNode = new CustomNode("自定義節點", localPoint.getX(), localPoint.getY());
+        nodes.add(newNode);
+        workflowPane.getChildren().add(newNode);
+        updateWorkflowPaneSize();  // 添加新節點後更新工作流程面板大小
+    }
+
     private void drawGrid() {
-        double width = 10000;  // 使用一個很大的值
-        double height = 10000; // 使用一個很大的值
+        double width = 10000;
+        double height = 10000;
 
         for (double x = 0; x < width; x += GRID_SIZE) {
             Line vline = new Line(x, 0, x, height);
@@ -140,7 +241,7 @@ public class WorkflowApplication extends Application {
         SamplingSettingsNode samplingSettingsNode = new SamplingSettingsNode("採樣設置", 300, 50);
         OutputSettingsNode outputSettingsNode = new OutputSettingsNode("輸出設置", 300, 250);
         Text2ImageSettingsNode text2ImageSettingsNode = new Text2ImageSettingsNode("文生圖設置", 300, 450);
-        GenerationNode generationNode = new GenerationNode("生成", 550, 250);
+        generationNode = new GenerationNode("生成", 550, 250);
 
         nodes.add(apiSettingsNode);
         nodes.add(positivePromptNode);
@@ -270,16 +371,18 @@ public class WorkflowApplication extends Application {
 
         private void onMousePressed(MouseEvent event) {
             toFront();
-            dragDeltaX = getLayoutX() - event.getSceneX();
-            dragDeltaY = getLayoutY() - event.getSceneY();
+            Point2D localPoint = sceneToLocal(event.getSceneX(), event.getSceneY());
+            dragDeltaX = getLayoutX() - localPoint.getX();
+            dragDeltaY = getLayoutY() - localPoint.getY();
         }
 
         private void onMouseDragged(MouseEvent event) {
-            double newX = snapToGrid(event.getSceneX() + dragDeltaX);
-            double newY = snapToGrid(event.getSceneY() + dragDeltaY);
-            setLayoutX(newX);
-            setLayoutY(newY);
+            Point2D localPoint = sceneToLocal(event.getSceneX(), event.getSceneY());
+            double newX = snapToGrid(localPoint.getX() + dragDeltaX);
+            double newY = snapToGrid(localPoint.getY() + dragDeltaY);
+            relocate(newX, newY);
             updateConnections();
+            updateWorkflowPaneSize();  // 在拖動節點後更新工作流程面板大小
         }
 
         private void onMouseReleased(MouseEvent event) {
@@ -702,6 +805,28 @@ public class WorkflowApplication extends Application {
         }
     }
 
+    private class CustomNode extends WorkflowNode {
+        private final TextArea customTextArea;
+
+        public CustomNode(String title, double x, double y) {
+            super(title, x, y);
+            addInputPort("輸入");
+            addOutputPort("輸出");
+
+            customTextArea = new TextArea();
+            customTextArea.setLayoutX(10);
+            customTextArea.setLayoutY(40);
+            customTextArea.setPrefSize(180, 150);
+            customTextArea.setPromptText("在此輸入自定義邏輯...");
+
+            getChildren().add(customTextArea);
+        }
+
+        public String getCustomLogic() {
+            return customTextArea.getText();
+        }
+    }
+
     private class PortCircle extends javafx.scene.shape.Circle {
         private final String portName;
         private final boolean isInput;
@@ -718,6 +843,9 @@ public class WorkflowApplication extends Application {
             setOnMousePressed(this::onMousePressed);
             setOnMouseReleased(this::onMouseReleased);
             setOnMouseDragged(this::onMouseDragged);
+
+            Tooltip tooltip = new Tooltip(portName);
+            Tooltip.install(this, tooltip);
         }
 
         private void onMousePressed(MouseEvent event) {
@@ -864,7 +992,6 @@ public class WorkflowApplication extends Application {
             connections.remove(this);
             workflowPane.getChildren().remove(this);
         }
-
     }
 
     private void showAlert(String title, String content) {
