@@ -11,10 +11,10 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.Bounds;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -25,8 +25,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.Line;
-import javafx.scene.transform.Scale;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -41,207 +40,52 @@ import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javafx.scene.layout.Region;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+
 @Log4j2
 public class WorkflowApplication extends Application {
 
-    private static final double GRID_SIZE = 20;
-    private static final double CONNECTION_DISTANCE_THRESHOLD = 50;
-    private static final double ZOOM_FACTOR = 1.1;
-    private static final double MIN_ZOOM = 0.1;
-    private static final double MAX_ZOOM = 10;
-
-    private Pane workflowPane;
-    private Group zoomGroup;
-    private final List<WorkflowNode> nodes = new ArrayList<>();
-    private final List<Connection> connections = new ArrayList<>();
-    private WorkflowNode sourceNode;
-    private PortCircle sourcePort;
-    private CubicCurve previewCurve;
-
     private PropertiesManager propertiesManager;
     private APIClient apiClient;
-
-    private Point2D lastMousePosition;
-    private Scale scaleTransform;
     private GenerationNode generationNode;
+    private WorkflowPane workflowPane;
+
+    private List<WorkflowNode> nodes = new ArrayList<>();
+    private List<Connection> connections = new ArrayList<>();
+    private double mouseAnchorX;
+    private double mouseAnchorY;
+    private WorkflowNode sourceNode;
+    private PortCircle sourcePort;
+    private Connection previewConnection;
 
     @Override
     public void start(Stage primaryStage) {
         propertiesManager = PropertiesManager.getInstance();
         apiClient = new APIClient(Endpoint.GENERATE_IMAGE);
 
-        workflowPane = new Pane();
-        workflowPane.setStyle("-fx-background-color: #2b2b2b;");
-
-        zoomGroup = new Group(workflowPane);
-        scaleTransform = new Scale();
-        zoomGroup.getTransforms().add(scaleTransform);
-
-        drawGrid();
-
-        Pane outerPane = new Pane(zoomGroup);
-        outerPane.setPrefSize(1200, 800);
-
-        Scene scene = new Scene(outerPane);
+        workflowPane = new WorkflowPane();
+        Scene scene = new Scene(workflowPane, 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.setTitle("NovelAI Workflow");
 
-        createNodes();
+        createNodes(workflowPane);
         createPresetConnections();
 
-        setupZoomAndPan(scene, outerPane);
-        setupContextMenu(workflowPane);
         setupKeyboardShortcuts(scene);
 
         primaryStage.show();
     }
 
-    private void updateWorkflowPaneSize() {
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE;
-        double maxY = Double.MIN_VALUE;
-
-        for (WorkflowNode node : nodes) {
-            minX = Math.min(minX, node.getLayoutX());
-            minY = Math.min(minY, node.getLayoutY());
-            maxX = Math.max(maxX, node.getLayoutX() + node.getWidth());
-            maxY = Math.max(maxY, node.getLayoutY() + node.getHeight());
-        }
-
-        // 添加一些邊距
-        double margin = 50;
-        workflowPane.setPrefSize(maxX - minX + margin * 2, maxY - minY + margin * 2);
-
-        // 移動所有節點，確保它們都在可見區域內
-        double offsetX = margin - minX;
-        double offsetY = margin - minY;
-        for (WorkflowNode node : nodes) {
-            node.setLayoutX(node.getLayoutX() + offsetX);
-            node.setLayoutY(node.getLayoutY() + offsetY);
-        }
-    }
-
-    private void setupZoomAndPan(Scene scene, Pane outerPane) {
-        scene.setOnScroll(event -> {
-            event.consume();
-            double zoomFactor = event.getDeltaY() > 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
-            zoom(zoomFactor, new Point2D(event.getX(), event.getY()));
-        });
-
-        outerPane.setOnMousePressed(event -> {
-            lastMousePosition = new Point2D(event.getX(), event.getY());
-        });
-
-        outerPane.setOnMouseDragged(event -> {
-            if (lastMousePosition != null) {
-                double deltaX = event.getX() - lastMousePosition.getX();
-                double deltaY = event.getY() - lastMousePosition.getY();
-
-                // 限制平移範圍
-                double newTranslateX = zoomGroup.getTranslateX() + deltaX;
-                double newTranslateY = zoomGroup.getTranslateY() + deltaY;
-
-                double minTranslateX = outerPane.getWidth() - workflowPane.getWidth() * scaleTransform.getX();
-                double minTranslateY = outerPane.getHeight() - workflowPane.getHeight() * scaleTransform.getY();
-
-                newTranslateX = Math.min(0, Math.max(newTranslateX, minTranslateX));
-                newTranslateY = Math.min(0, Math.max(newTranslateY, minTranslateY));
-
-                zoomGroup.setTranslateX(newTranslateX);
-                zoomGroup.setTranslateY(newTranslateY);
-
-                lastMousePosition = new Point2D(event.getX(), event.getY());
-            }
-        });
-    }
-
-    private void zoom(double factor, Point2D pivot) {
-        double oldScale = scaleTransform.getX();
-        double newScale = oldScale * factor;
-        newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
-
-        Point2D mousePoint = zoomGroup.sceneToLocal(pivot);
-
-        scaleTransform.setX(newScale);
-        scaleTransform.setY(newScale);
-
-        Point2D newMousePoint = zoomGroup.sceneToLocal(pivot);
-
-        zoomGroup.setTranslateX(zoomGroup.getTranslateX() - (newMousePoint.getX() - mousePoint.getX()) * newScale);
-        zoomGroup.setTranslateY(zoomGroup.getTranslateY() - (newMousePoint.getY() - mousePoint.getY()) * newScale);
-    }
-
-    private void setupKeyboardShortcuts(Scene scene) {
-        scene.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.SPACE) {
-                focusOnGenerationNode();
-            }
-        });
-    }
-
-    private void focusOnGenerationNode() {
-        if (generationNode != null) {
-            Point2D nodeCenter = generationNode.localToScene(
-                    generationNode.getBoundsInLocal().getWidth() / 2,
-                    generationNode.getBoundsInLocal().getHeight() / 2
-            );
-
-            double sceneWidth = zoomGroup.getScene().getWidth();
-            double sceneHeight = zoomGroup.getScene().getHeight();
-
-            double newTranslateX = sceneWidth / 2 - nodeCenter.getX() * scaleTransform.getX();
-            double newTranslateY = sceneHeight / 2 - nodeCenter.getY() * scaleTransform.getY();
-
-            zoomGroup.setTranslateX(newTranslateX);
-            zoomGroup.setTranslateY(newTranslateY);
-        }
-    }
-
-    private void setupContextMenu(Pane pane) {
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem addNodeItem = new MenuItem("添加新節點");
-        addNodeItem.setOnAction(e -> addNewNode(contextMenu.getX(), contextMenu.getY()));
-        contextMenu.getItems().add(addNodeItem);
-
-        pane.setOnContextMenuRequested(event -> {
-            contextMenu.show(pane, event.getScreenX(), event.getScreenY());
-        });
-    }
-
-    private void addNewNode(double x, double y) {
-        Point2D localPoint = zoomGroup.sceneToLocal(x, y);
-        WorkflowNode newNode = new CustomNode("自定義節點", localPoint.getX(), localPoint.getY());
-        nodes.add(newNode);
-        workflowPane.getChildren().add(newNode);
-        updateWorkflowPaneSize();  // 添加新節點後更新工作流程面板大小
-    }
-
-    private void drawGrid() {
-        double width = 10000;
-        double height = 10000;
-
-        for (double x = 0; x < width; x += GRID_SIZE) {
-            Line vline = new Line(x, 0, x, height);
-            vline.setStroke(Color.gray(0.2));
-            workflowPane.getChildren().add(vline);
-        }
-
-        for (double y = 0; y < height; y += GRID_SIZE) {
-            Line hline = new Line(0, y, width, y);
-            hline.setStroke(Color.gray(0.2));
-            workflowPane.getChildren().add(hline);
-        }
-    }
-
-    private void createNodes() {
-        ApiSettingsNode apiSettingsNode = new ApiSettingsNode("API設置", 50, 50);
-        PromptNode positivePromptNode = new PromptNode("正面提示詞", 50, 250);
-        PromptNode negativePromptNode = new PromptNode("負面提示詞", 50, 450);
-        SamplingSettingsNode samplingSettingsNode = new SamplingSettingsNode("採樣設置", 300, 50);
-        OutputSettingsNode outputSettingsNode = new OutputSettingsNode("輸出設置", 300, 250);
-        Text2ImageSettingsNode text2ImageSettingsNode = new Text2ImageSettingsNode("文生圖設置", 300, 450);
-        generationNode = new GenerationNode("生成", 550, 250);
+    private void createNodes(WorkflowPane workflowPane) {
+        ApiSettingsNode apiSettingsNode = new ApiSettingsNode("API設置");
+        PromptNode positivePromptNode = new PromptNode("正面提示詞");
+        PromptNode negativePromptNode = new PromptNode("負面提示詞");
+        SamplingSettingsNode samplingSettingsNode = new SamplingSettingsNode("採樣設置");
+        OutputSettingsNode outputSettingsNode = new OutputSettingsNode("輸出設置");
+        Text2ImageSettingsNode text2ImageSettingsNode = new Text2ImageSettingsNode("文生圖設置");
+        generationNode = new GenerationNode("生成");
 
         nodes.add(apiSettingsNode);
         nodes.add(positivePromptNode);
@@ -253,20 +97,34 @@ public class WorkflowApplication extends Application {
 
         workflowPane.getChildren().addAll(apiSettingsNode, positivePromptNode, negativePromptNode,
                 samplingSettingsNode, outputSettingsNode, text2ImageSettingsNode, generationNode);
+
+        // 設置節點的初始位置
+        double startX = 50;
+        double startY = 50;
+        double spacing = 220;
+
+        for (int i = 0; i < nodes.size(); i++) {
+            WorkflowNode node = nodes.get(i);
+            node.setLayoutX(startX + (i % 3) * spacing);
+            node.setLayoutY(startY + (i / 3) * spacing);
+        }
+
+        // 將生成節點放在中心位置
+        generationNode.setLayoutX(startX + spacing);
+        generationNode.setLayoutY(startY + 2 * spacing);
     }
 
     private void createPresetConnections() {
-        connectNodes("API設置");
-        connectNodes("正面提示詞");
-        connectNodes("負面提示詞");
-        connectNodes("採樣設置");
-        connectNodes("輸出設置");
-        connectNodes("文生圖設置");
+        for (WorkflowNode node : nodes) {
+            if (node != generationNode) {
+                connectNodes(node.title, "生成");
+            }
+        }
     }
 
-    private void connectNodes(String sourceTitle) {
+    private void connectNodes(String sourceTitle, String targetTitle) {
         WorkflowNode sourceNode = findNodeByTitle(sourceTitle);
-        WorkflowNode targetNode = findNodeByTitle("生成");
+        WorkflowNode targetNode = findNodeByTitle(targetTitle);
 
         if (sourceNode != null && targetNode != null) {
             PortCircle sourcePort = sourceNode.outputPorts.getFirst();
@@ -290,17 +148,69 @@ public class WorkflowApplication extends Application {
                 .orElse(null);
     }
 
-    private abstract class WorkflowNode extends Pane {
+    private void startConnection(WorkflowNode sourceNode, PortCircle sourcePort) {
+        this.sourceNode = sourceNode;
+        this.sourcePort = sourcePort;
+        previewConnection = new Connection(sourceNode, sourcePort, null, null);
+        workflowPane.getChildren().add(previewConnection);
+    }
+
+    private void updateConnection(double sceneX, double sceneY) {
+        if (previewConnection != null) {
+            previewConnection.setEndX(sceneX);
+            previewConnection.setEndY(sceneY);
+        }
+    }
+
+    private void endConnection(double sceneX, double sceneY) {
+        if (previewConnection != null) {
+            PortCircle targetPort = findPortAt(sceneX, sceneY);
+            if (targetPort != null && targetPort.isInput && targetPort.parentNode != sourceNode) {
+                Connection connection = new Connection(sourceNode, sourcePort, targetPort.parentNode, targetPort);
+                connections.add(connection);
+                workflowPane.getChildren().add(connection);
+            }
+            workflowPane.getChildren().remove(previewConnection);
+            previewConnection = null;
+            sourceNode = null;
+            sourcePort = null;
+        }
+    }
+
+    private PortCircle findPortAt(double sceneX, double sceneY) {
+        for (WorkflowNode node : nodes) {
+            for (PortCircle port : node.getAllPorts()) {
+                Point2D portPosition = port.localToScene(port.getBoundsInLocal().getCenterX(), port.getBoundsInLocal().getCenterY());
+                if (portPosition.distance(sceneX, sceneY) < 10) {
+                    return port;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void setupKeyboardShortcuts(Scene scene) {
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.SPACE) {
+                focusOnGenerationNode();
+            }
+        });
+    }
+
+    private void focusOnGenerationNode() {
+        if (generationNode != null) {
+            generationNode.requestFocus();
+        }
+    }
+
+    private abstract class WorkflowNode extends Region {
         protected String title;
         protected List<PortCircle> inputPorts = new ArrayList<>();
         protected List<PortCircle> outputPorts = new ArrayList<>();
-        private double dragDeltaX, dragDeltaY;
+        protected VBox content;
 
-        public WorkflowNode(String title, double x, double y) {
+        public WorkflowNode(String title) {
             this.title = title;
-            setLayoutX(snapToGrid(x));
-            setLayoutY(snapToGrid(y));
-            setPrefSize(200, 200);
             setStyle("-fx-background-color: #3c3f41; -fx-border-color: #5e5e5e; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-radius: 5;");
 
             DropShadow dropShadow = new DropShadow();
@@ -310,16 +220,33 @@ public class WorkflowApplication extends Application {
 
             Label titleLabel = new Label(title);
             titleLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-            titleLabel.setLayoutX(10);
-            titleLabel.setLayoutY(10);
 
-            getChildren().add(titleLabel);
+            content = new VBox(5);
+            content.setPadding(new Insets(10));
+            content.getChildren().add(titleLabel);
 
-            setOnMousePressed(this::onMousePressed);
-            setOnMouseDragged(this::onMouseDragged);
-            setOnMouseReleased(this::onMouseReleased);
+            getChildren().add(content);
 
             setupContextMenu();
+            setOnMousePressed(event -> {
+                mouseAnchorX = event.getSceneX() - getLayoutX();
+                mouseAnchorY = event.getSceneY() - getLayoutY();
+                toFront();
+            });
+
+            setOnMouseDragged(event -> {
+                setLayoutX(event.getSceneX() - mouseAnchorX);
+                setLayoutY(event.getSceneY() - mouseAnchorY);
+                event.consume();
+            });
+
+            // 添加大小監聽器
+            content.heightProperty().addListener((obs, oldVal, newVal) -> {
+                setPrefHeight(newVal.doubleValue() + 20); // 添加一些額外的空間
+            });
+            content.widthProperty().addListener((obs, oldVal, newVal) -> {
+                setPrefWidth(newVal.doubleValue() + 20); // 添加一些額外的空間
+            });
         }
 
         private void setupContextMenu() {
@@ -332,67 +259,46 @@ public class WorkflowApplication extends Application {
         }
 
         private void deleteNode() {
-            workflowPane.getChildren().remove(this);
+            Parent parent = getParent();
+            if (parent instanceof Pane) {
+                ((Pane) parent).getChildren().remove(this);
+            }
             nodes.remove(this);
             connections.removeIf(conn -> conn.getSourceNode() == this || conn.getTargetNode() == this);
-            workflowPane.getChildren().removeIf(node -> node instanceof Connection &&
-                    (((Connection) node).getSourceNode() == this || ((Connection) node).getTargetNode() == this));
         }
 
         protected void addInputPort(String name) {
-            PortCircle port = new PortCircle(name, true);
+            PortCircle port = new PortCircle(name, true, this);
             inputPorts.add(port);
-            updatePorts();
+            getChildren().add(port);
+            updatePortPositions();
         }
 
         protected void addOutputPort(String name) {
-            PortCircle port = new PortCircle(name, false);
+            PortCircle port = new PortCircle(name, false, this);
             outputPorts.add(port);
-            updatePorts();
+            getChildren().add(port);
+            updatePortPositions();
         }
 
-        private void updatePorts() {
-            getChildren().removeIf(node -> node instanceof PortCircle);
-
-            for (int i = 0; i < inputPorts.size(); i++) {
-                PortCircle inputPort = inputPorts.get(i);
-                inputPort.setLayoutX(0);
-                inputPort.setLayoutY(40 + i * 30);
-                getChildren().add(inputPort);
+        protected void updatePortPositions() {
+            double inputY = 0;
+            for (PortCircle port : inputPorts) {
+                port.relocate(0, inputY);
+                inputY += 20;
             }
 
-            for (int i = 0; i < outputPorts.size(); i++) {
-                PortCircle outputPort = outputPorts.get(i);
-                outputPort.setLayoutX(getPrefWidth());
-                outputPort.setLayoutY(40 + i * 30);
-                getChildren().add(outputPort);
+            double outputY = 0;
+            for (PortCircle port : outputPorts) {
+                port.relocate(getWidth(), outputY);
+                outputY += 20;
             }
         }
 
-        private void onMousePressed(MouseEvent event) {
-            toFront();
-            Point2D localPoint = sceneToLocal(event.getSceneX(), event.getSceneY());
-            dragDeltaX = getLayoutX() - localPoint.getX();
-            dragDeltaY = getLayoutY() - localPoint.getY();
-        }
-
-        private void onMouseDragged(MouseEvent event) {
-            Point2D localPoint = sceneToLocal(event.getSceneX(), event.getSceneY());
-            double newX = snapToGrid(localPoint.getX() + dragDeltaX);
-            double newY = snapToGrid(localPoint.getY() + dragDeltaY);
-            relocate(newX, newY);
-            updateConnections();
-            updateWorkflowPaneSize();  // 在拖動節點後更新工作流程面板大小
-        }
-
-        private void onMouseReleased(MouseEvent event) {
-            updateConnections();
-        }
-
-        private void updateConnections() {
-            connections.stream()
-                    .filter(conn -> conn.getSourceNode() == this || conn.getTargetNode() == this)
-                    .forEach(Connection::update);
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            updatePortPositions();
         }
 
         public List<PortCircle> getAllPorts() {
@@ -402,22 +308,13 @@ public class WorkflowApplication extends Application {
         }
     }
 
-    private double snapToGrid(double value) {
-        return Math.round(value / GRID_SIZE) * GRID_SIZE;
-    }
-
     private class ApiSettingsNode extends WorkflowNode {
         private final TextField apiKeyField;
         private final ComboBox<String> modelComboBox;
 
-        public ApiSettingsNode(String title, double x, double y) {
-            super(title, x, y);
+        public ApiSettingsNode(String title) {
+            super(title);
             addOutputPort("API設置");
-
-            VBox content = new VBox(5);
-            content.setLayoutX(10);
-            content.setLayoutY(40);
-            content.setPrefWidth(180);
 
             apiKeyField = new TextField();
             apiKeyField.setPromptText("API Key");
@@ -428,8 +325,6 @@ public class WorkflowApplication extends Application {
 
             content.getChildren().addAll(new Label("API Key"), apiKeyField,
                     new Label("模型"), modelComboBox);
-
-            getChildren().add(content);
 
             setupListeners();
         }
@@ -453,15 +348,15 @@ public class WorkflowApplication extends Application {
     private class PromptNode extends WorkflowNode {
         private final TextArea promptArea;
 
-        public PromptNode(String title, double x, double y) {
-            super(title, x, y);
+        public PromptNode(String title) {
+            super(title);
             addOutputPort("提示詞");
 
             promptArea = new TextArea();
-            promptArea.setLayoutX(10);
-            promptArea.setLayoutY(40);
-            promptArea.setPrefSize(180, 150);
-            getChildren().add(promptArea);
+            promptArea.setPrefRowCount(5);
+            VBox.setMargin(promptArea, new Insets(5, 0, 0, 0));
+
+            content.getChildren().add(promptArea);
 
             setupListeners();
         }
@@ -481,14 +376,9 @@ public class WorkflowApplication extends Application {
         private final Slider stepsSlider;
         private final TextField seedField;
 
-        public SamplingSettingsNode(String title, double x, double y) {
-            super(title, x, y);
+        public SamplingSettingsNode(String title) {
+            super(title);
             addOutputPort("採樣設置");
-
-            VBox content = new VBox(5);
-            content.setLayoutX(10);
-            content.setLayoutY(40);
-            content.setPrefWidth(180);
 
             samplerComboBox = new ComboBox<>();
             samplerComboBox.getItems().addAll(NAIConstants.SAMPLERS);
@@ -506,8 +396,6 @@ public class WorkflowApplication extends Application {
                     new Label("種子"), seedField
             );
 
-            getChildren().add(content);
-
             setupListeners();
         }
 
@@ -517,7 +405,7 @@ public class WorkflowApplication extends Application {
             stepsSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
                 int steps = newVal.intValue();
                 propertiesManager.setInt("steps", steps);
-                ((Label)((VBox)getChildren().getFirst()).getChildren().get(4)).setText("步數: " + steps);
+                ((Label)content.getChildren().get(4)).setText("步數: " + steps);
             });
             seedField.textProperty().addListener((obs, oldVal, newVal) ->
                     propertiesManager.setInt("seed", Integer.parseInt(newVal)));
@@ -543,14 +431,9 @@ public class WorkflowApplication extends Application {
         private final TextField countField;
         private final TextField outputDirectoryField;
 
-        public OutputSettingsNode(String title, double x, double y) {
-            super(title, x, y);
+        public OutputSettingsNode(String title) {
+            super(title);
             addOutputPort("輸出設置");
-
-            VBox content = new VBox(5);
-            content.setLayoutX(10);
-            content.setLayoutY(40);
-            content.setPrefWidth(180);
 
             widthField = new TextField(String.valueOf(propertiesManager.getInt("width", 832)));
             heightField = new TextField(String.valueOf(propertiesManager.getInt("height", 1216)));
@@ -565,8 +448,6 @@ public class WorkflowApplication extends Application {
                     new Label("生成數量"), countField,
                     new Label("輸出目錄"), outputDirectoryField
             );
-
-            getChildren().add(content);
 
             setupListeners();
         }
@@ -609,14 +490,9 @@ public class WorkflowApplication extends Application {
         private final CheckBox smeaCheckBox;
         private final CheckBox smeaDynCheckBox;
 
-        public Text2ImageSettingsNode(String title, double x, double y) {
-            super(title, x, y);
+        public Text2ImageSettingsNode(String title) {
+            super(title);
             addOutputPort("文生圖設置");
-
-            VBox content = new VBox(5);
-            content.setLayoutX(10);
-            content.setLayoutY(40);
-            content.setPrefWidth(180);
 
             smeaCheckBox = new CheckBox("SMEA");
             smeaCheckBox.setSelected(propertiesManager.getBoolean("smea", true));
@@ -625,8 +501,6 @@ public class WorkflowApplication extends Application {
             smeaDynCheckBox.setSelected(propertiesManager.getBoolean("smeaDyn", false));
 
             content.getChildren().addAll(smeaCheckBox, smeaDynCheckBox);
-
-            getChildren().add(content);
 
             setupListeners();
         }
@@ -651,8 +525,8 @@ public class WorkflowApplication extends Application {
         private final ImageView previewImageView;
         private final ScrollPane imageScrollPane;
 
-        public GenerationNode(String title, double x, double y) {
-            super(title, x, y);
+        public GenerationNode(String title) {
+            super(title);
             addInputPort("API設置");
             addInputPort("正面提示詞");
             addInputPort("負面提示詞");
@@ -662,23 +536,18 @@ public class WorkflowApplication extends Application {
             addOutputPort("生成結果");
 
             Button generateButton = new Button("生成");
-            generateButton.setLayoutX(50);
-            generateButton.setLayoutY(40);
             generateButton.setPrefSize(100, 30);
-
             generateButton.setOnAction(event -> generateImage());
 
             previewImageView = new ImageView();
             previewImageView.setPreserveRatio(true);
 
             imageScrollPane = new ScrollPane(previewImageView);
-            imageScrollPane.setLayoutX(10);
-            imageScrollPane.setLayoutY(80);
             imageScrollPane.setPrefSize(180, 100);
             imageScrollPane.setFitToWidth(true);
             imageScrollPane.setFitToHeight(true);
 
-            getChildren().addAll(generateButton, imageScrollPane);
+            content.getChildren().addAll(generateButton, imageScrollPane);
         }
 
         private void generateImage() {
@@ -805,143 +674,50 @@ public class WorkflowApplication extends Application {
         }
     }
 
-    private class CustomNode extends WorkflowNode {
-        private final TextArea customTextArea;
-
-        public CustomNode(String title, double x, double y) {
-            super(title, x, y);
-            addInputPort("輸入");
-            addOutputPort("輸出");
-
-            customTextArea = new TextArea();
-            customTextArea.setLayoutX(10);
-            customTextArea.setLayoutY(40);
-            customTextArea.setPrefSize(180, 150);
-            customTextArea.setPromptText("在此輸入自定義邏輯...");
-
-            getChildren().add(customTextArea);
-        }
-
-        public String getCustomLogic() {
-            return customTextArea.getText();
-        }
-    }
-
-    private class PortCircle extends javafx.scene.shape.Circle {
+    private class PortCircle extends Circle {
         private final String portName;
         private final boolean isInput;
+        private WorkflowNode parentNode;
 
-        public PortCircle(String portName, boolean isInput) {
+        public PortCircle(String portName, boolean isInput, WorkflowNode parentNode) {
             super(5);
             this.portName = portName;
             this.isInput = isInput;
+            this.parentNode = parentNode;
             setFill(Color.LIGHTBLUE);
             setStroke(Color.BLUE);
 
             setOnMouseEntered(e -> setFill(Color.YELLOW));
             setOnMouseExited(e -> setFill(Color.LIGHTBLUE));
-            setOnMousePressed(this::onMousePressed);
-            setOnMouseReleased(this::onMouseReleased);
-            setOnMouseDragged(this::onMouseDragged);
 
             Tooltip tooltip = new Tooltip(portName);
             Tooltip.install(this, tooltip);
-        }
 
-        private void onMousePressed(MouseEvent event) {
-            if (!isInput) {
-                sourceNode = (WorkflowNode) getParent();
-                sourcePort = this;
-                startConnection(event);
-            }
-            event.consume();
-        }
-
-        private void onMouseDragged(MouseEvent event) {
-            if (previewCurve != null) {
-                Point2D end = localToScene(new Point2D(0, 0));
-                updatePreviewCurve(previewCurve.getStartX(), previewCurve.getStartY(),
-                        event.getSceneX(), event.getSceneY());
-            }
-            event.consume();
-        }
-
-        private void onMouseReleased(MouseEvent event) {
-            if (sourceNode != null) {
-                PortCircle targetPort = findNearestPort(event.getSceneX(), event.getSceneY());
-                if (targetPort != null && targetPort.isInput && sourceNode != targetPort.getParent()) {
-                    createConnection((WorkflowNode) targetPort.getParent(), targetPort);
-                }
-            }
-            endConnection();
-            event.consume();
+            setOnMousePressed(this::startConnection);
+            setOnMouseDragged(this::updateConnection);
+            setOnMouseReleased(this::endConnection);
         }
 
         private void startConnection(MouseEvent event) {
-            Point2D start = localToScene(new Point2D(0, 0));
-            previewCurve = createCurve(start.getX(), start.getY(), event.getSceneX(), event.getSceneY());
-            workflowPane.getChildren().add(previewCurve);
-        }
-
-        private void createConnection(WorkflowNode targetNode, PortCircle targetPort) {
-            Connection connection = new Connection(sourceNode, sourcePort, targetNode, targetPort);
-            connections.add(connection);
-            workflowPane.getChildren().add(connection);
-        }
-
-        private void endConnection() {
-            sourceNode = null;
-            sourcePort = null;
-            if (previewCurve != null) {
-                workflowPane.getChildren().remove(previewCurve);
-                previewCurve = null;
+            if (!isInput) {
+                WorkflowApplication.this.startConnection(parentNode, this);
             }
+            event.consume();
         }
-    }
 
-    private PortCircle findNearestPort(double sceneX, double sceneY) {
-        PortCircle nearestPort = null;
-        double minDistance = Double.MAX_VALUE;
-
-        Point2D mousePoint = new Point2D(sceneX, sceneY);
-
-        for (WorkflowNode node : nodes) {
-            for (PortCircle port : node.getAllPorts()) {
-                Point2D portPosition = port.localToScene(new Point2D(0, 0));
-                double distance = mousePoint.distance(portPosition);
-                if (distance < minDistance && distance < CONNECTION_DISTANCE_THRESHOLD) {
-                    minDistance = distance;
-                    nearestPort = port;
-                }
+        private void updateConnection(MouseEvent event) {
+            if (!isInput) {
+                WorkflowApplication.this.updateConnection(event.getSceneX(), event.getSceneY());
             }
+            event.consume();
         }
 
-        return nearestPort;
-    }
-
-    private CubicCurve createCurve(double startX, double startY, double endX, double endY) {
-        CubicCurve curve = new CubicCurve();
-        curve.setStartX(startX);
-        curve.setStartY(startY);
-        curve.setEndX(endX);
-        curve.setEndY(endY);
-        curve.setControlX1(startX + 100);
-        curve.setControlY1(startY);
-        curve.setControlX2(endX - 100);
-        curve.setControlY2(endY);
-        curve.setStroke(Color.LIGHTGREEN);
-        curve.setFill(null);
-        curve.setStrokeWidth(2);
-        return curve;
-    }
-
-    private void updatePreviewCurve(double startX, double startY, double endX, double endY) {
-        previewCurve.setEndX(endX);
-        previewCurve.setEndY(endY);
-        previewCurve.setControlX1(startX + (endX - startX) / 2);
-        previewCurve.setControlY1(startY);
-        previewCurve.setControlX2(startX + (endX - startX) / 2);
-        previewCurve.setControlY2(endY);
+        private void endConnection(MouseEvent event) {
+            if (!isInput) {
+                WorkflowApplication.this.endConnection(event.getSceneX(), event.getSceneY());
+            }
+            event.consume();
+        }
     }
 
     private class Connection extends CubicCurve {
@@ -960,22 +736,31 @@ public class WorkflowApplication extends Application {
             setStroke(Color.LIGHTGREEN);
             setFill(null);
             setStrokeWidth(2);
-            update();
+
+            sourceNode.layoutXProperty().addListener((obs, oldVal, newVal) -> update());
+            sourceNode.layoutYProperty().addListener((obs, oldVal, newVal) -> update());
+            if (targetNode != null) {
+                targetNode.layoutXProperty().addListener((obs, oldVal, newVal) -> update());
+                targetNode.layoutYProperty().addListener((obs, oldVal, newVal) -> update());
+            }
 
             setOnContextMenuRequested(this::showContextMenu);
+            update();
         }
 
         public void update() {
-            if (sourcePort != null && targetPort != null) {
-                Point2D start = sourcePort.localToScene(new Point2D(0, 0));
-                Point2D end = targetPort.localToScene(new Point2D(0, 0));
-                setStartX(start.getX());
-                setStartY(start.getY());
-                setEndX(end.getX());
-                setEndY(end.getY());
-                setControlX1(getStartX() + (getEndX() - getStartX()) / 2);
+            if (sourcePort != null) {
+                Point2D sourcePoint = sourcePort.localToScene(sourcePort.getBoundsInLocal().getCenterX(), sourcePort.getBoundsInLocal().getCenterY());
+                setStartX(sourcePoint.getX());
+                setStartY(sourcePoint.getY());
+                setControlX1(getStartX() + 50);
                 setControlY1(getStartY());
-                setControlX2(getStartX() + (getEndX() - getStartX()) / 2);
+            }
+            if (targetPort != null) {
+                Point2D targetPoint = targetPort.localToScene(targetPort.getBoundsInLocal().getCenterX(), targetPort.getBoundsInLocal().getCenterY());
+                setEndX(targetPoint.getX());
+                setEndY(targetPoint.getY());
+                setControlX2(getEndX() - 50);
                 setControlY2(getEndY());
             }
         }
@@ -990,7 +775,51 @@ public class WorkflowApplication extends Application {
 
         private void deleteConnection() {
             connections.remove(this);
-            workflowPane.getChildren().remove(this);
+            Parent parent = getParent();
+            if (parent instanceof Pane) {
+                ((Pane) parent).getChildren().remove(this);
+            }
+        }
+    }
+
+    private class WorkflowPane extends Pane {
+        private double lastMouseX;
+        private double lastMouseY;
+
+        public WorkflowPane() {
+            setStyle("-fx-background-color: #2b2b2b;");
+            setPrefSize(1200, 800);
+
+            setOnMousePressed(event -> {
+                lastMouseX = event.getX();
+                lastMouseY = event.getY();
+            });
+
+            setOnMouseDragged(event -> {
+                double deltaX = event.getX() - lastMouseX;
+                double deltaY = event.getY() - lastMouseY;
+
+                for (Node child : getChildren()) {
+                    if (child instanceof WorkflowNode) {
+                        WorkflowNode node = (WorkflowNode) child;
+                        node.setLayoutX(node.getLayoutX() + deltaX);
+                        node.setLayoutY(node.getLayoutY() + deltaY);
+                    }
+                }
+
+                lastMouseX = event.getX();
+                lastMouseY = event.getY();
+            });
+        }
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            for (Node child : getChildren()) {
+                if (child instanceof Connection) {
+                    ((Connection) child).update();
+                }
+            }
         }
     }
 
