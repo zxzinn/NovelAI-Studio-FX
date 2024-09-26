@@ -22,7 +22,7 @@ public class GenerationPayload {
         private String sampler;
         private int steps;
         private int n_samples;
-        private boolean ucPreset;
+        private int ucPreset;
         private boolean qualityToggle;
         private boolean sm;
         private boolean sm_dyn;

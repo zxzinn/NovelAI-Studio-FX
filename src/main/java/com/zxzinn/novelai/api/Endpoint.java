@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Endpoint {
-    GENERATE_IMAGE("https://api.novelai.net/ai/generate-image"),
+    GENERATE_IMAGE("https://image.novelai.net/ai/generate-image"),
     SUGGEST_TAGS("https://api.novelai.net/ai/generate-image/suggest-tags"),
     SUBSCRIPTION("https://api.novelai.net/user/subscription")
     ;
