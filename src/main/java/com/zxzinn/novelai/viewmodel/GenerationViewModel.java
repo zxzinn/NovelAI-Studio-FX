@@ -159,7 +159,7 @@ public class GenerationViewModel {
         params.setSampler(uiData.sampler);
         params.setSteps(uiData.steps);
         params.setN_samples(uiData.count);
-        params.setSeed(uiData.seed);
+        params.setSeed(uiData.seed == 0 ? null : uiData.seed);
 
         params.setNegative_prompt(uiData.negativePromptPreviewText);
         return payload;
